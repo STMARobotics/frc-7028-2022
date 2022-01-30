@@ -22,7 +22,10 @@ public class ShooterSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   public ShooterSubsystem() {
     leader.configFactoryDefault();
+    leader.setSafetyEnabled(true);
     follower.configFactoryDefault();
+    follower.setSafetyEnabled(true);
+
     var config = new TalonFXConfiguration();
     config.slot0.kP = 0.02;
     config.slot0.kI = 0;

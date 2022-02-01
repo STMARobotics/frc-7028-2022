@@ -14,28 +14,30 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
-  private WPI_TalonFX motor = new WPI_TalonFX(0);
-  private WPI_TalonFX motor1 = new WPI_TalonFX(1);
+  private final WPI_TalonFX leader = new WPI_TalonFX(0);
+  private final WPI_TalonFX follower = new WPI_TalonFX(1);
 
-  SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.53095, 0.0882, 0.0030098);
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.53095, 0.0882, 0.0030098);
 
   /** Creates a new ExampleSubsystem. */
   public ShooterSubsystem() {
-    motor.configFactoryDefault();
+    leader.configFactoryDefault();
+    leader.setSafetyEnabled(true);
+    follower.configFactoryDefault();
+    follower.setSafetyEnabled(true);
+
     var config = new TalonFXConfiguration();
     config.slot0.kP = 0.02;
     config.slot0.kI = 0;
     config.slot0.kD = 0;
     config.closedloopRamp = 0.2;
+    leader.configAllSettings(config);
 
-    motor.configAllSettings(config);
+    leader.setNeutralMode(NeutralMode.Coast);
+    follower.setNeutralMode(NeutralMode.Coast);
 
-    motor.setNeutralMode(NeutralMode.Coast);
-    motor1.setNeutralMode(NeutralMode.Coast);
-
-    motor.setInverted(true);
-
-    motor1.follow(motor);
+    leader.setInverted(true);
+    follower.follow(leader);
   }
 
   @Override
@@ -47,15 +49,15 @@ public class ShooterSubsystem extends SubsystemBase {
    * @param speed velocity set point
    */
   public void runShooter(double speed) {
-    motor.set(
+    leader.set(
       ControlMode.Velocity, 
       speed,
       DemandType.ArbitraryFeedForward, 
-      feedforward.calculate(speed, motor.getSelectedSensorVelocity() - speed) / 2048);
+      feedforward.calculate(speed, leader.getSelectedSensorVelocity() - speed) / 2048);
   }
 
   public void stop() {
-    motor.set(0);
+    leader.set(0);
   }
 
 }

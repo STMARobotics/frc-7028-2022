@@ -26,6 +26,7 @@ public class ShooterSubsystem extends SubsystemBase {
     config.slot0.kP = 0.02;
     config.slot0.kI = 0;
     config.slot0.kD = 0;
+    config.closedloopRamp = 0.2;
 
     motor.configAllSettings(config);
 

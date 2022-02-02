@@ -17,7 +17,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private final WPI_TalonFX leader = new WPI_TalonFX(0);
   private final WPI_TalonFX follower = new WPI_TalonFX(1);
 
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.53095, 0.0882, 0.0030098);
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.57831, 0.09430, 0);// 0.01044
 
   /** Creates a new ExampleSubsystem. */
   public ShooterSubsystem() {
@@ -27,10 +27,10 @@ public class ShooterSubsystem extends SubsystemBase {
     follower.setSafetyEnabled(true);
 
     var config = new TalonFXConfiguration();
-    config.slot0.kP = 0.02;
+    config.slot0.kP = 0.13;
     config.slot0.kI = 0;
     config.slot0.kD = 0;
-    config.closedloopRamp = 0.2;
+    config.closedloopRamp = 0.4;
     leader.configAllSettings(config);
 
     leader.setNeutralMode(NeutralMode.Coast);

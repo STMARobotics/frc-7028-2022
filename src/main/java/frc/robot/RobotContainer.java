@@ -49,7 +49,7 @@ public class RobotContainer {
     .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
 
     new JoystickButton(mController, XboxController.Button.kY.value)
-    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(18000), m_exampleSubsystem))
+    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(20000), m_exampleSubsystem))
     .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
   }
 

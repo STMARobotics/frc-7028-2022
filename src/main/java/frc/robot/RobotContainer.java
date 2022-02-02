@@ -8,7 +8,10 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -18,9 +21,9 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DrivetrainSubsystem m_exampleSubsystem = new DrivetrainSubsystem();
+  private final ShooterSubsystem m_exampleSubsystem = new ShooterSubsystem();
 
-  private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
+  private final XboxController mController= new XboxController(0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -34,7 +37,23 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    new JoystickButton(mController, XboxController.Button.kA.value)
+    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(15000), m_exampleSubsystem))
+    .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
+
+    new JoystickButton(mController, XboxController.Button.kB.value)
+    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(15500), m_exampleSubsystem))
+    .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
+
+    new JoystickButton(mController, XboxController.Button.kX.value)
+    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(16000), m_exampleSubsystem))
+    .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
+
+    new JoystickButton(mController, XboxController.Button.kY.value)
+    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(20000), m_exampleSubsystem))
+    .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -43,6 +62,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return m_autoCommand;
+    return null;
   }
 }

@@ -6,10 +6,8 @@ import static frc.robot.Constants.ArcadeConstants.ROTATE_RATE_LIMIT_ARCADE;
 import static frc.robot.Constants.ArcadeConstants.SPEED_RATE_LIMIT_ARCADE;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_MASTER;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_SLAVE_ONE;
-import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_SLAVE_TWO;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_MASTER;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_SLAVE_ONE;
-import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_SLAVE_TWO;
 import static frc.robot.Constants.DriveTrainConstants.DRIVE_KINEMATICS;
 import static frc.robot.Constants.DriveTrainConstants.EDGES_PER_ROTATION;
 import static frc.robot.Constants.DriveTrainConstants.FEED_FORWARD;
@@ -20,9 +18,8 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.networktables.EntryListenerFlags;
@@ -53,12 +50,10 @@ import frc.robot.Constants.TrajectoryConstants;
  */
 public class DriveTrainSubsystem extends SubsystemBase {
 
-  private final WPI_TalonSRX leftMaster = new WPI_TalonSRX(DEVICE_ID_LEFT_MASTER);
-  private final WPI_VictorSPX leftSlaveOne = new WPI_VictorSPX(DEVICE_ID_LEFT_SLAVE_ONE);
-  private final WPI_VictorSPX leftSlaveTwo = new WPI_VictorSPX(DEVICE_ID_LEFT_SLAVE_TWO);
-  private final WPI_TalonSRX rightMaster = new WPI_TalonSRX(DEVICE_ID_RIGHT_MASTER);
-  private final WPI_VictorSPX rightSlaveOne = new WPI_VictorSPX(DEVICE_ID_RIGHT_SLAVE_ONE);
-  private final WPI_VictorSPX rightSlaveTwo = new WPI_VictorSPX(DEVICE_ID_RIGHT_SLAVE_TWO);
+  private final WPI_TalonFX leftMaster = new WPI_TalonFX(DEVICE_ID_LEFT_MASTER);
+  private final WPI_TalonFX leftSlaveOne = new WPI_TalonFX(DEVICE_ID_LEFT_SLAVE_ONE);
+  private final WPI_TalonFX rightMaster = new WPI_TalonFX(DEVICE_ID_RIGHT_MASTER);
+  private final WPI_TalonFX rightSlaveOne = new WPI_TalonFX(DEVICE_ID_RIGHT_SLAVE_ONE);
 
   private final AHRS gyro = new AHRS(SPI.Port.kMXP);
   private final DifferentialDriveOdometry differentialDriveOdometry;
@@ -75,7 +70,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
     gyro.zeroYaw();
     differentialDriveOdometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
 
-    TalonSRXConfiguration talonConfig = new TalonSRXConfiguration();
+    TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     talonConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.QuadEncoder;
     talonConfig.slot0.kP = DriveTrainConstants.kP;
     talonConfig.slot0.kI = 0.0;
@@ -87,11 +82,9 @@ public class DriveTrainSubsystem extends SubsystemBase {
     rightMaster.configAllSettings(talonConfig);
     rightMaster.enableVoltageCompensation(true);
     rightSlaveOne.configFactoryDefault();
-    rightSlaveTwo.configFactoryDefault();
     leftMaster.configAllSettings(talonConfig);
     leftMaster.enableVoltageCompensation(true);
     leftSlaveOne.configFactoryDefault();
-    leftSlaveTwo.configFactoryDefault();
 
     enableEncoders();
     
@@ -100,15 +93,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
     rightMaster.setSensorPhase(false);
     rightMaster.setInverted(true);
     rightSlaveOne.setInverted(true);
-    rightSlaveTwo.setInverted(true);
     leftMaster.setSensorPhase(false);
     rightMaster.overrideLimitSwitchesEnable(false);
     leftMaster.overrideLimitSwitchesEnable(false);
 
     leftSlaveOne.follow(leftMaster);
-    leftSlaveTwo.follow(leftMaster);
     rightSlaveOne.follow(rightMaster);
-    rightSlaveTwo.follow(rightMaster);
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
@@ -295,10 +285,8 @@ public class DriveTrainSubsystem extends SubsystemBase {
   public void setNeutralMode(NeutralMode neutralMode) {
     leftMaster.setNeutralMode(neutralMode);
     leftSlaveOne.setNeutralMode(neutralMode);
-    leftSlaveTwo.setNeutralMode(neutralMode);
     rightMaster.setNeutralMode(neutralMode);
     rightSlaveOne.setNeutralMode(neutralMode);
-    rightSlaveTwo.setNeutralMode(neutralMode);
   }
 
   public boolean isEncodersAvailable() {

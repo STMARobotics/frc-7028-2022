@@ -27,7 +27,7 @@ jobs:
         payload: |
           { 
             "status": "${{ job.status }}",
-            "repository": "${{ github.repositoryUrl }}"
+            "repository": "${{ github.repositoryUrl }}",
             "action_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }
       env:

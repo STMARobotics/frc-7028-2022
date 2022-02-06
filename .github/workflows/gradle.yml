@@ -23,10 +23,10 @@ jobs:
     - name: Send status to Slack
       id: slack
       uses: slackapi/slack-github-action@v1.18.0
-        with:
-          payload: |
-            {
-              "status": ${{ job.status }}
-            }
+      with:
+        payload: |
+          { 
+            "status": ${{ job.status }}
+          }
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

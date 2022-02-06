@@ -28,7 +28,7 @@ jobs:
         channel-id: 'C8Q6UHPA5'
         payload: |
           {
-            "text": "GitHub Action Result ${{ github.workflow }}\nStatus: ${{ job.status }}"
+            "text": "GitHub Action Result ${{ github.workflow }}\nStatus: ${{ job.status }}",
             "blocks": [
               {
                 "type":"section",

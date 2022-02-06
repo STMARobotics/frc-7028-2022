@@ -29,11 +29,11 @@ jobs:
         payload: |
           {
             "text": "GitHub Action Result ${{ github.workflow }}\nStatus: ${{ job.status }}",
+            "mrkdwn": "true",
+            "parse": "full"
             "blocks": [
               {
                 "type":"section",
-                "mrkdwn": "true",
-                "parse": "full",
                 "text": {
                   "type": "mrkdwn",
                   "text": "GitHub Action Result [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\nStatus: ${{ job.status }}\n[${{ github.sha }}](${{ github.event.head_commit.url }})"

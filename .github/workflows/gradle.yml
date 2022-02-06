@@ -29,7 +29,10 @@ jobs:
           { 
             "status": "${{ job.status }}",
             "repository": "${{ github.repository }}",
-            "action_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            "action_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            "workflow": "${{} github.workflow }}",
+            "run_number": "${{ github.run_number }}",
+            "sha": "${{ github.sha }}"
           }
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

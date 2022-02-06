@@ -28,11 +28,13 @@ jobs:
         channel-id: 'C8Q6UHPA5'
         payload: |
           {
+            "text": "GitHub Action Result ${{ github.workflow }}\nStatus: ${{ job.status }}"
             "blocks": [
               {
                 "type":"section",
                 "text": {
                   "type": "mrkdwn",
+                  "parse": "full"
                   "text": "GitHub Action Result [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\nStatus: ${{ job.status }}\n[${{ github.sha }}](${{ github.event.head_commit.url }}]"
                 }
               }

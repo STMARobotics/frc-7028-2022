@@ -6,10 +6,12 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.TeleopDriveCommand;
+import frc.robot.subsystems.DriveTrainSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -18,14 +20,19 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private final ShooterSubsystem m_exampleSubsystem = new ShooterSubsystem();
-
+  
   private final XboxController mController= new XboxController(0);
+
+  private final ShooterSubsystem m_exampleSubsystem = new ShooterSubsystem();
+  private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();
+
+  private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
+    driveTrainSubsystem, () -> -mController.getLeftY(), mController::getRightX);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure the button bindings
+    driveTrainSubsystem.setDefaultCommand(teleopDriveCommand);
+
     configureButtonBindings();
   }
 

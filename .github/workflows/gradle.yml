@@ -25,14 +25,13 @@ jobs:
       id: slack
       uses: slackapi/slack-github-action@v1.18.0
       with:
-        payload: |
-          { 
-            "status": "${{ job.status }}",
-            "repository": "${{ github.repository }}",
-            "action_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-            "workflow": "${{ github.workflow }}",
-            "run_number": "${{ github.run_number }}",
-            "sha": "${{ github.sha }}"
-          }
+        # Slack channel id, channel name, or user id to post message.
+        # See also: https://api.slack.com/methods/chat.postMessage#channels
+        channel-id: 'C8Q6UHPA5'
+        # For posting a simple plain text message
+        slack-message: >
+          GitHub Action Result [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n
+          Status: ${{ job.status }}\n
+          [${{ github.sha }}](${{ github.event.head_commit.url }}]"
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

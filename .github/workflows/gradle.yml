@@ -30,7 +30,7 @@ jobs:
           {
             "text": "GitHub Action Result ${{ github.workflow }}\nStatus: ${{ job.status }}",
             "mrkdwn": "true",
-            "parse": "full"
+            "parse": "full",
             "blocks": [
               {
                 "type":"section",

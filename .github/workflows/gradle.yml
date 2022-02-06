@@ -21,6 +21,7 @@ jobs:
       with:
         arguments: test
     - name: Send status to Slack
+      if: always()
       id: slack
       uses: slackapi/slack-github-action@v1.18.0
       with:

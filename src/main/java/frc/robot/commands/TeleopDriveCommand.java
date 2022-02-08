@@ -18,6 +18,7 @@ public class TeleopDriveCommand extends CommandBase {
     this.driveTrainSubsystem = driveTrainSubsystem;
     this.speedSupplier = speedSupplier;
     this.rotationSupplier = rotationSupplier;
+    addRequirements(driveTrainSubsystem);
   }
 
   @Override

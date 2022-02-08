@@ -21,14 +21,16 @@ jobs:
       with:
         arguments: test
     - name: Send status to Slack
+      if: always()
       id: slack
       uses: slackapi/slack-github-action@v1.18.0
       with:
+        channel-id: 'C8Q6UHPA5'
         payload: |
-          { 
-            "status": "${{ job.status }}",
-            "repository": "${{ github.repository }}",
-            "action_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          {
+            "text": "GitHub Action Result [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\nStatus: ${{ job.status }}\n[${{ github.sha }}](${{ github.event.head_commit.url }})",
+            "mrkdwn": "true",
+            "parse": "full"
           }
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

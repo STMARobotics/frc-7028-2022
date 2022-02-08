@@ -1,0 +1,36 @@
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: CI Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+    - name: Test with Gradle
+      uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
+      with:
+        arguments: test
+    - name: Send status to Slack
+      if: always()
+      id: slack
+      uses: slackapi/slack-github-action@v1.18.0
+      with:
+        channel-id: 'C8Q6UHPA5'
+        payload: |
+          {
+            "text": "GitHub Action Result [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\nStatus: ${{ job.status }}\n[${{ github.sha }}](${{ github.event.head_commit.url }})",
+            "mrkdwn": "true",
+            "parse": "full"
+          }
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

@@ -28,12 +28,12 @@ import edu.wpi.first.math.util.Units;
 public final class Constants {
 
     public static final class DriveTrainConstants {
-        public static final int DEVICE_ID_RIGHT_MASTER = 0;
-        public static final int DEVICE_ID_RIGHT_SLAVE_ONE = 1;
-        public static final int DEVICE_ID_LEFT_MASTER = 2;
-        public static final int DEVICE_ID_LEFT_SLAVE_ONE = 3;
+        public static final int DEVICE_ID_RIGHT_LEADER = 0;
+        public static final int DEVICE_ID_RIGHT_FOLLOWER = 1;
+        public static final int DEVICE_ID_LEFT_LEADER = 2;
+        public static final int DEVICE_ID_LEFT_FOLLOWER = 3;
 
-        public static final int EDGES_PER_ROTATION = 8192;
+        public static final int EDGES_PER_ROTATION = 2048;
         public static final double WHEEL_DIAMETER_INCHES = 6d;
         public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(WHEEL_DIAMETER_INCHES) * Math.PI;
 

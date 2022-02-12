@@ -6,9 +6,12 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
-import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.ShooterSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -26,6 +29,11 @@ public class RobotContainer {
   private final XboxController driverController = new XboxController(0);
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(driverController, driveTrainSubsystem);
+
+  private final ShooterSubsystem m_exampleSubsystem = new ShooterSubsystem();
+
+  private final XboxController mController= new XboxController(1);
+  
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -45,7 +53,30 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    new JoystickButton(mController, XboxController.Button.kA.value)
+    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(15000), m_exampleSubsystem))
+    .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
 
+    new JoystickButton(mController, XboxController.Button.kB.value)
+    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(15500), m_exampleSubsystem))
+    .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
+
+    new JoystickButton(mController, XboxController.Button.kX.value)
+    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(16000), m_exampleSubsystem))
+    .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
+
+    new JoystickButton(mController, XboxController.Button.kY.value)
+    .whenHeld(new RunCommand(()->m_exampleSubsystem.runShooter(20000), m_exampleSubsystem))
+    .whenReleased(new RunCommand(()->m_exampleSubsystem.stop(), m_exampleSubsystem));
+
+    //Drivetrain Bindings
+    new JoystickButton(driverController, XboxController.Button.kB.value)
+        .whenPressed(teleDriveCommand::toggleSlowMode);
+
+    new JoystickButton(driverController, XboxController.Button.kY.value)
+        .whenPressed(teleDriveCommand::toggleReverseMode);
+
+    
   }
 
   /**

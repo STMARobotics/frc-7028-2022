@@ -4,16 +4,15 @@ import static frc.robot.Constants.ArcadeConstants.MAX_ANGULAR_VEL_ARCADE;
 import static frc.robot.Constants.ArcadeConstants.MAX_SPEED_ARCADE;
 import static frc.robot.Constants.ArcadeConstants.ROTATE_RATE_LIMIT_ARCADE;
 import static frc.robot.Constants.ArcadeConstants.SPEED_RATE_LIMIT_ARCADE;
-import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_MASTER;
-import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_SLAVE_ONE;
-import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_MASTER;
-import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_SLAVE_ONE;
+import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_FOLLOWER;
+import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_LEADER;
+import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_FOLLOWER;
+import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_LEADER;
 import static frc.robot.Constants.DriveTrainConstants.DRIVE_KINEMATICS;
 import static frc.robot.Constants.DriveTrainConstants.EDGES_PER_ROTATION;
 import static frc.robot.Constants.DriveTrainConstants.FEED_FORWARD;
 import static frc.robot.Constants.DriveTrainConstants.WHEEL_CIRCUMFERENCE_METERS;
 
-import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -22,26 +21,23 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.networktables.EntryListenerFlags;
-import edu.wpi.first.networktables.EntryNotification;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.RamseteController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.TrajectoryConstants;
 
@@ -50,10 +46,10 @@ import frc.robot.Constants.TrajectoryConstants;
  */
 public class DriveTrainSubsystem extends SubsystemBase {
 
-  private final WPI_TalonFX leftMaster = new WPI_TalonFX(DEVICE_ID_LEFT_MASTER);
-  private final WPI_TalonFX leftSlaveOne = new WPI_TalonFX(DEVICE_ID_LEFT_SLAVE_ONE);
-  private final WPI_TalonFX rightMaster = new WPI_TalonFX(DEVICE_ID_RIGHT_MASTER);
-  private final WPI_TalonFX rightSlaveOne = new WPI_TalonFX(DEVICE_ID_RIGHT_SLAVE_ONE);
+  private final WPI_TalonFX leftLeader = new WPI_TalonFX(DEVICE_ID_LEFT_LEADER);
+  private final WPI_TalonFX leftFollower = new WPI_TalonFX(DEVICE_ID_LEFT_FOLLOWER);
+  private final WPI_TalonFX rightLeader = new WPI_TalonFX(DEVICE_ID_RIGHT_LEADER);
+  private final WPI_TalonFX rightFollower = new WPI_TalonFX(DEVICE_ID_RIGHT_FOLLOWER);
 
   private final AHRS gyro = new AHRS(SPI.Port.kMXP);
   private final DifferentialDriveOdometry differentialDriveOdometry;
@@ -61,9 +57,6 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
   private SlewRateLimiter speedRateLimiter = new SlewRateLimiter(SPEED_RATE_LIMIT_ARCADE);
   private SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(ROTATE_RATE_LIMIT_ARCADE);
-
-  private boolean useEncoders;
-  private boolean encodersAvailable;
   
   public DriveTrainSubsystem() {
     zeroDriveTrainEncoders();
@@ -79,71 +72,46 @@ public class DriveTrainSubsystem extends SubsystemBase {
     talonConfig.slot0.closedLoopPeakOutput = 1.0;
     talonConfig.openloopRamp = DriveTrainConstants.OPEN_LOOP_RAMP;
 
-    rightMaster.configAllSettings(talonConfig);
-    rightMaster.enableVoltageCompensation(true);
-    rightSlaveOne.configFactoryDefault();
-    leftMaster.configAllSettings(talonConfig);
-    leftMaster.enableVoltageCompensation(true);
-    leftSlaveOne.configFactoryDefault();
-
-    enableEncoders();
+    rightLeader.configAllSettings(talonConfig);
+    rightLeader.enableVoltageCompensation(true);
+    rightFollower.configFactoryDefault();
+    leftLeader.configAllSettings(talonConfig);
+    leftLeader.enableVoltageCompensation(true);
+    leftFollower.configFactoryDefault();
     
-    setNeutralMode(NeutralMode.Brake);
+    setNeutralMode(NeutralMode.Coast);
     
-    rightMaster.setSensorPhase(false);
-    rightMaster.setInverted(true);
-    rightSlaveOne.setInverted(true);
-    leftMaster.setSensorPhase(false);
-    rightMaster.overrideLimitSwitchesEnable(false);
-    leftMaster.overrideLimitSwitchesEnable(false);
+    rightLeader.setInverted(true);
+    rightFollower.setInverted(true);
+    rightLeader.overrideLimitSwitchesEnable(false);
+    leftLeader.overrideLimitSwitchesEnable(false);
 
-    leftSlaveOne.follow(leftMaster);
-    rightSlaveOne.follow(rightMaster);
+    leftFollower.follow(leftLeader);
+    rightFollower.follow(rightLeader);
+    
+    new Trigger(RobotState::isEnabled).whenActive(new StartEndCommand(() -> {
+      leftLeader.setNeutralMode(NeutralMode.Brake);
+      leftFollower.setNeutralMode(NeutralMode.Brake);
+      rightLeader.setNeutralMode(NeutralMode.Brake);
+      rightFollower.setNeutralMode(NeutralMode.Brake);
+    }, () -> {
+      leftLeader.setNeutralMode(NeutralMode.Coast);
+      leftFollower.setNeutralMode(NeutralMode.Coast);
+      rightLeader.setNeutralMode(NeutralMode.Coast);
+      rightFollower.setNeutralMode(NeutralMode.Coast);
+    }));
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
     dashboard.addString("Pose", () -> differentialDriveOdometry.getPoseMeters().toString());
     dashboard.addNumber("Speed", () ->
         DRIVE_KINEMATICS.toChassisSpeeds(new DifferentialDriveWheelSpeeds(
-          edgesPerDecisecToMetersPerSec(leftMaster.getSelectedSensorVelocity()),
-          edgesPerDecisecToMetersPerSec(rightMaster.getSelectedSensorVelocity()))).vxMetersPerSecond);
+          edgesPerDecisecToMetersPerSec(leftLeader.getSelectedSensorVelocity()),
+          edgesPerDecisecToMetersPerSec(rightLeader.getSelectedSensorVelocity()))).vxMetersPerSecond);
     dashboard.addNumber("Rotation", () ->
         DRIVE_KINEMATICS.toChassisSpeeds(new DifferentialDriveWheelSpeeds(
-          edgesPerDecisecToMetersPerSec(leftMaster.getSelectedSensorVelocity()),
-          edgesPerDecisecToMetersPerSec(rightMaster.getSelectedSensorVelocity()))).omegaRadiansPerSecond);
-
-    var useEncodersEntry = dashboard.addPersistent("Use encoders", useEncoders)
-        .withWidget(BuiltInWidgets.kToggleSwitch).getEntry();
-    useEncoders = useEncodersEntry.getBoolean(useEncoders);
-    useEncodersEntry.addListener(this::handleEncoderEntry, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-  }
-
-  /**
-   * Handles changing the "Use encoders" entry to retry enabling encoders if they failed previously.
-   * @param notification network table entry notification
-   */
-  private void handleEncoderEntry(EntryNotification notification) {
-    var entry = notification.getEntry();
-    if(entry.getBoolean(true) && (!encodersAvailable || !useEncoders)) {
-      useEncoders = true;
-      enableEncoders();
-    } else if (!entry.getBoolean(true)) {
-      useEncoders = false;
-    }
-    entry.setBoolean(useEncoders);
-  }
-
-  /**
-   * Attempts to enable the drivetrain encoders.
-   */
-  private void enableEncoders() {
-    encodersAvailable = 
-        leftMaster.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10) == ErrorCode.OK &
-        rightMaster.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10) == ErrorCode.OK;
-    if (!encodersAvailable) {
-      DriverStation.reportError("Failed to configure Drivetrain encoders!!", false);
-      useEncoders = false;
-    }
+          edgesPerDecisecToMetersPerSec(leftLeader.getSelectedSensorVelocity()),
+          edgesPerDecisecToMetersPerSec(rightLeader.getSelectedSensorVelocity()))).omegaRadiansPerSecond);
   }
 
   /**
@@ -192,12 +160,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
     xSpeed *= MAX_SPEED_ARCADE;
     zRotation *= MAX_ANGULAR_VEL_ARCADE;
     var wheelSpeeds = DRIVE_KINEMATICS.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0.0, zRotation));
-    if(useEncoders) {
-      tankDriveVelocity(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
-    } else {
-      leftMaster.set(FEED_FORWARD.calculate(wheelSpeeds.leftMetersPerSecond) / 12);
-      rightMaster.set(FEED_FORWARD.calculate(wheelSpeeds.rightMetersPerSecond) / 12);
-    }
+    tankDriveVelocity(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
   }
 
   /**
@@ -215,21 +178,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
       xLeftSpeed *= Math.abs(xLeftSpeed);
       xRightSpeed *= Math.abs(xRightSpeed);
     }
-    if(useEncoders) {
-      tankDriveVelocity(xLeftSpeed, xRightSpeed);
-    } else {
-      tankDriveRaw(FEED_FORWARD.calculate(xLeftSpeed) / 12, FEED_FORWARD.calculate(xRightSpeed) / 12);
-    }
-  }
-
-  /**
-   * WARNING this method doesn't used encoders, squaring, or feed forward logic. Use at your own risk!
-   * @param leftSpeed
-   * @param rightSpeed
-   */
-  public void tankDriveRaw(double leftSpeed, double rightSpeed) {
-    leftMaster.set(leftSpeed);
-    rightMaster.set(rightSpeed);
+    tankDriveVelocity(xLeftSpeed, xRightSpeed);
   }
 
   /**
@@ -243,12 +192,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
     var leftFeedForwardVolts = FEED_FORWARD.calculate(leftVelocity);
     var rightFeedForwardVolts = FEED_FORWARD.calculate(rightVelocity);
 
-    leftMaster.set(
+    leftLeader.set(
         ControlMode.Velocity, 
         metersPerSecToEdgesPerDecisec(leftVelocity), 
         DemandType.ArbitraryFeedForward,
         leftFeedForwardVolts / 12);
-    rightMaster.set(
+    rightLeader.set(
         ControlMode.Velocity,
         metersPerSecToEdgesPerDecisec(rightVelocity),
         DemandType.ArbitraryFeedForward,
@@ -259,8 +208,8 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * Sets the drivetrain to zero velocity and rotation.
    */
   public void stop() {
-    leftMaster.set(0);
-    rightMaster.set(0);
+    leftLeader.set(0);
+    rightLeader.set(0);
     speedRateLimiter.reset(0);
     rotationRateLimiter.reset(0);
   }
@@ -283,14 +232,10 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @param neutralMode the desired neutral mode
    */
   public void setNeutralMode(NeutralMode neutralMode) {
-    leftMaster.setNeutralMode(neutralMode);
-    leftSlaveOne.setNeutralMode(neutralMode);
-    rightMaster.setNeutralMode(neutralMode);
-    rightSlaveOne.setNeutralMode(neutralMode);
-  }
-
-  public boolean isEncodersAvailable() {
-    return encodersAvailable;
+    leftLeader.setNeutralMode(neutralMode);
+    leftFollower.setNeutralMode(neutralMode);
+    rightLeader.setNeutralMode(neutralMode);
+    rightFollower.setNeutralMode(neutralMode);
   }
 
   /**
@@ -299,7 +244,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @return left encoder position
    */
   public double getLeftEncoderPosition() {
-    return leftMaster.getSelectedSensorPosition(0);
+    return leftLeader.getSelectedSensorPosition(0);
   }
 
   /**
@@ -308,12 +253,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @return right encoder position
    */
   public double getRightEncoderPosition() {
-    return rightMaster.getSelectedSensorPosition(0);
+    return rightLeader.getSelectedSensorPosition(0);
   }
 
   private void zeroDriveTrainEncoders() {
-    leftMaster.setSelectedSensorPosition(0);
-    rightMaster.setSelectedSensorPosition(0);
+    leftLeader.setSelectedSensorPosition(0);
+    rightLeader.setSelectedSensorPosition(0);
   }
 
   public Pose2d getCurrentPose() {
@@ -344,15 +289,13 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @return command that will run the trajectory
    */
   public Command createCommandForTrajectory(Trajectory trajectory) {
-    return new ConditionalCommand(new RamseteCommand(
+    return new RamseteCommand(
             trajectory,
             this::getCurrentPose,
             new RamseteController(TrajectoryConstants.RAMSETE_B, TrajectoryConstants.RAMSETE_ZETA),
             DriveTrainConstants.DRIVE_KINEMATICS,
             this::tankDriveVelocity,
-            this),
-        new PrintCommand("Cannot run trajectory because encoders are unavailable!!"),
-        this::isEncodersAvailable);
+            this);
   }
 
   /**

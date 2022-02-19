@@ -38,10 +38,13 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
     rightLeader.setInverted(true);
     rightFollower.setInverted(true);
+
+    rightLeader.configOpenloopRamp(0.2);
+    leftLeader.configOpenloopRamp(0.2);
   }
 
   public void arcadeDrive(double speed, double rotation) {
-    drive.arcadeDrive(speed, rotation);
+    drive.arcadeDrive(Math.copySign(speed * speed, speed), Math.copySign(rotation * rotation * .8, rotation));
   }
 
   public void addInstruments(Orchestra orchestra) {

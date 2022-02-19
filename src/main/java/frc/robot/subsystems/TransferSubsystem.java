@@ -13,7 +13,6 @@ public class TransferSubsystem extends SubsystemBase {
   private final WPI_TalonSRX transferFollower = new WPI_TalonSRX(DEVICE_ID_TRANSFER_FOLLOWER);
 
   public TransferSubsystem() {
-    transferFollower.setInverted(true);
     transferFollower.follow(transferLeader);
   }
 
@@ -22,11 +21,11 @@ public class TransferSubsystem extends SubsystemBase {
   }
 
   public void intake() {
-    set(.50);
+    set(.25);
   }
 
   public void output() {
-    set(-.50);
+    set(-.25);
   }
 
   public void stop() {

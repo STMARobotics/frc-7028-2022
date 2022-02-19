@@ -21,8 +21,13 @@ public class MusicCommand extends CommandBase {
   @Override
   public void initialize() {
     orchestra = new Orchestra();
-    orchestra.loadMusic(new File(Filesystem.getDeployDirectory(), "unity.chrp").getAbsolutePath());
+    orchestra.loadMusic(new File(Filesystem.getDeployDirectory(), "moon.chrp").getAbsolutePath());
     driveTrainSubsystem.addInstruments(orchestra);
+    orchestra.play();
+  }
+
+  @Override
+  public void execute() {
     orchestra.play();
   }
 

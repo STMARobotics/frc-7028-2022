@@ -24,7 +24,6 @@ public class ShooterSubsystem extends SubsystemBase {
     leader.configFactoryDefault();
     leader.setSafetyEnabled(true);
     follower.configFactoryDefault();
-    follower.setSafetyEnabled(true);
 
     var config = new TalonFXConfiguration();
     config.slot0.kP = 0.13;
@@ -32,6 +31,7 @@ public class ShooterSubsystem extends SubsystemBase {
     config.slot0.kD = 0;
     config.closedloopRamp = 0.4;
     leader.configAllSettings(config);
+    follower.configAllSettings(config);
 
     leader.setNeutralMode(NeutralMode.Coast);
     follower.setNeutralMode(NeutralMode.Coast);
@@ -57,7 +57,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void stop() {
-    leader.set(0);
+    leader.set(ControlMode.PercentOutput, 0);
   }
 
 }

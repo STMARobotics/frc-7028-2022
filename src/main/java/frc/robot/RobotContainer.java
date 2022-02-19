@@ -39,6 +39,8 @@ public class RobotContainer {
 
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
 
+  private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+
   private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
       driveTrainSubsystem, () -> -xboxController.getLeftY(), xboxController::getRightX);
 
@@ -78,9 +80,15 @@ public class RobotContainer {
         .whenReleased(new RunCommand(() -> shooterSubsystem.stop(), shooterSubsystem));
 
     new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
+        .whenHeld(new RunCommand(intakeSubsystem::halfBack, intakeSubsystem))
+        .whenReleased(new RunCommand(intakeSubsystem::stop, intakeSubsystem));
+    new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
+        .whenHeld(new RunCommand(intakeSubsystem::halfForward, intakeSubsystem))
+        .whenReleased(new RunCommand(intakeSubsystem::stop, intakeSubsystem));
+
+    new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
         .whenHeld(new RunCommand(indexerSubsystem::output, indexerSubsystem))
         .whenReleased(new RunCommand(indexerSubsystem::stop, indexerSubsystem));
-
     new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
         .whenHeld(new RunCommand(indexerSubsystem::intake, indexerSubsystem))
         .whenReleased(new RunCommand(indexerSubsystem::stop, indexerSubsystem));
@@ -88,7 +96,6 @@ public class RobotContainer {
     new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
         .whenHeld(new RunCommand(transferSubsystem::output, transferSubsystem))
         .whenReleased(new RunCommand(transferSubsystem::stop, transferSubsystem));
-
     new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
         .whenHeld(new RunCommand(transferSubsystem::intake, transferSubsystem))
         .whenReleased(new RunCommand(transferSubsystem::stop, transferSubsystem));

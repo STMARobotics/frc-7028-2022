@@ -15,7 +15,6 @@ import frc.robot.commands.MusicCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
-import frc.robot.subsystems.IntakeSubSystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
 /**
@@ -33,7 +32,6 @@ public class RobotContainer {
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();
-  private final IntakeSubSystem intakeSubSystem = new IntakeSubSystem();
 
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
   private final IndexCommand indexCommand = new IndexCommand(indexerSubsystem);
@@ -46,7 +44,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
     driveTrainSubsystem.setDefaultCommand(teleopDriveCommand);
-    SmartDashboard.putData(new MusicCommand(driveTrainSubsystem, shooterSubsystem));
+    SmartDashboard.putData(new MusicCommand(driveTrainSubsystem));
 
     configureButtonBindings();
   }
@@ -92,13 +90,6 @@ public class RobotContainer {
           indexerSubsystem.stopIndexer();
         }, indexerSubsystem);
 
-        new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
-        .whenHeld(new RunCommand(intakeSubSystem::halfBack, intakeSubSystem))
-        .whenReleased(new RunCommand(intakeSubSystem::stop, intakeSubSystem));
-    
-        new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
-        .whenHeld(new RunCommand(intakeSubSystem::halfForward, intakeSubSystem))
-        .whenReleased(new RunCommand(intakeSubSystem::stop, intakeSubSystem));
   }
 
   /**

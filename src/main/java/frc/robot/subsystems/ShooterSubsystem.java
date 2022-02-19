@@ -9,7 +9,6 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.music.Orchestra;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -59,11 +58,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void stop() {
     leader.set(0);
-  }
-
-  public void addInstruments(Orchestra orchestra) {
-    orchestra.addInstrument(leader);
-    orchestra.addInstrument(follower);
   }
 
 }

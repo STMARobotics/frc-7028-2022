@@ -14,8 +14,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
-  private final WPI_TalonFX leader = new WPI_TalonFX(0);
-  private final WPI_TalonFX follower = new WPI_TalonFX(1);
+  private final WPI_TalonFX leader = new WPI_TalonFX(10);
+  private final WPI_TalonFX follower = new WPI_TalonFX(11);
 
   private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.57831, 0.09430, 0);// 0.01044
 

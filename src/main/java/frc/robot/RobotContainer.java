@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.MusicCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
-import frc.robot.subsystems.IntakeSubSystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
 /**
@@ -28,7 +28,7 @@ public class RobotContainer {
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();
-  private final IntakeSubSystem intakeSubSystem = new IntakeSubSystem();
+  private final IntakeSubsystem intakeSubSystem = new IntakeSubsystem();
 
   private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
     driveTrainSubsystem, () -> -xboxController.getLeftY(), xboxController::getRightX);

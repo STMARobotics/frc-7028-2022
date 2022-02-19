@@ -5,11 +5,11 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class IntakeSubSystem extends SubsystemBase {
+public class IntakeSubsystem extends SubsystemBase {
 
   private final WPI_TalonSRX intake = new WPI_TalonSRX(7);
 
-  public IntakeSubSystem() {
+  public IntakeSubsystem() {
     
   }
 

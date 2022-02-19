@@ -10,12 +10,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.IndexCommand;
+import frc.robot.commands.IndexerCommand;
 import frc.robot.commands.MusicCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.TransferSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -34,7 +35,9 @@ public class RobotContainer {
   private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();
 
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
-  private final IndexCommand indexCommand = new IndexCommand(indexerSubsystem);
+  private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
+
+  private final TransferSubsystem transferSubsystem = new TransferSubsystem();
 
   private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
       driveTrainSubsystem, () -> -xboxController.getLeftY(), xboxController::getRightX);
@@ -74,21 +77,21 @@ public class RobotContainer {
         .whenHeld(new RunCommand(() -> shooterSubsystem.runShooter(20000), shooterSubsystem))
         .whenReleased(new RunCommand(() -> shooterSubsystem.stop(), shooterSubsystem));
 
+    new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
+        .whenHeld(new RunCommand(indexerSubsystem::output, indexerSubsystem))
+        .whenReleased(new RunCommand(indexerSubsystem::stop, indexerSubsystem));
+
     new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
-        .whenHeld(new RunCommand(() -> {
-          indexerSubsystem.reverse();
-        }))
-        .whenReleased(() -> {
-          indexerSubsystem.stopIndexer();
-        }, indexerSubsystem);
+        .whenHeld(new RunCommand(indexerSubsystem::intake, indexerSubsystem))
+        .whenReleased(new RunCommand(indexerSubsystem::stop, indexerSubsystem));
 
     new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
-        .whenHeld(new RunCommand(() -> {
-          indexerSubsystem.runManually(.5);
-        }))
-        .whenReleased(() -> {
-          indexerSubsystem.stopIndexer();
-        }, indexerSubsystem);
+        .whenHeld(new RunCommand(transferSubsystem::output, transferSubsystem))
+        .whenReleased(new RunCommand(transferSubsystem::stop, transferSubsystem));
+
+    new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
+        .whenHeld(new RunCommand(transferSubsystem::intake, transferSubsystem))
+        .whenReleased(new RunCommand(transferSubsystem::stop, transferSubsystem));
 
   }
 

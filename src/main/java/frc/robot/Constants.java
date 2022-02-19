@@ -20,4 +20,19 @@ public final class Constants {
         public static final int RIGHT_FOLLOWER_ID = 3;
 
     }
+
+    public static final class IndexerConstants {
+
+    public static final int DEVICE_ID_BELT = 6;
+
+    public static final double BELT_kP = .01;
+    public static final double BELT_kF = 1023;
+    public static final double BELT_RUN_SPEED = 11000;
+
+  }
+
+  public static final class TransferConstants {
+    public static final int DEVICE_ID_TRANSFER_LEADER = 8;
+    public static final int DEVICE_ID_TRANSFER_FOLLOWER = 5;
+  }
 }

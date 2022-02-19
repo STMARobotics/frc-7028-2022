@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.MusicCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
+import frc.robot.subsystems.IntakeSubSystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
 /**
@@ -27,6 +28,7 @@ public class RobotContainer {
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();
+  private final IntakeSubSystem intakeSubSystem = new IntakeSubSystem();
 
   private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
     driveTrainSubsystem, () -> -xboxController.getLeftY(), xboxController::getRightX);
@@ -34,7 +36,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     driveTrainSubsystem.setDefaultCommand(teleopDriveCommand);
-    SmartDashboard.putData(new MusicCommand(driveTrainSubsystem));
+    SmartDashboard.putData(new MusicCommand(driveTrainSubsystem, shooterSubsystem));
 
     configureButtonBindings();
   }
@@ -47,20 +49,27 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     new JoystickButton(xboxController, XboxController.Button.kA.value)
-    .whenHeld(new RunCommand(()->shooterSubsystem.runShooter(15000), shooterSubsystem))
-    .whenReleased(new RunCommand(()->shooterSubsystem.stop(), shooterSubsystem));
+        .whenHeld(new RunCommand(()->shooterSubsystem.runShooter(15000), shooterSubsystem))
+        .whenReleased(new RunCommand(()->shooterSubsystem.stop(), shooterSubsystem));
 
     new JoystickButton(xboxController, XboxController.Button.kB.value)
-    .whenHeld(new RunCommand(()->shooterSubsystem.runShooter(15500), shooterSubsystem))
-    .whenReleased(new RunCommand(()->shooterSubsystem.stop(), shooterSubsystem));
+        .whenHeld(new RunCommand(()->shooterSubsystem.runShooter(15500), shooterSubsystem))
+        .whenReleased(new RunCommand(()->shooterSubsystem.stop(), shooterSubsystem));
 
     new JoystickButton(xboxController, XboxController.Button.kX.value)
-    .whenHeld(new RunCommand(()->shooterSubsystem.runShooter(16000), shooterSubsystem))
-    .whenReleased(new RunCommand(()->shooterSubsystem.stop(), shooterSubsystem));
+        .whenHeld(new RunCommand(()->shooterSubsystem.runShooter(16000), shooterSubsystem))
+        .whenReleased(new RunCommand(()->shooterSubsystem.stop(), shooterSubsystem));
 
     new JoystickButton(xboxController, XboxController.Button.kY.value)
-    .whenHeld(new RunCommand(()->shooterSubsystem.runShooter(20000), shooterSubsystem))
-    .whenReleased(new RunCommand(()->shooterSubsystem.stop(), shooterSubsystem));
+        .whenHeld(new RunCommand(()->shooterSubsystem.runShooter(20000), shooterSubsystem))
+        .whenReleased(new RunCommand(()->shooterSubsystem.stop(), shooterSubsystem));
+
+    new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
+        .whenHeld(new RunCommand(intakeSubSystem::halfBack, intakeSubSystem))
+        .whenReleased(new RunCommand(intakeSubSystem::stop, intakeSubSystem));
+    new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
+        .whenHeld(new RunCommand(intakeSubSystem::halfForward, intakeSubSystem))
+        .whenReleased(new RunCommand(intakeSubSystem::stop, intakeSubSystem));
   }
 
   /**

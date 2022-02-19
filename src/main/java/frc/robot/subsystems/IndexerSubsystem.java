@@ -98,7 +98,6 @@ public class IndexerSubsystem extends SubsystemBase {
   }
 
   public void runManually(double speed) {
-    System.out.println("testing");
     belt.set(speed);
     shooting = false;
   }

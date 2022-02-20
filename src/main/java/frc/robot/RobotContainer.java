@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.IndexerCommand;
 import frc.robot.commands.MusicCommand;
@@ -64,42 +63,36 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     new JoystickButton(xboxController, XboxController.Button.kA.value)
-        .whenHeld(new RunCommand(() -> shooterSubsystem.runShooter(15000), shooterSubsystem))
-        .whenReleased(new RunCommand(() -> shooterSubsystem.stop(), shooterSubsystem));
+        .whileHeld(() -> shooterSubsystem.runShooter(15000), shooterSubsystem)
+        .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
     new JoystickButton(xboxController, XboxController.Button.kB.value)
-        .whenHeld(new RunCommand(() -> shooterSubsystem.runShooter(15500), shooterSubsystem))
-        .whenReleased(new RunCommand(() -> shooterSubsystem.stop(), shooterSubsystem));
+        .whileHeld(() -> shooterSubsystem.runShooter(15500), shooterSubsystem)
+        .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
     new JoystickButton(xboxController, XboxController.Button.kX.value)
-        .whenHeld(new RunCommand(() -> shooterSubsystem.runShooter(16000), shooterSubsystem))
-        .whenReleased(new RunCommand(() -> shooterSubsystem.stop(), shooterSubsystem));
+        .whileHeld(() -> shooterSubsystem.runShooter(16000), shooterSubsystem)
+        .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
     new JoystickButton(xboxController, XboxController.Button.kY.value)
-        .whenHeld(new RunCommand(() -> shooterSubsystem.runShooter(20000), shooterSubsystem))
-        .whenReleased(new RunCommand(() -> shooterSubsystem.stop(), shooterSubsystem));
+        .whileHeld(() -> shooterSubsystem.runShooter(20000), shooterSubsystem)
+        .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
     new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
-        .whenHeld(new RunCommand(intakeSubsystem::reverse, intakeSubsystem))
-        .whenReleased(new RunCommand(intakeSubsystem::stop, intakeSubsystem));
+        .whileHeld(intakeSubsystem::reverse, intakeSubsystem)
+        .whileHeld(indexerSubsystem::output, indexerSubsystem)
+        .whileHeld(transferSubsystem::output, transferSubsystem)
+        .whenReleased(intakeSubsystem::stop, intakeSubsystem)
+        .whenReleased(indexerSubsystem::stop, indexerSubsystem)
+        .whenReleased(transferSubsystem::stop, transferSubsystem);
+        
     new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
-        .whenHeld(new RunCommand(intakeSubsystem::forward, intakeSubsystem))
-        .whenReleased(new RunCommand(intakeSubsystem::stop, intakeSubsystem));
-
-    new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
-        .whenHeld(new RunCommand(indexerSubsystem::output, indexerSubsystem))
-        .whenReleased(new RunCommand(indexerSubsystem::stop, indexerSubsystem));
-    new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
-        .whenHeld(new RunCommand(indexerSubsystem::intake, indexerSubsystem))
-        .whenReleased(new RunCommand(indexerSubsystem::stop, indexerSubsystem));
-
-    new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
-        .whenHeld(new RunCommand(transferSubsystem::output, transferSubsystem))
-        .whenReleased(new RunCommand(transferSubsystem::stop, transferSubsystem));
-    new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
-        .whenHeld(new RunCommand(transferSubsystem::intake, transferSubsystem))
-        .whenReleased(new RunCommand(transferSubsystem::stop, transferSubsystem));
-
+        .whileHeld(intakeSubsystem::forward, intakeSubsystem)
+        .whileHeld(indexerSubsystem::intake, indexerSubsystem)
+        .whileHeld(transferSubsystem::intake, transferSubsystem)
+        .whenReleased(intakeSubsystem::stop, intakeSubsystem)
+        .whenReleased(indexerSubsystem::stop, indexerSubsystem)
+        .whenReleased(transferSubsystem::stop, transferSubsystem);
   }
 
   /**

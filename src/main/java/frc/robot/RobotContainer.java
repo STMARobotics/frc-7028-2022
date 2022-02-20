@@ -29,7 +29,7 @@ import frc.robot.subsystems.TransferSubsystem;
  */
 public class RobotContainer {
 
-  private final XboxController xboxController = new XboxController(0);
+  private final XboxController driverController = new XboxController(0);
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();
@@ -41,7 +41,7 @@ public class RobotContainer {
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 
   private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
-      driveTrainSubsystem, () -> -xboxController.getLeftY(), xboxController::getRightX);
+      driveTrainSubsystem, () -> -driverController.getLeftY(), driverController::getRightX);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -62,23 +62,23 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    new JoystickButton(xboxController, XboxController.Button.kA.value)
+    new JoystickButton(driverController, XboxController.Button.kA.value)
         .whileHeld(() -> shooterSubsystem.runShooter(15000), shooterSubsystem)
         .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
-    new JoystickButton(xboxController, XboxController.Button.kB.value)
+    new JoystickButton(driverController, XboxController.Button.kB.value)
         .whileHeld(() -> shooterSubsystem.runShooter(15500), shooterSubsystem)
         .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
-    new JoystickButton(xboxController, XboxController.Button.kX.value)
+    new JoystickButton(driverController, XboxController.Button.kX.value)
         .whileHeld(() -> shooterSubsystem.runShooter(16000), shooterSubsystem)
         .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
-    new JoystickButton(xboxController, XboxController.Button.kY.value)
+    new JoystickButton(driverController, XboxController.Button.kY.value)
         .whileHeld(() -> shooterSubsystem.runShooter(20000), shooterSubsystem)
         .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
-    new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
+    new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
         .whileHeld(intakeSubsystem::reverse, intakeSubsystem)
         .whileHeld(indexerSubsystem::output, indexerSubsystem)
         .whileHeld(transferSubsystem::output, transferSubsystem)
@@ -86,7 +86,7 @@ public class RobotContainer {
         .whenReleased(indexerSubsystem::stop, indexerSubsystem)
         .whenReleased(transferSubsystem::stop, transferSubsystem);
         
-    new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
+    new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
         .whileHeld(intakeSubsystem::forward, intakeSubsystem)
         .whileHeld(indexerSubsystem::intake, indexerSubsystem)
         .whileHeld(transferSubsystem::intake, transferSubsystem)

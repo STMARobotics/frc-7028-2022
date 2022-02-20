@@ -6,7 +6,7 @@ import java.util.TreeMap;
  * Class that takes a table of known distances from the target and their shooter
  * power settings, and then interpolates values in between the known values.
  */
-public class ShootingInerpolator {
+public class ShootingInterpolator {
 
   /**
    * Stores a sorted table of known distance and speed values

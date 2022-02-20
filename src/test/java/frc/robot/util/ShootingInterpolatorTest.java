@@ -9,12 +9,12 @@ import org.junit.Test;
 public class ShootingInterpolatorTest {
 
   /** shooting interpolator under test */
-  private ShootingInerpolator shootingInterpolator;
+  private ShootingInterpolator shootingInterpolator;
 
   @Before
   public void setUp() {
     // Create a new interpolator for each test. This way the known values are not carried over between tests.
-    shootingInterpolator = new ShootingInerpolator();
+    shootingInterpolator = new ShootingInterpolator();
   }
 
   /**

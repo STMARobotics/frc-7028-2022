@@ -24,7 +24,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public ShooterSubsystem() {
     leader.configFactoryDefault();
-    leader.setSafetyEnabled(true);
     follower.configFactoryDefault();
 
     var config = new TalonFXConfiguration();

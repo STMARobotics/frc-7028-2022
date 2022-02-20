@@ -47,6 +47,14 @@ public class DriveTrainSubsystem extends SubsystemBase {
     drive.arcadeDrive(speed, rotation);
   }
 
+  public void arcadeDrive(double speed, double rotation, boolean squareInputs) {
+    drive.arcadeDrive(speed, rotation, squareInputs);
+  }
+
+  public void stop() {
+    drive.stopMotor();
+  }
+
   public void addInstruments(Orchestra orchestra) {
     orchestra.addInstrument(rightLeader);
     orchestra.addInstrument(rightFollower);

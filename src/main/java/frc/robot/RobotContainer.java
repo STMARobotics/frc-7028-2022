@@ -10,11 +10,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.IndexerCommand;
+import frc.robot.commands.JetsonBallCommand;
 import frc.robot.commands.MusicCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.JetsonSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 
@@ -39,6 +41,7 @@ public class RobotContainer {
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
 
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
 
   private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), driverController::getRightX);
@@ -66,17 +69,9 @@ public class RobotContainer {
         .whileHeld(() -> shooterSubsystem.runShooter(15000), shooterSubsystem)
         .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
-    new JoystickButton(driverController, XboxController.Button.kB.value)
-        .whileHeld(() -> shooterSubsystem.runShooter(15500), shooterSubsystem)
-        .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
-
+    // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
-        .whileHeld(() -> shooterSubsystem.runShooter(16000), shooterSubsystem)
-        .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
-
-    new JoystickButton(driverController, XboxController.Button.kY.value)
-        .whileHeld(() -> shooterSubsystem.runShooter(20000), shooterSubsystem)
-        .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
+        .whileHeld(new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem));
 
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
         .whileHeld(intakeSubsystem::reverse, intakeSubsystem)

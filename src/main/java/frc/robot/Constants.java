@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -37,4 +39,29 @@ public final class Constants {
     public static final int DEVICE_ID_TRANSFER_LEADER = 8;
     public static final int DEVICE_ID_TRANSFER_FOLLOWER = 5;
   }
+
+  public static final class LimeLightConstants {
+
+    public static final double PIPELINE_INDEX_NEAR = 0.0;
+    public static final double PIPELINE_INDEX_FAR = 1.0;
+
+    /** Height of the target in meters */
+    public static final double TARGET_HEIGHT = Units.inchesToMeters(80.875);
+
+    /** Height of the limelight on the bot in meters */
+    public static final double MOUNT_HEIGHT = Units.inchesToMeters(23);
+
+    /** Distance Limelight is mounted from the front frame of the bot */
+    public static final double DISTANCE_FROM_FRONT = Units.inchesToMeters(18);
+
+    /** Distance Limelight is mounted from the centerline of the bot */
+    public static final double DISTANCE_FROM_CENTER = Units.inchesToMeters(0);
+
+    /** Angle of the limelight in degrees */
+    public static final double MOUNT_ANGLE = 21.25;
+
+    public static final String NAME = "limelight";
+    
+  }
+ 
 }

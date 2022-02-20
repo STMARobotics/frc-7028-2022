@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.ShooterConstants.DEVICE_ID_SHOOTER_FOLLOWER;
+import static frc.robot.Constants.ShooterConstants.DEVICE_ID_SHOOTER_LEADER;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -14,17 +17,15 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
-  private final WPI_TalonFX leader = new WPI_TalonFX(0);
-  private final WPI_TalonFX follower = new WPI_TalonFX(1);
+  private final WPI_TalonFX leader = new WPI_TalonFX(DEVICE_ID_SHOOTER_LEADER);
+  private final WPI_TalonFX follower = new WPI_TalonFX(DEVICE_ID_SHOOTER_FOLLOWER);
 
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.57831, 0.09430, 0);// 0.01044
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.57831, 0.09430, 0);
 
-  /** Creates a new ExampleSubsystem. */
   public ShooterSubsystem() {
     leader.configFactoryDefault();
     leader.setSafetyEnabled(true);
     follower.configFactoryDefault();
-    follower.setSafetyEnabled(true);
 
     var config = new TalonFXConfiguration();
     config.slot0.kP = 0.13;
@@ -32,16 +33,13 @@ public class ShooterSubsystem extends SubsystemBase {
     config.slot0.kD = 0;
     config.closedloopRamp = 0.4;
     leader.configAllSettings(config);
+    follower.configAllSettings(config);
 
     leader.setNeutralMode(NeutralMode.Coast);
     follower.setNeutralMode(NeutralMode.Coast);
 
     leader.setInverted(true);
     follower.follow(leader);
-  }
-
-  @Override
-  public void periodic() {
   }
 
   /**
@@ -57,7 +55,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void stop() {
-    leader.set(0);
+    leader.set(ControlMode.PercentOutput, 0);
   }
 
 }

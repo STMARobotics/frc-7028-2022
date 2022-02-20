@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 /**
- * RumbleCommand
+ * Rumbles an XBoxController
  */
 public class RumbleCommand extends CommandBase {
 

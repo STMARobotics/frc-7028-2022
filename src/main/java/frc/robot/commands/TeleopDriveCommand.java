@@ -11,8 +11,6 @@ public class TeleopDriveCommand extends CommandBase {
   private final DoubleSupplier speedSupplier;
   private final DoubleSupplier rotationSupplier;
   
-
-  /** Creates a new ExampleSubsystem. */
   public TeleopDriveCommand(
       DriveTrainSubsystem driveTrainSubsystem, DoubleSupplier speedSupplier, DoubleSupplier rotationSupplier) {
     this.driveTrainSubsystem = driveTrainSubsystem;

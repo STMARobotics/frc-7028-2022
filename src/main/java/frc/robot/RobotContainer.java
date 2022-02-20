@@ -80,10 +80,10 @@ public class RobotContainer {
         .whenReleased(new RunCommand(() -> shooterSubsystem.stop(), shooterSubsystem));
 
     new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)
-        .whenHeld(new RunCommand(intakeSubsystem::halfBack, intakeSubsystem))
+        .whenHeld(new RunCommand(intakeSubsystem::reverse, intakeSubsystem))
         .whenReleased(new RunCommand(intakeSubsystem::stop, intakeSubsystem));
     new JoystickButton(xboxController, XboxController.Button.kRightBumper.value)
-        .whenHeld(new RunCommand(intakeSubsystem::halfForward, intakeSubsystem))
+        .whenHeld(new RunCommand(intakeSubsystem::forward, intakeSubsystem))
         .whenReleased(new RunCommand(intakeSubsystem::stop, intakeSubsystem));
 
     new JoystickButton(xboxController, XboxController.Button.kLeftBumper.value)

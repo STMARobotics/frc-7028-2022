@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.ShooterConstants.DEVICE_ID_SHOOTER_FOLLOWER;
+import static frc.robot.Constants.ShooterConstants.DEVICE_ID_SHOOTER_LEADER;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -14,12 +17,11 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
-  private final WPI_TalonFX leader = new WPI_TalonFX(10);
-  private final WPI_TalonFX follower = new WPI_TalonFX(11);
+  private final WPI_TalonFX leader = new WPI_TalonFX(DEVICE_ID_SHOOTER_LEADER);
+  private final WPI_TalonFX follower = new WPI_TalonFX(DEVICE_ID_SHOOTER_FOLLOWER);
 
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.57831, 0.09430, 0);// 0.01044
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.57831, 0.09430, 0);
 
-  /** Creates a new ExampleSubsystem. */
   public ShooterSubsystem() {
     leader.configFactoryDefault();
     leader.setSafetyEnabled(true);
@@ -38,10 +40,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
     leader.setInverted(true);
     follower.follow(leader);
-  }
-
-  @Override
-  public void periodic() {
   }
 
   /**

@@ -1,9 +1,9 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.DrivetrainConstants.LEFT_FOLLOWER_ID;
-import static frc.robot.Constants.DrivetrainConstants.LEFT_LEADER_ID;
-import static frc.robot.Constants.DrivetrainConstants.RIGHT_FOLLOWER_ID;
-import static frc.robot.Constants.DrivetrainConstants.RIGHT_LEADER_ID;
+import static frc.robot.Constants.DrivetrainConstants.DEVICE_ID_LEFT_FOLLOWER;
+import static frc.robot.Constants.DrivetrainConstants.DEVICE_ID_LEFT_LEADER;
+import static frc.robot.Constants.DrivetrainConstants.DEVICE_ID_RIGHT_FOLLOWER;
+import static frc.robot.Constants.DrivetrainConstants.DEVICE_ID_RIGHT_LEADER;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -14,10 +14,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveTrainSubsystem extends SubsystemBase {
 
-  private final WPI_TalonFX leftLeader = new WPI_TalonFX(LEFT_LEADER_ID);
-  private final WPI_TalonFX leftFollower = new WPI_TalonFX(LEFT_FOLLOWER_ID);
-  private final WPI_TalonFX rightLeader = new WPI_TalonFX(RIGHT_LEADER_ID);
-  private final WPI_TalonFX rightFollower = new WPI_TalonFX(RIGHT_FOLLOWER_ID);
+  private final WPI_TalonFX leftLeader = new WPI_TalonFX(DEVICE_ID_LEFT_LEADER);
+  private final WPI_TalonFX leftFollower = new WPI_TalonFX(DEVICE_ID_LEFT_FOLLOWER);
+  private final WPI_TalonFX rightLeader = new WPI_TalonFX(DEVICE_ID_RIGHT_LEADER);
+  private final WPI_TalonFX rightFollower = new WPI_TalonFX(DEVICE_ID_RIGHT_FOLLOWER);
   private final DifferentialDrive drive = new DifferentialDrive(leftLeader, rightLeader);
   
 

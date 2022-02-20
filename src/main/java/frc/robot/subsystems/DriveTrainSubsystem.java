@@ -44,7 +44,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
   }
 
   public void arcadeDrive(double speed, double rotation) {
-    drive.arcadeDrive(Math.copySign(speed * speed, speed), Math.copySign(rotation * rotation * .8, rotation));
+    drive.arcadeDrive(speed, rotation);
   }
 
   public void addInstruments(Orchestra orchestra) {

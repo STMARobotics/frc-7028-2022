@@ -15,21 +15,17 @@ public class IntakeSubsystem extends SubsystemBase {
     intake.configFactoryDefault();
     intake.setNeutralMode(NeutralMode.Coast);
   }
-
-  public void set(double power) {
-    intake.set(power);
-  }
   
-  public void forward() {
-    set(.5);
+  public void intake() {
+    intake.set(.5);
   }
   
   public void reverse() {
-    set(-.5);
+    intake.set(-.5);
   }
   
   public void stop() {
-    set(0);
+    intake.set(0);
   }
   
 }

@@ -34,16 +34,29 @@ public class RobotContainer {
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();
+<<<<<<< HEAD
+  private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
+  private final TransferSubsystem transferSubsystem = new TransferSubsystem();
+=======
+>>>>>>> master
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
-  private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
-  private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem("limelight");
 
-  private final JetsonBallCommand jetsonBallCommand = 
-      new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem);
+  private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
+<<<<<<< HEAD
+  
   private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
+=======
+  private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem("limelight");
+
+  private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
+  private final JetsonBallCommand jetsonBallCommand = 
+      new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem);
+
+  private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
+>>>>>>> master
       driveTrainSubsystem, () -> -driverController.getLeftY(), driverController::getRightX);
 
   /**
@@ -71,14 +84,21 @@ public class RobotContainer {
     // Drivetrain
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
-        .whileHeld(jetsonBallCommand);
+        .whileHeld(new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem));
     
     // Shooter
     new JoystickButton(driverController, XboxController.Button.kA.value)
         .whileHeld(() -> shooterSubsystem.runShooter(15000), shooterSubsystem)
         .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
+<<<<<<< HEAD
     // Intake/transfer/indexer
+=======
+    // Detect and Chase Cargo
+    new JoystickButton(driverController, XboxController.Button.kX.value)
+        .whileHeld(jetsonBallCommand);
+
+>>>>>>> master
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
         .whileHeld(intakeSubsystem::reverse, intakeSubsystem)
         .whileHeld(indexerSubsystem::unload, indexerSubsystem)
@@ -87,9 +107,15 @@ public class RobotContainer {
         .whenReleased(indexerSubsystem::stop, indexerSubsystem)
         .whenReleased(transferSubsystem::stop, transferSubsystem);
         
+<<<<<<< HEAD
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
+        .whileHeld(intakeSubsystem::forward, intakeSubsystem)
+        .whileHeld(indexerSubsystem::intake, indexerSubsystem)
+=======
+    new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
         .whileHeld(intakeSubsystem::intake, intakeSubsystem)
         .whileHeld(indexerSubsystem::load, indexerSubsystem)
+>>>>>>> master
         .whileHeld(transferSubsystem::intake, transferSubsystem)
         .whenReleased(intakeSubsystem::stop, intakeSubsystem)
         .whenReleased(indexerSubsystem::stop, indexerSubsystem)

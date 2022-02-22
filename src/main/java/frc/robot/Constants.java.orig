@@ -7,12 +7,15 @@
 
 package frc.robot;
 
+<<<<<<< HEAD
 import static frc.robot.Constants.DriveTrainConstants.DRIVE_KINEMATICS;
 import static frc.robot.Constants.DriveTrainConstants.FEED_FORWARD;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
+=======
+>>>>>>> master
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -75,34 +78,12 @@ public final class Constants {
     public static final int DEVICE_ID_TRANSFER_FOLLOWER = 5;
   }
 
+<<<<<<< HEAD
   public static final class ControllerConstants {
     public static final int PORT_ID_DRIVER_CONTROLLER = 0;
     public static final int PORT_ID_OPERATOR_CONSOLE = 1;
   }
-  
-  public static final class LimeLightConstants {
 
-    public static final double PIPELINE_INDEX_NEAR = 0.0;
-    public static final double PIPELINE_INDEX_FAR = 1.0;
-
-    /** Height of the target in meters */
-    public static final double TARGET_HEIGHT = Units.inchesToMeters(80.875);
-
-    /** Height of the limelight on the bot in meters */
-    public static final double MOUNT_HEIGHT = Units.inchesToMeters(23);
-
-    /** Distance Limelight is mounted from the front frame of the bot */
-    public static final double DISTANCE_FROM_FRONT = Units.inchesToMeters(18);
-
-    /** Distance Limelight is mounted from the centerline of the bot */
-    public static final double DISTANCE_FROM_CENTER = Units.inchesToMeters(0);
-
-    /** Angle of the limelight in degrees */
-    public static final double MOUNT_ANGLE = 21.25;
-
-    public static final String NAME = "limelight";
-  }
-    
   public static final class TrajectoryConstants {
 
     // Max speed in meters per second
@@ -147,3 +128,30 @@ public final class Constants {
     public static final double ROTATE_RATE_LIMIT_ARCADE = 3.0;
   }
 }
+=======
+  public static final class LimeLightConstants {
+
+    public static final double PIPELINE_INDEX_NEAR = 0.0;
+    public static final double PIPELINE_INDEX_FAR = 1.0;
+
+    /** Height of the target in meters */
+    public static final double TARGET_HEIGHT = Units.inchesToMeters(80.875);
+
+    /** Height of the limelight on the bot in meters */
+    public static final double MOUNT_HEIGHT = Units.inchesToMeters(23);
+
+    /** Distance Limelight is mounted from the front frame of the bot */
+    public static final double DISTANCE_FROM_FRONT = Units.inchesToMeters(18);
+
+    /** Distance Limelight is mounted from the centerline of the bot */
+    public static final double DISTANCE_FROM_CENTER = Units.inchesToMeters(0);
+
+    /** Angle of the limelight in degrees */
+    public static final double MOUNT_ANGLE = 21.25;
+
+    public static final String NAME = "limelight";
+    
+  }
+ 
+}
+>>>>>>> master

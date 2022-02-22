@@ -18,7 +18,7 @@ public class IndexerCommand extends CommandBase {
 
   @Override
   public void execute() {
-    indexerSubsystem.intake();
+    indexerSubsystem.load();
   }
   
 }

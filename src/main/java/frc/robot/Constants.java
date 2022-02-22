@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.LimelightConfig;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -46,21 +47,15 @@ public final class Constants {
     public static final double PIPELINE_INDEX_FAR = 1.0;
 
     /** Height of the target in meters */
-    public static final double TARGET_HEIGHT = Units.inchesToMeters(80.875);
+    public static final double TARGET_HEIGHT = Units.inchesToMeters(104);
 
-    /** Height of the limelight on the bot in meters */
-    public static final double MOUNT_HEIGHT = Units.inchesToMeters(23);
-
-    /** Distance Limelight is mounted from the front frame of the bot */
-    public static final double DISTANCE_FROM_FRONT = Units.inchesToMeters(18);
-
-    /** Distance Limelight is mounted from the centerline of the bot */
-    public static final double DISTANCE_FROM_CENTER = Units.inchesToMeters(0);
-
-    /** Angle of the limelight in degrees */
-    public static final double MOUNT_ANGLE = 21.25;
-
-    public static final String NAME = "limelight";
+    public static final LimelightConfig LIMELIGHT_CONFIG = LimelightConfig.Builder.create()
+        .withMountDepth(Units.inchesToMeters(18))
+        .withMountDistanceFromCenter(Units.inchesToMeters(0))
+        .withMountingAngle(40)
+        .withMountingHeight(Units.inchesToMeters(23))
+        .withNetworkTableName("limelight")
+        .build();
     
   }
  

@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,6 +18,7 @@ import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.JetsonSubsystem;
+import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 
@@ -35,13 +37,16 @@ public class RobotContainer {
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();
-  private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
-  private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
-
-  private final TransferSubsystem transferSubsystem = new TransferSubsystem();
-
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  private final TransferSubsystem transferSubsystem = new TransferSubsystem();
+  private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
+
   private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
+  private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem("limelight");
+
+  private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
+  private final JetsonBallCommand jetsonBallCommand = 
+      new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem);
 
   private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), driverController::getRightX);
@@ -52,6 +57,10 @@ public class RobotContainer {
   public RobotContainer() {
     driveTrainSubsystem.setDefaultCommand(teleopDriveCommand);
     SmartDashboard.putData(new MusicCommand(driveTrainSubsystem));
+
+    // Forward ports for USB access
+    PortForwarder.add(8811, "10.70.28.11", 5801); // Limelight
+    PortForwarder.add(8813, "10.70.28.13", 1181); // Jetson
 
     configureButtonBindings();
   }
@@ -71,19 +80,19 @@ public class RobotContainer {
 
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
-        .whileHeld(new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem));
+        .whileHeld(jetsonBallCommand);
 
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
         .whileHeld(intakeSubsystem::reverse, intakeSubsystem)
-        .whileHeld(indexerSubsystem::output, indexerSubsystem)
+        .whileHeld(indexerSubsystem::unload, indexerSubsystem)
         .whileHeld(transferSubsystem::output, transferSubsystem)
         .whenReleased(intakeSubsystem::stop, intakeSubsystem)
         .whenReleased(indexerSubsystem::stop, indexerSubsystem)
         .whenReleased(transferSubsystem::stop, transferSubsystem);
         
     new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
-        .whileHeld(intakeSubsystem::forward, intakeSubsystem)
-        .whileHeld(indexerSubsystem::intake, indexerSubsystem)
+        .whileHeld(intakeSubsystem::intake, intakeSubsystem)
+        .whileHeld(indexerSubsystem::load, indexerSubsystem)
         .whileHeld(transferSubsystem::intake, transferSubsystem)
         .whenReleased(intakeSubsystem::stop, intakeSubsystem)
         .whenReleased(indexerSubsystem::stop, indexerSubsystem)

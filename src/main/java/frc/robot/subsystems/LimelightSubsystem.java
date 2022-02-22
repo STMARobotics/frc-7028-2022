@@ -21,7 +21,6 @@ import frc.robot.commands.InstantWhenDisabledCommand;
  */
 public class LimelightSubsystem extends SubsystemBase {
   //valid keys - https://docs.limelightvision.io/en/latest/networktables_api.html
-  private final static String ntPipelineLatency = "tl";
   private final static String ntTargetValid = "tv";
   private final static String ntTargetX = "tx";
   private final static String ntTargetY = "ty";
@@ -45,9 +44,9 @@ public class LimelightSubsystem extends SubsystemBase {
     this.networkTableName = networkTableName;
 
     //this adds listeners on an explicit list
-    addLimelightUpdateListeners(limelightNetworkTable, ntPipelineLatency, ntTargetValid, ntTargetX, ntTargetY);
+    addLimelightUpdateListeners(limelightNetworkTable, ntTargetValid, ntTargetX, ntTargetY);
 
-    new Trigger(RobotState::isEnabled).whenInactive(new InstantWhenDisabledCommand(this::disable));
+    new Trigger(RobotState::isEnabled).whenInactive(new InstantWhenDisabledCommand(this::disable, this));
   }
 
   private void addLimelightUpdateListeners(NetworkTable limelightTable, String... keys) {
@@ -69,7 +68,6 @@ public class LimelightSubsystem extends SubsystemBase {
   private void update(final NetworkTable table, final String key, final NetworkTableEntry entry,
       final NetworkTableValue value, final int flags) {
 
-    boolean shouldFlush = false;
     switch(key) {
 
       case ntTargetX:
@@ -80,21 +78,22 @@ public class LimelightSubsystem extends SubsystemBase {
         targetY = value.getDouble();
         break;
 
-      case ntPipelineLatency:
-        // Flush NetworkTable to send LED mode and pipeline updates immediately
-        shouldFlush = (table.getEntry("ledMode").getDouble(0.0) != (enabled ? 0.0 : 1.0) || 
-          limelightNetworkTable.getEntry("pipeline").getDouble(0.0) != activeProfile.pipelineId);
-
-        table.getEntry("ledMode").setDouble(enabled ? 0.0 : 1.0);
-        table.getEntry("camMode").setDouble(enabled ? 0.0 : 1.0);
-        limelightNetworkTable.getEntry("pipeline").setDouble(activeProfile.pipelineId);
-        break;
-
       case ntTargetValid:
         targetValid = value.getDouble() == 1.0;
         break;
     }
+  }
 
+  @Override
+  public void periodic() {
+    // Flush NetworkTable to send LED mode and pipeline updates immediately
+    var shouldFlush = (limelightNetworkTable.getEntry("ledMode").getDouble(0.0) != (enabled ? 0.0 : 1.0) || 
+        limelightNetworkTable.getEntry("pipeline").getDouble(0.0) != activeProfile.pipelineId);
+  
+    limelightNetworkTable.getEntry("ledMode").setDouble(enabled ? 0.0 : 1.0);
+    limelightNetworkTable.getEntry("camMode").setDouble(enabled ? 0.0 : 1.0);
+    limelightNetworkTable.getEntry("pipeline").setDouble(activeProfile.pipelineId);
+  
     if (shouldFlush)  {
       NetworkTableInstance.getDefault().flush();
     }

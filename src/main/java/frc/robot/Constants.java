@@ -28,7 +28,7 @@ public final class Constants {
   }
 
   public static final class IndexerConstants {
-    public static final int DEVICE_ID_BELT = 6;
+    public static final int DEVICE_ID_INDEXER = 6;
   }
 
   public static final class IntakeConstants {

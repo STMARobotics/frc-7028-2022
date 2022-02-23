@@ -1,5 +1,8 @@
 package frc.robot.util;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 /**
@@ -11,7 +14,11 @@ public class ShootingInterpolator {
   /**
    * Stores a sorted table of known distance and speed values
    */
-  private final TreeMap<Double, Double> knownValuesMap = new TreeMap<>();
+  private final NavigableMap<Double, Double> knownValuesMap;;
+
+  public ShootingInterpolator(Map<Double, Double> knownValues) {
+    this.knownValuesMap = Collections.unmodifiableNavigableMap(new TreeMap<>(knownValues));
+  }
 
   /**
    * Puts a known distance and speed into the table.

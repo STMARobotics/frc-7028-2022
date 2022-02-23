@@ -14,10 +14,11 @@ public class IntakeSubsystem extends SubsystemBase {
   public IntakeSubsystem() {
     intake.configFactoryDefault();
     intake.setNeutralMode(NeutralMode.Coast);
+    intake.setInverted(true);
   }
   
   public void intake() {
-    intake.set(.5);
+    intake.set(.8);
   }
   
   public void reverse() {

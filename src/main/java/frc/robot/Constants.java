@@ -10,10 +10,14 @@ package frc.robot;
 import static frc.robot.Constants.DriveTrainConstants.DRIVE_KINEMATICS;
 import static frc.robot.Constants.DriveTrainConstants.FEED_FORWARD;
 
+import java.util.Map;
+
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.LimelightConfig;
+import frc.robot.util.ShootingInterpolator;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -60,6 +64,28 @@ public final class Constants {
   public static final class ShooterConstants {
     public static final int DEVICE_ID_SHOOTER_LEADER = 10;
     public static final int DEVICE_ID_SHOOTER_FOLLOWER = 11;
+
+    public static final double kS = 0.5196;
+    public static final double kV = 0.0917;
+    public static final double kA = 0.0056284;
+
+    public static final double kP = 0.0011962;
+
+    public static final int COUNTS_PER_REVOLUTION = 2048;
+
+    public static final double RAMP_RATE = 0.4;
+    public static final int CLOSED_LOOP_ERROR_RANGE = 200;
+
+    public static final ShootingInterpolator SHOOTING_INTERPOLATOR = new ShootingInterpolator(Map.ofEntries(
+      Map.entry(Units.inchesToMeters(55.95), 11000d),
+      Map.entry(Units.inchesToMeters(69.33), 11700d),
+      Map.entry(Units.inchesToMeters(84.90), 12200d),
+      Map.entry(Units.inchesToMeters(98.92), 12500d),
+      Map.entry(Units.inchesToMeters(114.50), 12500d),
+      Map.entry(Units.inchesToMeters(129.90), 12800d),
+      Map.entry(Units.inchesToMeters(148.25), 13550d),
+      Map.entry(Units.inchesToMeters(166.62), 14000d),
+      Map.entry(Units.inchesToMeters(186.05), 14400d)));
   }
 
   public static final class IndexerConstants {
@@ -86,21 +112,15 @@ public final class Constants {
     public static final double PIPELINE_INDEX_FAR = 1.0;
 
     /** Height of the target in meters */
-    public static final double TARGET_HEIGHT = Units.inchesToMeters(80.875);
+    public static final double TARGET_HEIGHT = Units.inchesToMeters(104);
 
-    /** Height of the limelight on the bot in meters */
-    public static final double MOUNT_HEIGHT = Units.inchesToMeters(23);
-
-    /** Distance Limelight is mounted from the front frame of the bot */
-    public static final double DISTANCE_FROM_FRONT = Units.inchesToMeters(18);
-
-    /** Distance Limelight is mounted from the centerline of the bot */
-    public static final double DISTANCE_FROM_CENTER = Units.inchesToMeters(0);
-
-    /** Angle of the limelight in degrees */
-    public static final double MOUNT_ANGLE = 21.25;
-
-    public static final String NAME = "limelight";
+    public static final LimelightConfig LIMELIGHT_CONFIG = LimelightConfig.Builder.create()
+        .withMountDepth(Units.inchesToMeters(9))
+        .withMountDistanceFromCenter(Units.inchesToMeters(0))
+        .withMountingAngle(43)
+        .withMountingHeight(Units.inchesToMeters(35.875))
+        .withNetworkTableName("limelight")
+        .build();
   }
     
   public static final class TrajectoryConstants {

@@ -83,5 +83,13 @@ public final class Constants {
         .build();
     
   }
+
+  public static final class AimConstants {
+
+    public static final double kP = 0.5;
+    public static final double kD = 0.2;
+    public static final double AIM_TOLERANCE = 0.3;
+
+  }
  
 }

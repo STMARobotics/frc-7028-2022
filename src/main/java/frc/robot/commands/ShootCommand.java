@@ -1,6 +1,8 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants.AimConstants;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterLimelightSubsystem;
@@ -16,6 +18,8 @@ public class ShootCommand extends CommandBase {
   private final DriveTrainSubsystem driveTrainSubsystem;
   private final IndexerSubsystem indexerSubsystem;
 
+  private final PIDController pidController = new PIDController(AimConstants.kP, 0, AimConstants.kD);
+
   private double lastTargetDistance = 0;
 
   public ShootCommand(
@@ -29,12 +33,15 @@ public class ShootCommand extends CommandBase {
     this.indexerSubsystem = indexerSubsystem;
 
     addRequirements(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem);
+
+    pidController.setTolerance(AimConstants.AIM_TOLERANCE);
   }
 
   @Override
   public void initialize() {
     limelightSubsystem.enable();
     lastTargetDistance = 0;
+    pidController.reset();
   }
 
   @Override
@@ -47,9 +54,9 @@ public class ShootCommand extends CommandBase {
     // If we have a target distance, spin up and shoot
     if (lastTargetDistance > 0) {
       shooterSubsystem.prepareToShoot(lastTargetDistance);
-      // TODO aim left-to-right
-      if (shooterSubsystem.isReadyToShoot()) {
-        // TODO do we want to make sure the target is currently visible before shooting?
+      double rotationSpeed = pidController.calculate(limelightSubsystem.getTargetX() / 5);
+      driveTrainSubsystem.arcadeDrive(0.0, rotationSpeed, false);
+      if (shooterSubsystem.isReadyToShoot() && pidController.atSetpoint()) {
         indexerSubsystem.shoot();
       } else {
         indexerSubsystem.stop();

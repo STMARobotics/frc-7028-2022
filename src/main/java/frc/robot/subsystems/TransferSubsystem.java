@@ -20,6 +20,8 @@ public class TransferSubsystem extends SubsystemBase {
     transferFollower.setNeutralMode(NeutralMode.Coast);
 
     transferFollower.follow(transferLeader);
+    transferFollower.setInverted(true);
+    transferLeader.setInverted(true);
   }
 
   public void set(double power) {

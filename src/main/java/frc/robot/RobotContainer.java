@@ -9,16 +9,20 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Constants.LimeLightConstants;
 import frc.robot.commands.IndexerCommand;
 import frc.robot.commands.JetsonBallCommand;
 import frc.robot.commands.MusicCommand;
+import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.JetsonSubsystem;
-import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.Profile;
+import frc.robot.subsystems.ShooterLimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 
@@ -42,14 +46,16 @@ public class RobotContainer {
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
 
   private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
-  private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem("limelight");
+  private final ShooterLimelightSubsystem limelightSubsystem =
+      new ShooterLimelightSubsystem(LimeLightConstants.LIMELIGHT_CONFIG);
 
   private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
   private final JetsonBallCommand jetsonBallCommand = 
       new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem);
-
   private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
-      driveTrainSubsystem, () -> -driverController.getLeftY(), driverController::getRightX);
+      driveTrainSubsystem, () -> -driverController.getLeftY() / 2, () -> driverController.getRightX() / 2);
+  private final ShootCommand shootCommand = 
+      new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -74,9 +80,22 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    new JoystickButton(driverController, XboxController.Button.kA.value)
-        .whileHeld(() -> shooterSubsystem.runShooter(15000), shooterSubsystem)
-        .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
+
+    // // TODO Remove this, it's just for shop testing
+    // var shooterTab  = Shuffleboard.getTab("Shooter");
+    // shooterSubsystem.addDashboardWidgets(shooterTab.getLayout("shooter", BuiltInLayouts.kList));
+    // var shooterSpeed = shooterTab.add("Y-Button Shoot Speed", 0).withWidget(BuiltInWidgets.kNumberSlider)
+    //     .withProperties(Map.of("Max", 21000, "Min", 0)).getEntry();
+    // new JoystickButton(driverController, XboxController.Button.kY.value)
+    //     .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> shooterSpeed.getDouble(150000)));
+    // limelightSubsystem.addDashboardWidgets(shooterTab.getLayout("Limelight", BuiltInLayouts.kList));
+    
+    // Shooting and Limelight
+    new JoystickButton(driverController, XboxController.Button.kA.value).whileHeld(shootCommand);
+    new JoystickButton(driverController, XboxController.Button.kStart.value)
+        .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
+    new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
+            () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
 
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)

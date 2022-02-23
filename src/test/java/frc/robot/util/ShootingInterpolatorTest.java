@@ -3,40 +3,21 @@ package frc.robot.util;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-import org.junit.Before;
+import java.util.Map;
+
 import org.junit.Test;
 
 public class ShootingInterpolatorTest {
-
-  /** shooting interpolator under test */
-  private ShootingInterpolator shootingInterpolator;
-
-  @Before
-  public void setUp() {
-    // Create a new interpolator for each test. This way the known values are not carried over between tests.
-    shootingInterpolator = new ShootingInterpolator();
-  }
 
   /**
    * Test getting the speed for a distance that is a known value.
    */
   @Test
   public void testDirectMatch() {
-    shootingInterpolator.put(2d, 5d);
-    shootingInterpolator.put(3d, 6d);
+    ShootingInterpolator shootingInterpolator =
+        new ShootingInterpolator(Map.ofEntries(Map.entry(2d, 5d), Map.entry(3d, 6d)));
 
     assertThat(shootingInterpolator.interpolate(2d), equalTo(5d));
-  }
-
-  /**
-   * Test getting the speed for a distance that's easily calculated.
-   */
-  @Test
-  public void testSimple() {
-    shootingInterpolator.put(4d, 14d);
-    shootingInterpolator.put(6d, 16d);
-
-    assertThat(shootingInterpolator.interpolate(5d), equalTo(15d));
   }
 
   /**
@@ -44,8 +25,8 @@ public class ShootingInterpolatorTest {
    */
   @Test
   public void testInteger() {
-    shootingInterpolator.put(4d, 14d);
-    shootingInterpolator.put(6d, 16d);
+    ShootingInterpolator shootingInterpolator =
+        new ShootingInterpolator(Map.ofEntries(Map.entry(4d, 14d), Map.entry(6d, 16d)));
 
     assertThat(shootingInterpolator.interpolate(5d), equalTo(15d));
   }
@@ -55,9 +36,9 @@ public class ShootingInterpolatorTest {
    */
   @Test
   public void testDecimal() {
-    shootingInterpolator.put(4.75, 14.75);
-    shootingInterpolator.put(6.75, 16.75);
-
+    ShootingInterpolator shootingInterpolator =
+        new ShootingInterpolator(Map.ofEntries(Map.entry(4.75d, 14.75d), Map.entry(6.75d, 16.75d)));
+    
     assertThat(shootingInterpolator.interpolate(5.25), equalTo(15.25));
   }
 
@@ -66,8 +47,8 @@ public class ShootingInterpolatorTest {
    */
   @Test
   public void testAbove() {
-    shootingInterpolator.put(2d, 5d);
-    shootingInterpolator.put(3d, 10d);
+    ShootingInterpolator shootingInterpolator =
+        new ShootingInterpolator(Map.ofEntries(Map.entry(2d, 5d), Map.entry(3d, 10d)));
 
     assertThat(shootingInterpolator.interpolate(5d), equalTo(10d));
   }
@@ -77,8 +58,8 @@ public class ShootingInterpolatorTest {
    */
   @Test
   public void testBelow() {
-    shootingInterpolator.put(2d, 5d);
-    shootingInterpolator.put(3d, 10d);
+    ShootingInterpolator shootingInterpolator =
+        new ShootingInterpolator(Map.ofEntries(Map.entry(2d, 5d), Map.entry(3d, 10d)));
 
     assertThat(shootingInterpolator.interpolate(1d), equalTo(5d));
   }

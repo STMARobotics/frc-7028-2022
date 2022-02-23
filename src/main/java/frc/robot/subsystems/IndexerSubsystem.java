@@ -14,23 +14,22 @@ public class IndexerSubsystem extends SubsystemBase {
   public IndexerSubsystem() {
     indexer.configFactoryDefault();
     indexer.setNeutralMode(NeutralMode.Coast);
-    indexer.setInverted(true);
-  }
-
-  public void set(double power) {
-    indexer.set(power);
   }
 
   public void load() {
-    set(.65);
+    indexer.set(.65);
   }
 
   public void unload() {
-    set(-.65);
+    indexer.set(-.65);
+  }
+
+  public void shoot() {
+    indexer.set(.4);
   }
 
   public void stop() {
-    set(0);
+    indexer.set(0);
   }
 
 }

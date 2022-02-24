@@ -62,6 +62,7 @@ public class ShootCommand extends CommandBase {
     } else {
       // No target has ever been visible, so stop
       shooterSubsystem.stop();
+      driveTrainSubsystem.stop();
     }    
   }
 

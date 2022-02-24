@@ -22,7 +22,6 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -56,9 +55,10 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
-    dashboard.addNumber("Velocity", leader::getSelectedSensorVelocity).withWidget(BuiltInWidgets.kGraph);
-    dashboard.addNumber("Target Velocity", leader::getClosedLoopTarget);
-    dashboard.addNumber("Error", leader::getClosedLoopError).withWidget(BuiltInWidgets.kGraph);
+    dashboard.addNumber("Velocity", leader::getSelectedSensorVelocity);
+    dashboard.addNumber("Target Velocity",
+        () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopTarget() : 0);
+    dashboard.addNumber("Error", leader::getClosedLoopError);
   }
 
   /**

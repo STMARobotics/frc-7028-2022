@@ -79,6 +79,9 @@ public class DriveTrainSubsystem extends SubsystemBase {
     leftLeader.configAllSettings(talonConfig);
     leftLeader.enableVoltageCompensation(true);
     leftFollower.configFactoryDefault();
+
+    rightLeader.setSafetyEnabled(true);
+    leftLeader.setSafetyEnabled(true);
     
     setNeutralMode(NeutralMode.Coast);
     

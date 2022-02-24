@@ -49,7 +49,7 @@ public class RobotContainer {
       new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem);
   private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
-      driveTrainSubsystem, () -> -driverController.getLeftY() / 2, () -> driverController.getRightX() / 2);
+      driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
   private final ShootCommand shootCommand = 
       new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem);
 
@@ -80,8 +80,8 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kB.value)
       .whenPressed(teleDriveCommand::toggleSlowMode);
 
-    new JoystickButton(driverController, XboxController.Button.kY.value)
-      .whenPressed(teleDriveCommand::toggleReverseMode);
+    // new JoystickButton(driverController, XboxController.Button.kY.value)
+    //   .whenPressed(teleDriveCommand::toggleReverseMode);
 
     // // TODO Remove this, it's just for shop testing
     // var shooterTab  = Shuffleboard.getTab("Shooter");
@@ -101,11 +101,6 @@ public class RobotContainer {
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
         .whileHeld(jetsonBallCommand);
-    
-    // Shooter
-    new JoystickButton(driverController, XboxController.Button.kA.value)
-        .whileHeld(() -> shooterSubsystem.runShooter(15000), shooterSubsystem)
-        .whenReleased(() -> shooterSubsystem.stop(), shooterSubsystem);
 
     // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
@@ -116,7 +111,7 @@ public class RobotContainer {
         .whenReleased(indexerSubsystem::stop, indexerSubsystem)
         .whenReleased(transferSubsystem::stop, transferSubsystem);
         
-    new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
+    new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
         .whileHeld(intakeSubsystem::intake, intakeSubsystem)
         .whileHeld(indexerSubsystem::load, indexerSubsystem)
         .whileHeld(transferSubsystem::intake, transferSubsystem)

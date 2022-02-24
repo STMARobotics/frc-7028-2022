@@ -31,10 +31,10 @@ import frc.robot.util.ShootingInterpolator;
  */
 public final class Constants {
   public static final class DriveTrainConstants {
-    public static final int DEVICE_ID_RIGHT_LEADER = 0;
-    public static final int DEVICE_ID_RIGHT_FOLLOWER = 1;
-    public static final int DEVICE_ID_LEFT_LEADER = 2;
-    public static final int DEVICE_ID_LEFT_FOLLOWER = 3;
+    public static final int DEVICE_ID_LEFT_LEADER = 0;
+    public static final int DEVICE_ID_LEFT_FOLLOWER = 1;
+    public static final int DEVICE_ID_RIGHT_LEADER = 2;
+    public static final int DEVICE_ID_RIGHT_FOLLOWER = 3;
 
     public static final int EDGES_PER_ROTATION = 2048;
     public static final double WHEEL_DIAMETER_INCHES = 6d;
@@ -45,17 +45,17 @@ public final class Constants {
         TRACK_WIDTH_METERS);
 
     /** Voltage needed to overcome the motor’s static friction. kS */
-    public static final double kS = 1.01;
+    public static final double kS = 0.67854;
 
     /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
-    public static final double kV = 2.93;
+    public static final double kV = 1.9308;
 
     /** Voltage needed to induce a given acceleration in the motor shaft. kA */
-    public static final double kA = 0.761;
+    public static final double kA = 0.51442;
 
     public static final SimpleMotorFeedforward FEED_FORWARD = new SimpleMotorFeedforward(kS, kV, kA);
 
-    public static final double kP = 0.154;
+    public static final double kP = 1.2317;
 
     public static final double CLOSED_LOOP_RAMP = .2;
     public static final double OPEN_LOOP_RAMP = .25;
@@ -155,15 +155,15 @@ public final class Constants {
 
   public static final class ArcadeConstants {
     // Max speed to drive in teleop in meters per second
-    public static final double MAX_SPEED_ARCADE = 3.7;
+    public static final double MAX_SPEED_ARCADE = 1;
 
     // Max angular velocity in teleop in radians per second
-    public static final double MAX_ANGULAR_VEL_ARCADE = Units.degreesToRadians(360);
+    public static final double MAX_ANGULAR_VEL_ARCADE = Units.degreesToRadians(100);
 
     // Max rate of change for speed per second
-    public static final double SPEED_RATE_LIMIT_ARCADE = 2.5;
+    public static final double SPEED_RATE_LIMIT_ARCADE = 2.0;
 
     // Max rate of change for rotation per second
-    public static final double ROTATE_RATE_LIMIT_ARCADE = 3.0;
+    public static final double ROTATE_RATE_LIMIT_ARCADE = 2.0;
   }
 }

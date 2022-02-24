@@ -54,7 +54,7 @@ public class ShootCommand extends CommandBase {
     // If we have a target distance, spin up and shoot
     if (lastTargetDistance > 0) {
       shooterSubsystem.prepareToShoot(lastTargetDistance);
-      double rotationSpeed = -pidController.calculate(limelightSubsystem.getTargetX() / 5);
+      double rotationSpeed = -pidController.calculate(limelightSubsystem.getTargetX());
       driveTrainSubsystem.arcadeDrive(0.0, rotationSpeed, false);
       if (shooterSubsystem.isReadyToShoot() && pidController.atSetpoint()) {
         indexerSubsystem.shoot();

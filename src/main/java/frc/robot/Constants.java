@@ -39,13 +39,14 @@ public final class Constants {
     public static final int EDGES_PER_ROTATION = 2048;
     public static final double WHEEL_DIAMETER_INCHES = 6d;
     public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(WHEEL_DIAMETER_INCHES) * Math.PI;
+    public static final double DRIVE_GEAR_RATIO = 625d / 72d;
 
     public static final double TRACK_WIDTH_METERS = 0.7101550117116572;
     public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
         TRACK_WIDTH_METERS);
 
     /** Voltage needed to overcome the motor’s static friction. kS */
-    public static final double kS = 0.67854;
+    public static final double kS = 0.57854;
 
     /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
     public static final double kV = 1.9308;
@@ -55,7 +56,7 @@ public final class Constants {
 
     public static final SimpleMotorFeedforward FEED_FORWARD = new SimpleMotorFeedforward(kS, kV, kA);
 
-    public static final double kP = 1.2317;
+    public static final double kP = 0;
 
     public static final double CLOSED_LOOP_RAMP = .2;
     public static final double OPEN_LOOP_RAMP = .25;
@@ -155,21 +156,21 @@ public final class Constants {
 
   public static final class AimConstants {
 
-    public static final double kP = 0.5;
-    public static final double kD = 0.2;
+    public static final double kP = 0.02;
+    public static final double kD = 0.0;
     public static final double AIM_TOLERANCE = 0.3;
 
   }
  
   public static final class ArcadeConstants {
     // Max speed to drive in teleop in meters per second
-    public static final double MAX_SPEED_ARCADE = 1;
+    public static final double MAX_SPEED_ARCADE = 3.7;
 
     // Max angular velocity in teleop in radians per second
-    public static final double MAX_ANGULAR_VEL_ARCADE = Units.degreesToRadians(50);
+    public static final double MAX_ANGULAR_VEL_ARCADE = Units.degreesToRadians(270);
 
     // Max rate of change for speed per second
-    public static final double SPEED_RATE_LIMIT_ARCADE = 2.0;
+    public static final double SPEED_RATE_LIMIT_ARCADE = 1.5;
 
     // Max rate of change for rotation per second
     public static final double ROTATE_RATE_LIMIT_ARCADE = 3.0;

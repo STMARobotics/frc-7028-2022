@@ -125,6 +125,11 @@ public class RobotContainer {
         .withSize(2, 5).withPosition(0, 0);
     driveTrainSubsystem.addDashboardWidgets(drivetrainLayout);
     drivetrainLayout.add(driveTrainSubsystem);
+
+    // var shooterLayout = Dashboard.subsystemsTab.getLayout("Shooter", BuiltInLayouts.kList)
+    //     .withSize(2, 5).withPosition(3, 0);
+    // shooterSubsystem.addDashboardWidgets(shooterLayout);
+    // shooterLayout.add(shooterSubsystem);
   }
 
   /**

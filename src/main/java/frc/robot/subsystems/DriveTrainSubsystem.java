@@ -8,6 +8,7 @@ import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_FOLLOWER;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_LEADER;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_FOLLOWER;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_LEADER;
+import static frc.robot.Constants.DriveTrainConstants.DRIVE_GEAR_RATIO;
 import static frc.robot.Constants.DriveTrainConstants.DRIVE_KINEMATICS;
 import static frc.robot.Constants.DriveTrainConstants.EDGES_PER_ROTATION;
 import static frc.robot.Constants.DriveTrainConstants.FEED_FORWARD;
@@ -15,7 +16,6 @@ import static frc.robot.Constants.DriveTrainConstants.WHEEL_CIRCUMFERENCE_METERS
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -65,7 +65,6 @@ public class DriveTrainSubsystem extends SubsystemBase {
     differentialDriveOdometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
 
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
-    talonConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.QuadEncoder;
     talonConfig.slot0.kP = DriveTrainConstants.kP;
     talonConfig.slot0.kI = 0.0;
     talonConfig.slot0.kD = 0.0;
@@ -74,6 +73,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
     talonConfig.openloopRamp = DriveTrainConstants.OPEN_LOOP_RAMP;
 
     rightLeader.configAllSettings(talonConfig);
+    rightLeader.enableVoltageCompensation(true);
     rightLeader.enableVoltageCompensation(true);
     rightFollower.configFactoryDefault();
     leftLeader.configAllSettings(talonConfig);
@@ -104,6 +104,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
       rightLeader.setNeutralMode(NeutralMode.Coast);
       rightFollower.setNeutralMode(NeutralMode.Coast);
     }));
+    setCurrentPose(new Pose2d());
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
@@ -255,7 +256,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @return left encoder position
    */
   public double getLeftEncoderPosition() {
-    return leftLeader.getSelectedSensorPosition(0);
+    return leftLeader.getSelectedSensorPosition();
   }
 
   /**
@@ -264,7 +265,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @return right encoder position
    */
   public double getRightEncoderPosition() {
-    return rightLeader.getSelectedSensorPosition(0);
+    return rightLeader.getSelectedSensorPosition();
   }
 
   private void zeroDriveTrainEncoders() {
@@ -312,11 +313,11 @@ public class DriveTrainSubsystem extends SubsystemBase {
   /**
    * Converts from encoder edges to meters.
    * 
-   * @param steps encoder edges to convert
+   * @param edges encoder edges to convert
    * @return meters
    */
-  public static double edgesToMeters(double steps) {
-    return (WHEEL_CIRCUMFERENCE_METERS / EDGES_PER_ROTATION) * steps;
+  public static double edgesToMeters(double edges) {
+    return (WHEEL_CIRCUMFERENCE_METERS / (EDGES_PER_ROTATION * DRIVE_GEAR_RATIO)) * edges;
   }
 
   /**
@@ -334,7 +335,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @return encoder edges
    */
   public static double metersToEdges(double meters) {
-    return (meters / WHEEL_CIRCUMFERENCE_METERS) * EDGES_PER_ROTATION;
+    return (meters / WHEEL_CIRCUMFERENCE_METERS) * (EDGES_PER_ROTATION * DRIVE_GEAR_RATIO);
   }
 
   /**

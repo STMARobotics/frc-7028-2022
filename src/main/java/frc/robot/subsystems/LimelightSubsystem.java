@@ -91,7 +91,7 @@ public class LimelightSubsystem extends SubsystemBase {
         limelightNetworkTable.getEntry("pipeline").getDouble(0.0) != activeProfile.pipelineId);
   
     limelightNetworkTable.getEntry("ledMode").setDouble(enabled ? 0.0 : 1.0);
-    limelightNetworkTable.getEntry("camMode").setDouble(enabled ? 0.0 : 1.0);
+    limelightNetworkTable.getEntry("camMode").setDouble(enabled ? 0.0 : 0.0);
     limelightNetworkTable.getEntry("pipeline").setDouble(activeProfile.pipelineId);
   
     if (shouldFlush)  {

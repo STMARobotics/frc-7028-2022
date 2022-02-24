@@ -1,12 +1,12 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -16,7 +16,7 @@ import frc.robot.commands.IndexerCommand;
 import frc.robot.commands.JetsonBallCommand;
 import frc.robot.commands.MusicCommand;
 import frc.robot.commands.ShootCommand;
-import frc.robot.commands.TeleopDriveCommand;
+import frc.robot.commands.TeleDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -27,12 +27,9 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 
 /**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
- * the robot (including
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
@@ -44,16 +41,15 @@ public class RobotContainer {
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
-
   private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
   private final ShooterLimelightSubsystem limelightSubsystem =
       new ShooterLimelightSubsystem(LimeLightConstants.LIMELIGHT_CONFIG);
 
-  private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
   private final JetsonBallCommand jetsonBallCommand = 
       new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem);
-  private final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(
-      driveTrainSubsystem, () -> -driverController.getLeftY() / 2, () -> driverController.getRightX() / 2);
+  private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
+  private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
+      driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
   private final ShootCommand shootCommand = 
       new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem);
 
@@ -61,7 +57,6 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    driveTrainSubsystem.setDefaultCommand(teleopDriveCommand);
     SmartDashboard.putData(new MusicCommand(driveTrainSubsystem));
 
     // Forward ports for USB access
@@ -69,17 +64,24 @@ public class RobotContainer {
     PortForwarder.add(8813, "10.70.28.13", 1181); // Jetson
 
     configureButtonBindings();
+    configureSubsystemCommands();
+    configureSubsystemDashboard();
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be
-   * created by
+   * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
-   * it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+
+    // Drivetrain
+    new JoystickButton(driverController, XboxController.Button.kB.value)
+      .whenPressed(teleDriveCommand::toggleSlowMode);
+
+    // new JoystickButton(driverController, XboxController.Button.kY.value)
+    //   .whenPressed(teleDriveCommand::toggleReverseMode);
 
     // // TODO Remove this, it's just for shop testing
     // var shooterTab  = Shuffleboard.getTab("Shooter");
@@ -96,11 +98,11 @@ public class RobotContainer {
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
     new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
             () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
-
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
         .whileHeld(jetsonBallCommand);
 
+    // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
         .whileHeld(intakeSubsystem::reverse, intakeSubsystem)
         .whileHeld(indexerSubsystem::unload, indexerSubsystem)
@@ -118,18 +120,23 @@ public class RobotContainer {
         .whenReleased(transferSubsystem::stop, transferSubsystem);
   }
 
+  private void configureSubsystemDashboard() {
+    var drivetrainLayout = Dashboard.subsystemsTab.getLayout("Drivetrain", BuiltInLayouts.kList)
+        .withSize(2, 5).withPosition(0, 0);
+    driveTrainSubsystem.addDashboardWidgets(drivetrainLayout);
+    drivetrainLayout.add(driveTrainSubsystem);
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
     return null;
   }
 
-  public Command getTeleopCommand() {
-    // An ExampleCommand will run in autonomous
-    return indexCommand;
+  private void configureSubsystemCommands() {
+    driveTrainSubsystem.setDefaultCommand(teleDriveCommand);
   }
 }

@@ -166,12 +166,12 @@ public final class Constants {
     public static final double MAX_SPEED_ARCADE = 1;
 
     // Max angular velocity in teleop in radians per second
-    public static final double MAX_ANGULAR_VEL_ARCADE = Units.degreesToRadians(100);
+    public static final double MAX_ANGULAR_VEL_ARCADE = Units.degreesToRadians(50);
 
     // Max rate of change for speed per second
     public static final double SPEED_RATE_LIMIT_ARCADE = 2.0;
 
     // Max rate of change for rotation per second
-    public static final double ROTATE_RATE_LIMIT_ARCADE = 2.0;
+    public static final double ROTATE_RATE_LIMIT_ARCADE = 3.0;
   }
 }

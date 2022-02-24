@@ -326,7 +326,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @return meters per second
    */
   public static double edgesPerDecisecToMetersPerSec(double stepsPerDecisec) {
-    return edgesToMeters(stepsPerDecisec * 10);
+    return edgesToMeters(stepsPerDecisec / .1d);
   }
 
   /**

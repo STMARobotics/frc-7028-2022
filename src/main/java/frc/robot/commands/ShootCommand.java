@@ -54,6 +54,8 @@ public class ShootCommand extends CommandBase {
     // If we have a target distance, spin up and shoot
     if (lastTargetDistance > 0) {
       shooterSubsystem.prepareToShoot(lastTargetDistance);
+      // We're not going to worry about losing the target for rotation because Limelight returns target X of 0 when no
+      // target is visible, so we just won't rotate when no target is visible
       double rotationSpeed = -pidController.calculate(limelightSubsystem.getTargetX());
       driveTrainSubsystem.arcadeDrive(0.0, rotationSpeed, false);
       if (shooterSubsystem.isReadyToShoot() && pidController.atSetpoint()) {

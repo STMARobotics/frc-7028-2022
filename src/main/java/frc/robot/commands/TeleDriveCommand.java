@@ -2,12 +2,14 @@ package frc.robot.commands;
 
 import static frc.robot.Constants.DriverConstants.DEADBAND_HIGH;
 import static frc.robot.Constants.DriverConstants.DEADBAND_LOW;
-import static frc.robot.Constants.DriverConstants.ROTATION_MULTIPLIER;
+import static frc.robot.Constants.DriverConstants.ROTATE_RATE_LIMIT_ARCADE;
 import static frc.robot.Constants.DriverConstants.SLOW_MODE_ROTATION_MULTIPLIER;
 import static frc.robot.Constants.DriverConstants.SLOW_MODE_SPEED_MULTIPLIER;
+import static frc.robot.Constants.DriverConstants.SPEED_RATE_LIMIT_ARCADE;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.DeadbandFilter;
 import frc.robot.subsystems.DriveTrainSubsystem;
@@ -22,6 +24,10 @@ public class TeleDriveCommand extends CommandBase {
   private final DoubleSupplier speedSupplier;
   private final DoubleSupplier rotationSupplier;
   private final DriveTrainSubsystem driveTrainSubsystem;
+  
+  private final SlewRateLimiter speedRateLimiter = new SlewRateLimiter(SPEED_RATE_LIMIT_ARCADE);
+  private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(ROTATE_RATE_LIMIT_ARCADE);
+
   private boolean slowMode = false;
   private boolean reverseMode = false;
 
@@ -31,6 +37,14 @@ public class TeleDriveCommand extends CommandBase {
     this.speedSupplier = speedSupplier;
     this.rotationSupplier = rotationSupplier;
     addRequirements(driveTrainSubsystem);
+  }
+
+  @Override
+  public void initialize() {
+    // Set the rate limiters to the current drivetrain speeds. The robot may not be standing still and we want changes
+    // to be limited from the current speeds, not from zero.
+    speedRateLimiter.reset(driveTrainSubsystem.getVelocityPercent());
+    rotationRateLimiter.reset(driveTrainSubsystem.getAngularVelocityPercent());
   }
 
   @Override
@@ -46,15 +60,15 @@ public class TeleDriveCommand extends CommandBase {
     if (isReverseMode()) {
       speed = -speed;
     }
-    return speed;
+    return speedRateLimiter.calculate(speed);
   }
 
   private double getRotation() {
-    double rotation = deadbandFilter.calculate(rotationSupplier.getAsDouble()) * ROTATION_MULTIPLIER;
+    double rotation = deadbandFilter.calculate(rotationSupplier.getAsDouble());
     if (isSlowMode()) {
       rotation *= SLOW_MODE_ROTATION_MULTIPLIER;
     }
-    return rotation;
+    return -rotationRateLimiter.calculate(rotation);
   }
 
   public void toggleSlowMode() {
@@ -81,6 +95,8 @@ public class TeleDriveCommand extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     driveTrainSubsystem.stop();
+    speedRateLimiter.reset(0);
+    rotationRateLimiter.reset(0);
   }
 
 }

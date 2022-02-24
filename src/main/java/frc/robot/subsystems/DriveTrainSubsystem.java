@@ -2,8 +2,6 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.ArcadeConstants.MAX_ANGULAR_VEL_ARCADE;
 import static frc.robot.Constants.ArcadeConstants.MAX_SPEED_ARCADE;
-import static frc.robot.Constants.ArcadeConstants.ROTATE_RATE_LIMIT_ARCADE;
-import static frc.robot.Constants.ArcadeConstants.SPEED_RATE_LIMIT_ARCADE;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_FOLLOWER;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_LEADER;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_RIGHT_FOLLOWER;
@@ -23,7 +21,6 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.RamseteController;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -53,15 +50,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
   private final AHRS gyro = new AHRS(SPI.Port.kMXP);
   private final DifferentialDriveOdometry differentialDriveOdometry;
-  private Pose2d savedPose;
-
-  private SlewRateLimiter speedRateLimiter = new SlewRateLimiter(SPEED_RATE_LIMIT_ARCADE);
-  private SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(ROTATE_RATE_LIMIT_ARCADE);
   
   public DriveTrainSubsystem() {
     zeroDriveTrainEncoders();
     gyro.zeroYaw();
     differentialDriveOdometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
+    resetOdometry();
 
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     talonConfig.slot0.kP = DriveTrainConstants.kP;
@@ -103,37 +97,29 @@ public class DriveTrainSubsystem extends SubsystemBase {
       rightLeader.setNeutralMode(NeutralMode.Coast);
       rightFollower.setNeutralMode(NeutralMode.Coast);
     }));
-    setCurrentPose(new Pose2d());
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
     dashboard.addString("Pose", () -> differentialDriveOdometry.getPoseMeters().toString());
-    dashboard.addNumber("Speed", () ->
-        DRIVE_KINEMATICS.toChassisSpeeds(new DifferentialDriveWheelSpeeds(
-          edgesPerDecisecToMetersPerSec(leftLeader.getSelectedSensorVelocity()),
-          edgesPerDecisecToMetersPerSec(rightLeader.getSelectedSensorVelocity()))).vxMetersPerSecond);
-    dashboard.addNumber("Rotation", () ->
-        DRIVE_KINEMATICS.toChassisSpeeds(new DifferentialDriveWheelSpeeds(
-          edgesPerDecisecToMetersPerSec(leftLeader.getSelectedSensorVelocity()),
-          edgesPerDecisecToMetersPerSec(rightLeader.getSelectedSensorVelocity()))).omegaRadiansPerSecond);
+    dashboard.addNumber("Speed", () -> getCurrentChassisSpeeds().vxMetersPerSecond);
+    dashboard.addNumber("Rotation", () -> getCurrentChassisSpeeds().omegaRadiansPerSecond);
   }
 
   /**
-   * Resets the current pose to 0, 0, 0° and resets the saved pose
+   * Resets the current pose to 0, 0, 0°
    */
   public void resetOdometry() {
     setCurrentPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
   }
 
   /**
-   * Resets the current pose to the specified pose. This this ONLY be called
+   * Resets the current pose to the specified pose. This should ONLY be called
    * when the robot's position on the field is known, like at the beginnig of
-   * a match. This will also reset the saved pose since the old pose could be invalidated.
+   * a match.
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
     zeroDriveTrainEncoders();
-    savedPose = newPose;
     differentialDriveOdometry.resetPosition(newPose, Rotation2d.fromDegrees(getHeading()));
   }
 
@@ -153,14 +139,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @param useSquares if set, decreases input sensitivity at low speeds
    */
   public void arcadeDrive(double speed, double rotation, boolean useSquares) {
-    var xSpeed = speed;
-    var zRotation = rotation;
+    var xSpeed = safeClamp(speed);
+    var zRotation = safeClamp(rotation);
     if (useSquares) {
       xSpeed *= Math.abs(xSpeed);
       zRotation *= Math.abs(zRotation);
     }
-    xSpeed = speedRateLimiter.calculate(safeClamp(speed));
-    zRotation = -rotationRateLimiter.calculate(safeClamp(rotation));
     xSpeed *= MAX_SPEED_ARCADE;
     zRotation *= MAX_ANGULAR_VEL_ARCADE;
     var wheelSpeeds = DRIVE_KINEMATICS.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0.0, zRotation));
@@ -168,21 +152,32 @@ public class DriveTrainSubsystem extends SubsystemBase {
   }
 
   /**
-   * Drives the robot by individually addressing the left and right side of the
-   * drive train
-   * 
-   * @param leftSpeed  speed of the left motors [-1.0..1.0]
-   * @param rightSpeed speed of the right motors [-1.0..1.0]
-   * @param useSquares if set, decreases input sensitivity at low speeds
+   * Gets the current ChassisSpeeds in meters per second.
+   * Use {@link #getVelocityPercent()} or {@link #getAngularVelocityPercent()} to get speeds in percentage terms.
+   * @return chasis speed of the drivetrain
    */
-  public void tankDrive(double leftSpeed, double rightSpeed, boolean useSquares) {
-    var xLeftSpeed = safeClamp(leftSpeed) * MAX_SPEED_ARCADE;
-    var xRightSpeed = safeClamp(rightSpeed) * MAX_SPEED_ARCADE;
-    if (useSquares) {
-      xLeftSpeed *= Math.abs(xLeftSpeed);
-      xRightSpeed *= Math.abs(xRightSpeed);
-    }
-    tankDriveVelocity(xLeftSpeed, xRightSpeed);
+  public ChassisSpeeds getCurrentChassisSpeeds() {
+    return DRIVE_KINEMATICS.toChassisSpeeds(new DifferentialDriveWheelSpeeds(
+        edgesPerDecisecToMetersPerSec(leftLeader.getSelectedSensorVelocity()),
+        edgesPerDecisecToMetersPerSec(rightLeader.getSelectedSensorVelocity())));
+  }
+
+  /**
+   * Gets the current velocity as a percentage of the max speed.
+   * Use {@link #getCurrentChassisSpeeds()} to get speeds in meters/second.
+   * @return current velocity percent
+   */
+  public double getVelocityPercent() {
+    return getCurrentChassisSpeeds().vyMetersPerSecond / MAX_SPEED_ARCADE;
+  }
+
+  /**
+   * Gets the current angular velocity (rotation) as a percentage of the max angular velocity.
+   * Use {@link #getCurrentChassisSpeeds()} to get speeds in meters/second.
+   * @return current angular velocity percent
+   */
+  public double getAngularVelocityPercent() {
+    return getCurrentChassisSpeeds().omegaRadiansPerSecond / MAX_ANGULAR_VEL_ARCADE;
   }
 
   /**
@@ -214,8 +209,6 @@ public class DriveTrainSubsystem extends SubsystemBase {
   public void stop() {
     leftLeader.set(0);
     rightLeader.set(0);
-    speedRateLimiter.reset(0);
-    rotationRateLimiter.reset(0);
   }
 
   /**
@@ -267,14 +260,6 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
   public Pose2d getCurrentPose() {
     return differentialDriveOdometry.getPoseMeters();
-  }
-
-  public void saveCurrentPose() {
-    savedPose = getCurrentPose();
-  }
-
-  public Pose2d getSavedPose() {
-    return savedPose;
   }
 
   /**

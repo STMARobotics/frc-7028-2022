@@ -145,13 +145,17 @@ public final class Constants {
 
   public static final class DriverConstants {
 
-    public static final double ROTATION_MULTIPLIER = 1;
-
     public static final double SLOW_MODE_SPEED_MULTIPLIER = .6;
     public static final double SLOW_MODE_ROTATION_MULTIPLIER = .9;
 
     public static final double DEADBAND_HIGH = 0.12;
     public static final double DEADBAND_LOW = -DEADBAND_HIGH;
+
+    // Max rate of change for speed per second (1 / <value> is the number of seconds allowed to go from 0 to max)
+    public static final double SPEED_RATE_LIMIT_ARCADE = 1.5;
+
+    // Max rate of change for rotation per second (1 / <value> is the number of seconds allowed to go from 0 to max)
+    public static final double ROTATE_RATE_LIMIT_ARCADE = 3.0;
   }
 
   public static final class AimConstants {
@@ -173,11 +177,5 @@ public final class Constants {
 
     // Max angular velocity in teleop in radians per second
     public static final double MAX_ANGULAR_VEL_ARCADE = Units.degreesToRadians(270);
-
-    // Max rate of change for speed per second
-    public static final double SPEED_RATE_LIMIT_ARCADE = 1.5;
-
-    // Max rate of change for rotation per second
-    public static final double ROTATE_RATE_LIMIT_ARCADE = 3.0;
   }
 }

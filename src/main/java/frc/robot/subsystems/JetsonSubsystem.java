@@ -1,7 +1,10 @@
 package frc.robot.subsystems;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -9,8 +12,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.TableEntryListener;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.InstantWhenDisabledCommand;
@@ -38,11 +43,30 @@ public class JetsonSubsystem extends SubsystemBase {
       .whenActive(this::enable)
       .whenInactive(new InstantWhenDisabledCommand(this::disable));
   
-    // Put a chooser on the dashboard for picking which cargo to target
+    // Configure the chooser for picking which cargo to target
     cargoColorChooser.setDefaultOption("Both", CargoColor.Both);
     cargoColorChooser.addOption("RedCargo", CargoColor.Red);
     cargoColorChooser.addOption("BlueCargo", CargoColor.Blue);
-    SmartDashboard.putData("Cargo Color", cargoColorChooser);
+  }
+
+  public ShuffleboardLayout addDashboardWidgets(ShuffleboardLayout dashboard) {
+    var detailDashboard = dashboard.getLayout("Target", BuiltInLayouts.kGrid)
+        .withProperties(Map.of("numberOfColumns", 2, "numberOfRows", 2));
+    detailDashboard.addBoolean("Acquired", () -> getClosestDetection() != null).withPosition(0, 1);
+    detailDashboard.addNumber("X", () -> getClosestDetection() == null ? 0 : getClosestDetection().targetX).withPosition(0, 0);
+    detailDashboard.addNumber("Y", () -> getClosestDetection() == null ? 0 : getClosestDetection().targetY).withPosition(1, 0);
+    return detailDashboard;
+  }
+
+  public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
+    // Put a chooser on the dashboard for picking which cargo to target
+    driverTab.add("Cargo Color", cargoColorChooser).withSize(1, 1).withPosition(0, 0);
+
+    // Add the Jetson camera to the driver dashboard
+    var camera = new HttpCamera("Jetson", "http://10.70.28.13:1181");
+    if (camera != null) {
+      driverTab.add("Jetson", camera).withSize(5, 3).withPosition(1, 0);
+    }
   }
 
   @Override

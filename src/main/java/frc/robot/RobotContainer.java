@@ -7,14 +7,12 @@ import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.LimeLightConstants;
-import frc.robot.commands.IndexerCommand;
 import frc.robot.commands.JetsonBallCommand;
-import frc.robot.commands.MusicCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
@@ -47,7 +45,6 @@ public class RobotContainer {
 
   private final JetsonBallCommand jetsonBallCommand = 
       new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem);
-  private final IndexerCommand indexCommand = new IndexerCommand(indexerSubsystem);
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
   private final ShootCommand shootCommand = 
@@ -57,8 +54,6 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    SmartDashboard.putData(new MusicCommand(driveTrainSubsystem));
-
     // Forward ports for USB access
     PortForwarder.add(8811, "10.70.28.11", 5801); // Limelight
     PortForwarder.add(8813, "10.70.28.13", 1181); // Jetson
@@ -66,6 +61,7 @@ public class RobotContainer {
     configureButtonBindings();
     configureSubsystemCommands();
     configureSubsystemDashboard();
+    configureDriverDashboard();
   }
 
   /**
@@ -80,24 +76,18 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kB.value)
       .whenPressed(teleDriveCommand::toggleSlowMode);
 
-    // new JoystickButton(driverController, XboxController.Button.kY.value)
-    //   .whenPressed(teleDriveCommand::toggleReverseMode);
+    new JoystickButton(driverController, XboxController.Button.kY.value)
+      .whenPressed(teleDriveCommand::toggleReverseMode);
 
-    // // TODO Remove this, it's just for shop testing
-    // var shooterTab  = Shuffleboard.getTab("Shooter");
-    // shooterSubsystem.addDashboardWidgets(shooterTab.getLayout("shooter", BuiltInLayouts.kList));
-    // var shooterSpeed = shooterTab.add("Y-Button Shoot Speed", 0).withWidget(BuiltInWidgets.kNumberSlider)
-    //     .withProperties(Map.of("Max", 21000, "Min", 0)).getEntry();
-    // new JoystickButton(driverController, XboxController.Button.kY.value)
-    //     .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> shooterSpeed.getDouble(150000)));
-    // limelightSubsystem.addDashboardWidgets(shooterTab.getLayout("Limelight", BuiltInLayouts.kList));
-    
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value).whileHeld(shootCommand);
+
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
-    new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
+    
+        new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
             () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
+    
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
         .whileHeld(jetsonBallCommand);
@@ -122,14 +112,29 @@ public class RobotContainer {
 
   private void configureSubsystemDashboard() {
     var drivetrainLayout = Dashboard.subsystemsTab.getLayout("Drivetrain", BuiltInLayouts.kList)
-        .withSize(2, 5).withPosition(0, 0);
+        .withSize(2, 3).withPosition(0, 0);
     driveTrainSubsystem.addDashboardWidgets(drivetrainLayout);
     drivetrainLayout.add(driveTrainSubsystem);
 
-    // var shooterLayout = Dashboard.subsystemsTab.getLayout("Shooter", BuiltInLayouts.kList)
-    //     .withSize(2, 5).withPosition(3, 0);
-    // shooterSubsystem.addDashboardWidgets(shooterLayout);
-    // shooterLayout.add(shooterSubsystem);
+    var shooterLayout = Dashboard.subsystemsTab.getLayout("Shooter", BuiltInLayouts.kList)
+        .withSize(2, 3).withPosition(2, 0);
+    shooterSubsystem.addDashboardWidgets(shooterLayout);
+    shooterLayout.add(shooterSubsystem);
+
+    var limelightLayout = Dashboard.subsystemsTab.getLayout("Limelight", BuiltInLayouts.kList)
+        .withSize(2, 3).withPosition(4, 0);
+    limelightSubsystem.addDashboardWidgets(limelightLayout);
+    limelightLayout.add(limelightSubsystem);
+
+    var jetsonLayout = Dashboard.subsystemsTab.getLayout("Jetson", BuiltInLayouts.kList)
+        .withSize(2, 3).withPosition(6, 0);
+    jetsonSubsystem.addDashboardWidgets(jetsonLayout);
+    jetsonLayout.add(jetsonSubsystem);
+  }
+
+  private void configureDriverDashboard() {
+    jetsonSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
+    Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
   }
 
   /**

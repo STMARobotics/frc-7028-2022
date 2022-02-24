@@ -19,7 +19,6 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.music.Orchestra;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.MathUtil;
@@ -117,13 +116,6 @@ public class DriveTrainSubsystem extends SubsystemBase {
         DRIVE_KINEMATICS.toChassisSpeeds(new DifferentialDriveWheelSpeeds(
           edgesPerDecisecToMetersPerSec(leftLeader.getSelectedSensorVelocity()),
           edgesPerDecisecToMetersPerSec(rightLeader.getSelectedSensorVelocity()))).omegaRadiansPerSecond);
-  }
-
-  public void addInstruments(Orchestra orchestra) {
-    orchestra.addInstrument(rightLeader);
-    orchestra.addInstrument(rightFollower);
-    orchestra.addInstrument(leftLeader);
-    orchestra.addInstrument(leftFollower);
   }
 
   /**

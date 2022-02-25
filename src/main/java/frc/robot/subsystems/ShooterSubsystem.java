@@ -45,6 +45,8 @@ public class ShooterSubsystem extends SubsystemBase {
     leader.configAllSettings(config);
     follower.configAllSettings(config);
     
+    leader.configVoltageCompSaturation(12);
+    follower.configVoltageCompSaturation(12);
     leader.enableVoltageCompensation(true);
     follower.enableVoltageCompensation(true);
     leader.setNeutralMode(NeutralMode.Coast);
@@ -58,7 +60,8 @@ public class ShooterSubsystem extends SubsystemBase {
     dashboard.addNumber("Velocity", leader::getSelectedSensorVelocity);
     dashboard.addNumber("Target Velocity",
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopTarget() : 0);
-    dashboard.addNumber("Error", leader::getClosedLoopError);
+    dashboard.addNumber("Error", 
+        () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopError() : 0);
   }
 
   /**

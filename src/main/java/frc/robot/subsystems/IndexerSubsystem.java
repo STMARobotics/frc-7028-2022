@@ -14,14 +14,15 @@ public class IndexerSubsystem extends SubsystemBase {
   public IndexerSubsystem() {
     indexer.configFactoryDefault();
     indexer.setNeutralMode(NeutralMode.Coast);
+    indexer.configOpenloopRamp(0.1);
   }
 
   public void load() {
-    indexer.set(.65);
+    indexer.set(.3);
   }
 
   public void unload() {
-    indexer.set(-.65);
+    indexer.set(-.3);
   }
 
   public void shoot() {

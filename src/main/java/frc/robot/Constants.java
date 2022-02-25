@@ -67,7 +67,7 @@ public final class Constants {
     public static final int DEVICE_ID_SHOOTER_FOLLOWER = 11;
 
     public static final double kS = 0.5196;
-    public static final double kV = 0.0917;
+    public static final double kV = 0.091;
     public static final double kA = 0.0056284;
 
     public static final double kP = 0.0011962;
@@ -81,12 +81,10 @@ public final class Constants {
       Map.entry(Units.inchesToMeters(55.95), 11000d),
       Map.entry(Units.inchesToMeters(69.33), 11700d),
       Map.entry(Units.inchesToMeters(84.90), 12200d),
-      Map.entry(Units.inchesToMeters(98.92), 12500d),
-      Map.entry(Units.inchesToMeters(114.50), 12500d),
-      Map.entry(Units.inchesToMeters(129.90), 12800d),
-      Map.entry(Units.inchesToMeters(148.25), 13550d),
-      Map.entry(Units.inchesToMeters(166.62), 14000d),
-      Map.entry(Units.inchesToMeters(186.05), 14400d)));
+      Map.entry(Units.inchesToMeters(127.02), 13400d),
+      Map.entry(Units.inchesToMeters(134.51), 13900d),
+      Map.entry(Units.inchesToMeters(168.33), 14800d),
+      Map.entry(Units.inchesToMeters(188.35), 15600d)));
   }
 
   public static final class IndexerConstants {
@@ -152,17 +150,17 @@ public final class Constants {
     public static final double DEADBAND_LOW = -DEADBAND_HIGH;
 
     // Max rate of change for speed per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double SPEED_RATE_LIMIT_ARCADE = 1.5;
+    public static final double SPEED_RATE_LIMIT_ARCADE = 2.25;
 
     // Max rate of change for rotation per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double ROTATE_RATE_LIMIT_ARCADE = 3.0;
+    public static final double ROTATE_RATE_LIMIT_ARCADE = 5.0;
   }
 
   public static final class AimConstants {
 
-    public static final double kP = 0.02;
+    public static final double kP = 0.023;
     public static final double kD = 0.0;
-    public static final double AIM_TOLERANCE = 0.3;
+    public static final double AIM_TOLERANCE = 1.75;
 
     public static final double SLOW_MODE_SPEED_MULTIPLIER = .6;
     public static final double SLOW_MODE_ROTATION_MULTIPLIER = .9;

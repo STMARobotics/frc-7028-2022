@@ -56,10 +56,17 @@ public class ShootCommand extends CommandBase {
       shooterSubsystem.prepareToShoot(lastTargetDistance);
       // We're not going to worry about losing the target for rotation because Limelight returns target X of 0 when no
       // target is visible, so we just won't rotate when no target is visible
-      double rotationSpeed = -pidController.calculate(limelightSubsystem.getTargetX());
-      driveTrainSubsystem.arcadeDrive(0.0, rotationSpeed, false);
+      double rotationSpeed = pidController.calculate(limelightSubsystem.getTargetX());
       if (shooterSubsystem.isReadyToShoot() && pidController.atSetpoint()) {
+        // Turn the indexer to put ball in shooter. It does not have safety so it will stay on until stopped.
         indexerSubsystem.shoot();
+      }
+      if (pidController.atSetpoint()) {
+        // Having a wide enough tolerance and stopping the drivetrain once at the setpoint prevents
+        // jittering / oscalation when very close to the target
+        driveTrainSubsystem.stop();
+      } else {
+        driveTrainSubsystem.arcadeDrive(0.0, rotationSpeed, false);
       }
     } else {
       // No target has ever been visible, so stop

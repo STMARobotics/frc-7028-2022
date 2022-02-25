@@ -3,16 +3,20 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import java.util.Map;
+
 import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.commands.JetsonBallCommand;
+import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
@@ -71,7 +75,6 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-
     // Drivetrain
     new JoystickButton(driverController, XboxController.Button.kB.value)
       .whenPressed(teleDriveCommand::toggleSlowMode);
@@ -108,6 +111,19 @@ public class RobotContainer {
         .whenReleased(intakeSubsystem::stop, intakeSubsystem)
         .whenReleased(indexerSubsystem::stop, indexerSubsystem)
         .whenReleased(transferSubsystem::stop, transferSubsystem);
+  }
+
+  /**
+   * Adds "Shooter" Shuffleboard tab and Y-button binding for tuning the shooter.
+   */
+  private void addShootCalibrationMode() {
+    var shooterTab  = Shuffleboard.getTab("Shooter");
+    shooterSubsystem.addDashboardWidgets(shooterTab.getLayout("shooter", BuiltInLayouts.kList));
+    var shooterSpeed = shooterTab.add("Y-Button Shoot Speed", 0).withWidget(BuiltInWidgets.kNumberSlider)
+        .withProperties(Map.of("Max", 21000, "Min", 0)).getEntry();
+    new JoystickButton(driverController, XboxController.Button.kY.value)
+        .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> shooterSpeed.getDouble(150000)));
+    limelightSubsystem.addDashboardWidgets(shooterTab.getLayout("Limelight", BuiltInLayouts.kList));
   }
 
   private void configureSubsystemDashboard() {

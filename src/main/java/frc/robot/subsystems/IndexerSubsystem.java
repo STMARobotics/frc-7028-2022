@@ -14,6 +14,8 @@ public class IndexerSubsystem extends SubsystemBase {
   public IndexerSubsystem() {
     indexer.configFactoryDefault();
     indexer.setNeutralMode(NeutralMode.Coast);
+    // A small amount of ramp helps prevent voltage drop when the indexer starts up. The voltage drop was causing the
+    // shooter flywheel to slow down.
     indexer.configOpenloopRamp(0.1);
   }
 

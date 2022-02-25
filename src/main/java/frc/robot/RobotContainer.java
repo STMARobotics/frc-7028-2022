@@ -3,8 +3,17 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import static edu.wpi.first.math.util.Units.inchesToMeters;
+
+import java.util.Collections;
 import java.util.Map;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -14,7 +23,9 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
+import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.JetsonBallCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.ShootCommand;
@@ -78,19 +89,19 @@ public class RobotContainer {
     // Drivetrain
     new JoystickButton(driverController, XboxController.Button.kB.value)
       .whenPressed(teleDriveCommand::toggleSlowMode);
-
-    new JoystickButton(driverController, XboxController.Button.kY.value)
-      .whenPressed(teleDriveCommand::toggleReverseMode);
-
+      
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value).whileHeld(shootCommand);
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
     
-        new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
-            () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
-    
+    new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
+        () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
+ 
+    new JoystickButton(driverController, XboxController.Button.kY.value)
+        .whenPressed(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
+
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
         .whileHeld(jetsonBallCommand);
@@ -159,7 +170,18 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return null;
+    var currentPose = driveTrainSubsystem.getCurrentPose();
+    var endPose = currentPose.plus(new Transform2d(new Translation2d(inchesToMeters(72), 0), new Rotation2d(0)));
+    var trajectory = TrajectoryGenerator.generateTrajectory(
+        new Pose2d(),
+        Collections.emptyList(),
+        endPose,
+        new TrajectoryConfig(TrajectoryConstants.MAX_SPEED_AUTO * .5, TrajectoryConstants.MAX_ACCELERATION_AUTO * .5)
+            .setKinematics(DriveTrainConstants.DRIVE_KINEMATICS)
+            .addConstraint(TrajectoryConstants.VOLTAGE_CONSTRAINT));
+    var trajectoryCommand = driveTrainSubsystem.createCommandForTrajectory(trajectory);
+
+    return null;// trajectoryCommand.andThen(shootCommand);
   }
 
   private void configureSubsystemCommands() {

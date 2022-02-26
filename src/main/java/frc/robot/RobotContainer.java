@@ -171,7 +171,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     var currentPose = driveTrainSubsystem.getCurrentPose();
-    var endPose = currentPose.plus(new Transform2d(new Translation2d(inchesToMeters(72), 0), new Rotation2d(0));
+    var endPose = currentPose.plus(new Transform2d(new Translation2d(inchesToMeters(72), 0), new Rotation2d(0)));
     var trajectory = TrajectoryGenerator.generateTrajectory(
         new Pose2d(),
         Collections.emptyList(),

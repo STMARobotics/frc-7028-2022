@@ -100,7 +100,7 @@ public class RobotContainer {
         () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
  
     new JoystickButton(driverController, XboxController.Button.kY.value)
-        .whenPressed(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
+        .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
 
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
@@ -181,7 +181,12 @@ public class RobotContainer {
             .addConstraint(TrajectoryConstants.VOLTAGE_CONSTRAINT));
     var trajectoryCommand = driveTrainSubsystem.createCommandForTrajectory(trajectory);
 
-    return null;// trajectoryCommand.andThen(shootCommand);
+    return trajectoryCommand
+        .raceWith(new StartEndCommand(intakeSubsystem::intake, intakeSubsystem::stop, intakeSubsystem))
+        .raceWith(new StartEndCommand(transferSubsystem::intake, transferSubsystem::stop, transferSubsystem))
+        .raceWith(new StartEndCommand(indexerSubsystem::load, indexerSubsystem::stop, indexerSubsystem))
+        .andThen(new StartEndCommand(indexerSubsystem::unload, indexerSubsystem::stop, indexerSubsystem).withTimeout(.1))
+        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem));
   }
 
   private void configureSubsystemCommands() {

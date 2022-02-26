@@ -20,15 +20,15 @@ public class IndexerSubsystem extends SubsystemBase {
   }
 
   public void load() {
-    indexer.set(.3);
+    indexer.set(.5);
   }
 
   public void unload() {
-    indexer.set(-.3);
+    indexer.set(-.5);
   }
 
   public void shoot() {
-    indexer.set(.4);
+    indexer.set(.6);
   }
 
   public void stop() {

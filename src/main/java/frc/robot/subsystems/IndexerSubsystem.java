@@ -28,7 +28,7 @@ public class IndexerSubsystem extends SubsystemBase {
   }
 
   public void shoot() {
-    indexer.set(.6);
+    indexer.set(.7);
   }
 
   public void stop() {

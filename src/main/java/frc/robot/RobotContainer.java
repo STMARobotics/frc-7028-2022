@@ -10,8 +10,6 @@ import java.util.Map;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.util.net.PortForwarder;
@@ -21,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DriveTrainConstants;
@@ -40,9 +39,12 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
@@ -55,15 +57,15 @@ public class RobotContainer {
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
   private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
-  private final ShooterLimelightSubsystem limelightSubsystem =
-      new ShooterLimelightSubsystem(LimeLightConstants.LIMELIGHT_CONFIG);
+  private final ShooterLimelightSubsystem limelightSubsystem = new ShooterLimelightSubsystem(
+      LimeLightConstants.LIMELIGHT_CONFIG);
 
-  private final JetsonBallCommand jetsonBallCommand = 
-      new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem);
+  private final JetsonBallCommand jetsonBallCommand = new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem,
+      intakeSubsystem, transferSubsystem, indexerSubsystem);
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
-  private final ShootCommand shootCommand = 
-      new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem);
+  private final ShootCommand shootCommand = new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem,
+      indexerSubsystem, transferSubsystem);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -80,25 +82,27 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
     // Drivetrain
     new JoystickButton(driverController, XboxController.Button.kB.value)
-      .whenPressed(teleDriveCommand::toggleSlowMode);
-      
+        .whenPressed(teleDriveCommand::toggleSlowMode);
+
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value).whileHeld(shootCommand);
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
-    
+
     new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
         () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
- 
+
     new JoystickButton(driverController, XboxController.Button.kY.value)
         .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
 
@@ -114,7 +118,7 @@ public class RobotContainer {
         .whenReleased(intakeSubsystem::stop, intakeSubsystem)
         .whenReleased(indexerSubsystem::stop, indexerSubsystem)
         .whenReleased(transferSubsystem::stop, transferSubsystem);
-        
+
     new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
         .whileHeld(intakeSubsystem::intake, intakeSubsystem)
         .whileHeld(indexerSubsystem::load, indexerSubsystem)
@@ -128,7 +132,7 @@ public class RobotContainer {
    * Adds "Shooter" Shuffleboard tab and Y-button binding for tuning the shooter.
    */
   private void addShootCalibrationMode() {
-    var shooterTab  = Shuffleboard.getTab("Shooter");
+    var shooterTab = Shuffleboard.getTab("Shooter");
     shooterSubsystem.addDashboardWidgets(shooterTab.getLayout("shooter", BuiltInLayouts.kList));
     var shooterSpeed = shooterTab.add("Y-Button Shoot Speed", 0).withWidget(BuiltInWidgets.kNumberSlider)
         .withProperties(Map.of("Max", 21000, "Min", 0)).getEntry();
@@ -170,8 +174,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    var currentPose = driveTrainSubsystem.getCurrentPose();
-    var endPose = currentPose.plus(new Transform2d(new Translation2d(inchesToMeters(72), 0), new Rotation2d(0)));
+    var endPose = new Pose2d(inchesToMeters(72), 0, new Rotation2d(0));
     var trajectory = TrajectoryGenerator.generateTrajectory(
         new Pose2d(),
         Collections.emptyList(),
@@ -181,12 +184,15 @@ public class RobotContainer {
             .addConstraint(TrajectoryConstants.VOLTAGE_CONSTRAINT));
     var trajectoryCommand = driveTrainSubsystem.createCommandForTrajectory(trajectory);
 
-    return trajectoryCommand
-        .raceWith(new StartEndCommand(intakeSubsystem::intake, intakeSubsystem::stop, intakeSubsystem))
-        .raceWith(new StartEndCommand(transferSubsystem::intake, transferSubsystem::stop, transferSubsystem))
-        .raceWith(new StartEndCommand(indexerSubsystem::load, indexerSubsystem::stop, indexerSubsystem))
-        .andThen(new StartEndCommand(indexerSubsystem::unload, indexerSubsystem::stop, indexerSubsystem).withTimeout(.1))
-        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem));
+    return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d()), driveTrainSubsystem)
+        .andThen(trajectoryCommand
+            .raceWith(new StartEndCommand(intakeSubsystem::intake, intakeSubsystem::stop, intakeSubsystem))
+            .raceWith(new StartEndCommand(transferSubsystem::intake, transferSubsystem::stop, transferSubsystem))
+            .raceWith(new StartEndCommand(indexerSubsystem::load, indexerSubsystem::stop, indexerSubsystem)))
+        .andThen(
+            new StartEndCommand(indexerSubsystem::unload, indexerSubsystem::stop, indexerSubsystem).withTimeout(.1))
+        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem,
+            transferSubsystem));
   }
 
   private void configureSubsystemCommands() {

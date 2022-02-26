@@ -7,6 +7,7 @@ import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterLimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.TransferSubsystem;
 
 /**
  * Command that finds a target, spins up the shooter, aims, and shoots at a the correct speed for the target distance.
@@ -17,6 +18,7 @@ public class ShootCommand extends CommandBase {
   private final ShooterLimelightSubsystem limelightSubsystem;
   private final DriveTrainSubsystem driveTrainSubsystem;
   private final IndexerSubsystem indexerSubsystem;
+  private final TransferSubsystem transferSubsystem;
 
   private final PIDController pidController = new PIDController(AimConstants.kP, 0, AimConstants.kD);
 
@@ -26,13 +28,14 @@ public class ShootCommand extends CommandBase {
       ShooterSubsystem shooterSubsystem,
       ShooterLimelightSubsystem limelightSubsystem,
       DriveTrainSubsystem driveTrainSubsystem,
-      IndexerSubsystem indexerSubsystem) {
+      IndexerSubsystem indexerSubsystem, TransferSubsystem transferSubsystem) {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
     this.driveTrainSubsystem = driveTrainSubsystem;
     this.indexerSubsystem = indexerSubsystem;
+    this.transferSubsystem = transferSubsystem;
 
-    addRequirements(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem);
+    addRequirements(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem, transferSubsystem);
 
     pidController.setTolerance(AimConstants.AIM_TOLERANCE);
   }
@@ -60,6 +63,7 @@ public class ShootCommand extends CommandBase {
       if (shooterSubsystem.isReadyToShoot() && pidController.atSetpoint()) {
         // Turn the indexer to put ball in shooter. It does not have safety so it will stay on until stopped.
         indexerSubsystem.shoot();
+        transferSubsystem.intake();
       }
       if (pidController.atSetpoint()) {
         // Having a wide enough tolerance and stopping the drivetrain once at the setpoint prevents
@@ -86,6 +90,7 @@ public class ShootCommand extends CommandBase {
     shooterSubsystem.stop();
     driveTrainSubsystem.stop();
     indexerSubsystem.stop();
+    transferSubsystem.stop();
   }
 
 }

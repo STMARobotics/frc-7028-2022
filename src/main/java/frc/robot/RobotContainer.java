@@ -27,8 +27,10 @@ import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.JetsonBallCommand;
 import frc.robot.commands.JustShootCommand;
+import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
+import frc.robot.commands.UnloadCargoCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -60,12 +62,8 @@ public class RobotContainer {
   private final ShooterLimelightSubsystem limelightSubsystem = new ShooterLimelightSubsystem(
       LimeLightConstants.LIMELIGHT_CONFIG);
 
-  private final JetsonBallCommand jetsonBallCommand = new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem,
-      intakeSubsystem, transferSubsystem, indexerSubsystem);
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
-  private final ShootCommand shootCommand = new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem,
-      indexerSubsystem, transferSubsystem);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -95,7 +93,8 @@ public class RobotContainer {
         .whenPressed(teleDriveCommand::toggleSlowMode);
 
     // Shooting and Limelight
-    new JoystickButton(driverController, XboxController.Button.kA.value).whileHeld(shootCommand);
+    new JoystickButton(driverController, XboxController.Button.kA.value)
+        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem, transferSubsystem));
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
@@ -108,24 +107,14 @@ public class RobotContainer {
 
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
-        .whileHeld(jetsonBallCommand);
+        .whileHeld(new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem));
 
     // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
-        .whileHeld(intakeSubsystem::reverse, intakeSubsystem)
-        .whileHeld(indexerSubsystem::unload, indexerSubsystem)
-        .whileHeld(transferSubsystem::output, transferSubsystem)
-        .whenReleased(intakeSubsystem::stop, intakeSubsystem)
-        .whenReleased(indexerSubsystem::stop, indexerSubsystem)
-        .whenReleased(transferSubsystem::stop, transferSubsystem);
+        .whileHeld(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
 
     new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
-        .whileHeld(intakeSubsystem::intake, intakeSubsystem)
-        .whileHeld(indexerSubsystem::load, indexerSubsystem)
-        .whileHeld(transferSubsystem::intake, transferSubsystem)
-        .whenReleased(intakeSubsystem::stop, intakeSubsystem)
-        .whenReleased(indexerSubsystem::stop, indexerSubsystem)
-        .whenReleased(transferSubsystem::stop, transferSubsystem);
+        .whileHeld(new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
   }
 
   /**
@@ -185,14 +174,9 @@ public class RobotContainer {
     var trajectoryCommand = driveTrainSubsystem.createCommandForTrajectory(trajectory);
 
     return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d()), driveTrainSubsystem)
-        .andThen(trajectoryCommand
-            .raceWith(new StartEndCommand(intakeSubsystem::intake, intakeSubsystem::stop, intakeSubsystem))
-            .raceWith(new StartEndCommand(transferSubsystem::intake, transferSubsystem::stop, transferSubsystem))
-            .raceWith(new StartEndCommand(indexerSubsystem::load, indexerSubsystem::stop, indexerSubsystem)))
-        .andThen(
-            new StartEndCommand(indexerSubsystem::unload, indexerSubsystem::stop, indexerSubsystem).withTimeout(.1))
-        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem,
-            transferSubsystem));
+        .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem)))
+        .andThen(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem).withTimeout(.1))
+        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem, transferSubsystem));
   }
 
   private void configureSubsystemCommands() {

@@ -66,10 +66,6 @@ dependencies {
     simulationRelease wpi.sim.enableRelease()
 
     testImplementation 'junit:junit:4.12'
-
-    implementation  'com.fasterxml.jackson.core:jackson-core:2.13.1'
-    implementation  'com.fasterxml.jackson.core:jackson-annotations:2.13.1'
-    implementation  'com.fasterxml.jackson.core:jackson-databind:2.13.1'
 }
 
 // Simulation configuration (e.g. environment variables).

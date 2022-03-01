@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
-import frc.robot.commands.JetsonBallCommand;
+import frc.robot.commands.JetsonCargoCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
@@ -60,7 +60,7 @@ public class RobotContainer {
   private final ShooterLimelightSubsystem limelightSubsystem = new ShooterLimelightSubsystem(
       LimeLightConstants.LIMELIGHT_CONFIG);
 
-  private final JetsonBallCommand jetsonBallCommand = new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem,
+  private final JetsonCargoCommand jetsonCargoCommand = new JetsonCargoCommand(driveTrainSubsystem, jetsonSubsystem,
       intakeSubsystem, transferSubsystem, indexerSubsystem);
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
@@ -108,7 +108,7 @@ public class RobotContainer {
 
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
-        .whileHeld(jetsonBallCommand);
+        .whileHeld(jetsonCargoCommand);
 
     // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)

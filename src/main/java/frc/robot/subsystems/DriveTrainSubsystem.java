@@ -134,8 +134,8 @@ public class DriveTrainSubsystem extends SubsystemBase {
   /**
    * Drives the robot by adjusting x axis speed and z axis rotation
    * 
-   * @param speed      speed along the x axis [-1.0..1.0]
-   * @param rotation   rotation rate along the z axis [-1.0..1.0]
+   * @param speed      speed along the x axis [-1.0..1.0] (FWD is +)
+   * @param rotation   rotation rate along the z axis [-1.0..1.0] (CW is +)
    * @param useSquares if set, decreases input sensitivity at low speeds
    */
   public void arcadeDrive(double speed, double rotation, boolean useSquares) {
@@ -147,7 +147,8 @@ public class DriveTrainSubsystem extends SubsystemBase {
     }
     xSpeed *= MAX_SPEED_ARCADE;
     zRotation *= MAX_ANGULAR_VEL_ARCADE;
-    var wheelSpeeds = DRIVE_KINEMATICS.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0.0, zRotation));
+    // Note that CCW is positive rotation for the ChasisSpeeds object, so we negate it
+    var wheelSpeeds = DRIVE_KINEMATICS.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0.0, -zRotation));
     tankDriveVelocity(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
   }
 

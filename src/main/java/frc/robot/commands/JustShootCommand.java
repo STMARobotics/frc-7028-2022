@@ -7,7 +7,7 @@ import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
 /**
- * Command to spin up the shooter and run the indexer to shoot a ball when the shooter is up to speed.
+ * Command to spin up the shooter and run the indexer to shoot a cargo when the shooter is up to speed.
  */
 public class JustShootCommand extends CommandBase {
   

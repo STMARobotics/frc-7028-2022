@@ -68,7 +68,7 @@ public class TeleDriveCommand extends CommandBase {
     if (isSlowMode()) {
       rotation *= SLOW_MODE_ROTATION_MULTIPLIER;
     }
-    return -rotationRateLimiter.calculate(rotation);
+    return rotationRateLimiter.calculate(rotation);
   }
 
   public void toggleSlowMode() {

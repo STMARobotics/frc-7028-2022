@@ -8,7 +8,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.JetsonSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 
-public class JetsonBallCommand extends CommandBase {
+public class JetsonCargoCommand extends CommandBase {
 
   private final JetsonSubsystem jetson;
   private final DriveTrainSubsystem driveTrainSubsystem;
@@ -19,12 +19,12 @@ public class JetsonBallCommand extends CommandBase {
   private final PIDController xPidController = new PIDController(.0007, 0, 0);
   private final PIDController yPidController = new PIDController(.0007, 0, 0);
 
-  public JetsonBallCommand(
+  public JetsonCargoCommand(
       DriveTrainSubsystem driveTrainSubsystem,
       JetsonSubsystem jetsonSubsystem,
       IntakeSubsystem intakeSubsystem,
       TransferSubsystem transferSubsystem,
-        IndexerSubsystem indexerSubsystem) {
+      IndexerSubsystem indexerSubsystem) {
     this.driveTrainSubsystem = driveTrainSubsystem;
     this.jetson = jetsonSubsystem;
     this.intakeSubsystem = intakeSubsystem;
@@ -53,8 +53,11 @@ public class JetsonBallCommand extends CommandBase {
     if (detection == null) {
       driveTrainSubsystem.stop();
     } else {
-      var speed = -yPidController.calculate(detection.targetY);
-      var rotation = -xPidController.calculate(detection.targetX);
+      // The values passed to the PIDControllers are negated. The Jetson returns the position of the target on a
+      // coordinate grid with the origin (0, 0) in the position where we want to put the cargo. To get the error we
+      // subtract the current position from the origin. Since the origin is 0, we can just negate the current position.
+      var speed = yPidController.calculate(-detection.targetY);
+      var rotation = xPidController.calculate(-detection.targetX);
       driveTrainSubsystem.arcadeDrive(speed, rotation, false);
       intakeSubsystem.intake();
       transferSubsystem.intake();

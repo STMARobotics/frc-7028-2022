@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
-import frc.robot.commands.JetsonBallCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
@@ -92,6 +91,9 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kB.value)
         .whenPressed(teleDriveCommand::toggleSlowMode);
 
+    new JoystickButton(driverController, XboxController.Button.kY.value)
+        .whenPressed(teleDriveCommand::toggleReverseMode);
+    
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value)
         .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem, transferSubsystem));
@@ -102,12 +104,12 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
         () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
 
-    new JoystickButton(driverController, XboxController.Button.kY.value)
-        .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
+    // new JoystickButton(driverController, XboxController.Button.kY.value)
+    //     .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
 
     // Detect and Chase Cargo
-    new JoystickButton(driverController, XboxController.Button.kX.value)
-        .whileHeld(new JetsonBallCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem));
+    // new JoystickButton(driverController, XboxController.Button.kX.value)
+    //    .whileHeld(new JetsonCargoCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem));
 
     // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)

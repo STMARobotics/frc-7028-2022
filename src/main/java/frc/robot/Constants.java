@@ -67,12 +67,12 @@ public final class Constants {
     public static final int DEVICE_ID_SHOOTER_FOLLOWER = 11;
 
     public static final double kS = 0.5196;
-    public static final double kV = 0.091;
+    public static final double kV = 0.1;
     public static final double kA = 0.0056284;
 
-    public static final double kP = 0.0011962;
+    public static final double kP = 0;//0.0011962;
 
-    public static final int COUNTS_PER_REVOLUTION = 2048;
+    public static final int EDGES_PER_REVOLUTION = 2048;
 
     public static final double RAMP_RATE = 0.4;
     public static final int CLOSED_LOOP_ERROR_RANGE = 200;
@@ -84,7 +84,7 @@ public final class Constants {
       Map.entry(Units.inchesToMeters(127.02), 13400d),
       Map.entry(Units.inchesToMeters(134.51), 13900d),
       Map.entry(Units.inchesToMeters(168.33), 14800d),
-      Map.entry(Units.inchesToMeters(188.35), 15600d)));
+      Map.entry(Units.inchesToMeters(188.35), 15300d)));
   }
 
   public static final class IndexerConstants {

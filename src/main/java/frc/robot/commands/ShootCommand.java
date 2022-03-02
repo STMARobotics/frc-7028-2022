@@ -58,10 +58,14 @@ public class ShootCommand extends CommandBase {
     if (lastTargetDistance > 0) {
       shooterSubsystem.prepareToShoot(lastTargetDistance);
       // We're not going to worry about losing the target for rotation because Limelight returns target X of 0 when no
-      // target is visible, so we just won't rotate when no target is visible
-      double rotationSpeed = pidController.calculate(limelightSubsystem.getTargetX());
+      // target is visible, so we just won't rotate when no target is visible (although we may shoot since we're at
+      // the setpoint)
+      // Also note, the value passed to the PIDController is negated. The Limelight returns the position of the target
+      // on a coordinate grid with the origin (X = 0) in the position where we want to put the cargo. To get the error
+      // we subtract the current position from the origin. Since the origin is 0, we can just negate the current position.
+      double rotationSpeed = pidController.calculate(-limelightSubsystem.getTargetX());
       if (shooterSubsystem.isReadyToShoot() && pidController.atSetpoint()) {
-        // Turn the indexer to put ball in shooter. It does not have safety so it will stay on until stopped.
+        // Turn the indexer on to put cargo in shooter. It does not have safety so it will stay on until stopped.
         indexerSubsystem.shoot();
         transferSubsystem.intake();
       }

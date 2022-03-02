@@ -5,9 +5,9 @@
 package frc.robot.subsystems;
 
 import static frc.robot.Constants.ShooterConstants.CLOSED_LOOP_ERROR_RANGE;
-import static frc.robot.Constants.ShooterConstants.COUNTS_PER_REVOLUTION;
 import static frc.robot.Constants.ShooterConstants.DEVICE_ID_SHOOTER_FOLLOWER;
 import static frc.robot.Constants.ShooterConstants.DEVICE_ID_SHOOTER_LEADER;
+import static frc.robot.Constants.ShooterConstants.EDGES_PER_REVOLUTION;
 import static frc.robot.Constants.ShooterConstants.RAMP_RATE;
 import static frc.robot.Constants.ShooterConstants.SHOOTING_INTERPOLATOR;
 import static frc.robot.Constants.ShooterConstants.kA;
@@ -26,10 +26,13 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
+  private static final double VOLTAGE_COMP_SATURATION = 12d;
   private final WPI_TalonFX leader = new WPI_TalonFX(DEVICE_ID_SHOOTER_LEADER);
   private final WPI_TalonFX follower = new WPI_TalonFX(DEVICE_ID_SHOOTER_FOLLOWER);
 
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(kS,kV, kA);
+  // Shooter feed forward from SysID. This is configured for rotations per second. Note, CTRE native velocities are in
+  // encoder edges per 100 ms.
+  private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(kS,kV, kA);
 
   private double targetSpeed = 0;
 
@@ -42,11 +45,10 @@ public class ShooterSubsystem extends SubsystemBase {
     config.slot0.kI = 0;
     config.slot0.kD = 0;
     config.closedloopRamp = RAMP_RATE;
+    config.voltageCompSaturation = VOLTAGE_COMP_SATURATION;
     leader.configAllSettings(config);
     follower.configAllSettings(config);
     
-    leader.configVoltageCompSaturation(12);
-    follower.configVoltageCompSaturation(12);
     leader.enableVoltageCompensation(true);
     follower.enableVoltageCompensation(true);
     leader.setNeutralMode(NeutralMode.Coast);
@@ -58,6 +60,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
     dashboard.addNumber("Velocity", leader::getSelectedSensorVelocity);
+    dashboard.addNumber("Velocity RPS", () -> edgesPerDecisecToRPS(leader.getSelectedSensorVelocity()));
     dashboard.addNumber("Target Velocity",
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopTarget() : 0);
     dashboard.addNumber("Error", 
@@ -66,20 +69,45 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * Runs the shooter at the specified velocity
-   * @param speed velocity set point
+   * @param speed velocity set point in native units (encoder edges per 100 ms)
    */
   public void runShooter(double speed) {
-    targetSpeed = speed;
+    // Feedforward is configured for rotations per second so a conversion from native units is needed.
+    var feedForwardVolts = feedForward.calculate(edgesPerDecisecToRPS(targetSpeed), edgesPerDecisecToRPS(speed), .02);
+
+    // Arbitrary feed forward is a value in the range [-1, 1], which is a percentage of the saturation voltage
     leader.set(
       ControlMode.Velocity, 
       speed,
       DemandType.ArbitraryFeedForward, 
-      feedforward.calculate(speed, leader.getSelectedSensorVelocity() - speed) / COUNTS_PER_REVOLUTION);
+      feedForwardVolts / VOLTAGE_COMP_SATURATION);
+    
+    targetSpeed = speed;
   }
 
   public void prepareToShoot(double distance) {
     var speed = SHOOTING_INTERPOLATOR.interpolate(distance);
     runShooter(speed);
+  }
+
+  /**
+   * Converts from edges per decisecond to rotations per second.
+   * @param edgesPerDecisec velocity in edges per decisecond (native Talon units)
+   * @return velocity in rotations per second
+   */
+  public static double edgesPerDecisecToRPS(double edgesPerDecisec) {
+    var rotationsPerDecisecond = edgesPerDecisec / EDGES_PER_REVOLUTION;
+    return rotationsPerDecisecond * 10;
+  }
+
+    /**
+   * Converts from rotations per second to edges per decisecond.
+   * @param rps velocity in RPM
+   * @return velocity in edges per decisecond (native talon units)
+   */
+  public static double rpsToedgesPerDecisec(double rps) {
+    var edgesPerSecond = rps * EDGES_PER_REVOLUTION;
+    return edgesPerSecond / 10;
   }
 
   public boolean isReadyToShoot() {

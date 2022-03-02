@@ -94,6 +94,9 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kB.value)
         .whenPressed(teleDriveCommand::toggleSlowMode);
 
+    new JoystickButton(driverController, XboxController.Button.kY.value)
+        .whenPressed(teleDriveCommand::toggleReverseMode);
+    
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value).whileHeld(shootCommand);
 
@@ -103,12 +106,12 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
         () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
 
-    new JoystickButton(driverController, XboxController.Button.kY.value)
-        .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
+    // new JoystickButton(driverController, XboxController.Button.kY.value)
+    //     .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
 
     // Detect and Chase Cargo
-    new JoystickButton(driverController, XboxController.Button.kX.value)
-        .whileHeld(jetsonCargoCommand);
+    // new JoystickButton(driverController, XboxController.Button.kX.value)
+    //     .whileHeld(jetsonCargoCommand);
 
     // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)

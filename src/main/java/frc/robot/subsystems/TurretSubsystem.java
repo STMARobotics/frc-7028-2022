@@ -17,6 +17,8 @@ public class TurretSubsystem extends SubsystemBase {
   public TurretSubsystem() {
     turretMotor.configFactoryDefault();
     turretMotor.setNeutralMode(NeutralMode.Brake);
+    turretMotor.configVoltageCompSaturation(12);
+    turretMotor.enableVoltageCompensation(true);
     turretMotor.setSafetyEnabled(true);
   }
 

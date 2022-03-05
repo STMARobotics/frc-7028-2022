@@ -97,6 +97,9 @@ public final class Constants {
 
   public static final class IntakeConstants {
     public static final int DEVICE_ID_INTAKE = 7;
+    
+    public static final int CHANNEL_SOLENOID_FORWARD = 1;
+    public static final int CHANNEL_SOLENOID_BACKWARD = 2;
   }
 
   public static final class TransferConstants {

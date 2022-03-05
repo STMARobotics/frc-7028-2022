@@ -2,31 +2,33 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.IntakeConstants.DEVICE_ID_INTAKE;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeSubsystem extends SubsystemBase {
 
-  private final WPI_TalonSRX intake = new WPI_TalonSRX(DEVICE_ID_INTAKE);
+  private final CANSparkMax intakeMotor = new CANSparkMax(DEVICE_ID_INTAKE, MotorType.kBrushless);
 
   public IntakeSubsystem() {
-    intake.configFactoryDefault();
-    intake.setNeutralMode(NeutralMode.Coast);
-    intake.setInverted(true);
+    intakeMotor.restoreFactoryDefaults();
+    intakeMotor.enableVoltageCompensation(12);
+    intakeMotor.setIdleMode(IdleMode.kCoast);
+    intakeMotor.burnFlash();
   }
   
   public void intake() {
-    intake.set(.8);
+    intakeMotor.set(.8);
   }
   
   public void reverse() {
-    intake.set(-.5);
+    intakeMotor.set(-.5);
   }
   
   public void stop() {
-    intake.set(0);
+    intakeMotor.set(0);
   }
   
 }

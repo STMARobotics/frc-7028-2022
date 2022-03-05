@@ -87,6 +87,10 @@ public final class Constants {
       Map.entry(Units.inchesToMeters(188.35), 15300d)));
   }
 
+  public static final class TurretConstants {
+    public static final int DEVICE_ID_TURRET = 5;
+  }
+
   public static final class IndexerConstants {
     public static final int DEVICE_ID_INDEXER = 6;
   }
@@ -96,8 +100,7 @@ public final class Constants {
   }
 
   public static final class TransferConstants {
-    public static final int DEVICE_ID_TRANSFER_LEADER = 8;
-    public static final int DEVICE_ID_TRANSFER_FOLLOWER = 5;
+    public static final int DEVICE_ID_TRANSFER = 8;
   }
 
   public static final class ControllerConstants {

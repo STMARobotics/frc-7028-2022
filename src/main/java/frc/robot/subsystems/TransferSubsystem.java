@@ -1,31 +1,26 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.TransferConstants.DEVICE_ID_TRANSFER_FOLLOWER;
-import static frc.robot.Constants.TransferConstants.DEVICE_ID_TRANSFER_LEADER;
+import static frc.robot.Constants.TransferConstants.DEVICE_ID_TRANSFER;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class TransferSubsystem extends SubsystemBase {
 
-  private final WPI_TalonSRX transferLeader = new WPI_TalonSRX(DEVICE_ID_TRANSFER_LEADER);
-  private final WPI_TalonSRX transferFollower = new WPI_TalonSRX(DEVICE_ID_TRANSFER_FOLLOWER);
+  private final CANSparkMax transferMotor = new CANSparkMax(DEVICE_ID_TRANSFER, MotorType.kBrushless);
 
   public TransferSubsystem() {
-    transferLeader.configFactoryDefault();
-    transferFollower.configFactoryDefault();
-    transferLeader.setNeutralMode(NeutralMode.Coast);
-    transferFollower.setNeutralMode(NeutralMode.Coast);
-
-    transferFollower.follow(transferLeader);
-    transferFollower.setInverted(true);
-    transferLeader.setInverted(true);
+    transferMotor.restoreFactoryDefaults();
+    transferMotor.enableVoltageCompensation(12);
+    transferMotor.setIdleMode(IdleMode.kCoast);
+    transferMotor.burnFlash();
   }
 
   public void set(double power) {
-    transferLeader.set(power);
+    transferMotor.set(power);
   }
 
   public void intake() {

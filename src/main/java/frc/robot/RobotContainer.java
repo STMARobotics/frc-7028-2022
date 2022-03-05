@@ -30,6 +30,7 @@ import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
+import frc.robot.commands.TeleopTurretCommand;
 import frc.robot.commands.UnloadCargoCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -39,6 +40,7 @@ import frc.robot.subsystems.Profile;
 import frc.robot.subsystems.ShooterLimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -58,12 +60,15 @@ public class RobotContainer {
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
+  private final TurretSubsystem turretSubsystem = new TurretSubsystem();
   private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
   private final ShooterLimelightSubsystem limelightSubsystem = new ShooterLimelightSubsystem(
       LimeLightConstants.LIMELIGHT_CONFIG);
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
+  private final TeleopTurretCommand teleopTurretCommand = new TeleopTurretCommand(turretSubsystem,
+    driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -190,5 +195,6 @@ public class RobotContainer {
 
   private void configureSubsystemCommands() {
     driveTrainSubsystem.setDefaultCommand(teleDriveCommand);
+    turretSubsystem.setDefaultCommand(teleopTurretCommand);
   }
 }

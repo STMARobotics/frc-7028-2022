@@ -10,6 +10,8 @@ import static frc.robot.Constants.DriverConstants.SPEED_RATE_LIMIT_ARCADE;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.DeadbandFilter;
 import frc.robot.subsystems.DriveTrainSubsystem;
@@ -27,6 +29,9 @@ public class TeleDriveCommand extends CommandBase {
   
   private final SlewRateLimiter speedRateLimiter = new SlewRateLimiter(SPEED_RATE_LIMIT_ARCADE);
   private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(ROTATE_RATE_LIMIT_ARCADE);
+
+  private NetworkTableEntry cameraFrontEntry = 
+      NetworkTableInstance.getDefault().getTable("DriverCam").getEntry("Front");
 
   private boolean slowMode = false;
   private boolean reverseMode = false;
@@ -80,7 +85,12 @@ public class TeleDriveCommand extends CommandBase {
   }
 
   public void toggleReverseMode() {
-    reverseMode = !reverseMode;
+    setReverseMode(!isReverseMode());
+  }
+
+  public void setReverseMode(boolean reverse) {
+    reverseMode = reverse;
+    cameraFrontEntry.setBoolean(!reverseMode);
   }
 
   public boolean isReverseMode() {

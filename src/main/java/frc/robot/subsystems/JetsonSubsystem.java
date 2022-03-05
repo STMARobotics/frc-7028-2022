@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -61,12 +60,6 @@ public class JetsonSubsystem extends SubsystemBase {
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
     // Put a chooser on the dashboard for picking which cargo to target
     driverTab.add("Cargo Color", cargoColorChooser).withSize(1, 1).withPosition(0, 0);
-
-    // Add the Jetson camera to the driver dashboard
-    var camera = new HttpCamera("Jetson", "http://10.70.28.13:1181");
-    if (camera != null) {
-      driverTab.add("Jetson", camera).withSize(5, 3).withPosition(1, 0);
-    }
   }
 
   @Override

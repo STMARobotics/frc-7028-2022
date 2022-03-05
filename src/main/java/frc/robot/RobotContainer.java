@@ -8,6 +8,7 @@ import static edu.wpi.first.math.util.Units.inchesToMeters;
 import java.util.Collections;
 import java.util.Map;
 
+import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -91,8 +92,8 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kB.value)
         .whenPressed(teleDriveCommand::toggleSlowMode);
 
-    new JoystickButton(driverController, XboxController.Button.kY.value)
-        .whenPressed(teleDriveCommand::toggleReverseMode);
+    new JoystickButton(driverController, XboxController.Button.kY.value).toggleWhenPressed(new StartEndCommand(
+        () -> teleDriveCommand.setReverseMode(true), () -> teleDriveCommand.setReverseMode(false)));
     
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value)
@@ -156,6 +157,12 @@ public class RobotContainer {
 
   private void configureDriverDashboard() {
     jetsonSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
+
+    var camera = new HttpCamera("Driver", "http://10.70.28.13:1182");
+    if (camera != null) {
+      Dashboard.driverTab.add("Driver", camera).withSize(5, 3).withPosition(1, 0);
+    }
+
     Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
   }
 

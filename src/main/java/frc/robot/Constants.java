@@ -56,6 +56,10 @@ public final class Constants {
 
     public static final SimpleMotorFeedforward FEED_FORWARD = new SimpleMotorFeedforward(kS, kV, kA);
 
+    // Values from SysID angular analysis used by simulation
+    public static final double kV_ANGULAR = 1.5;
+    public static final double kA_ANGULAR = 0.3;
+
     public static final double kP = 0;
 
     public static final double CLOSED_LOOP_RAMP = .2;

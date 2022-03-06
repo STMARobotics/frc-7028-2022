@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.hal.simulation.SimDeviceDataJNI.getSimDeviceHandle;
+import static edu.wpi.first.hal.simulation.SimDeviceDataJNI.getSimValueHandle;
 import static frc.robot.Constants.ArcadeConstants.MAX_ANGULAR_VEL_ARCADE;
 import static frc.robot.Constants.ArcadeConstants.MAX_SPEED_ARCADE;
 import static frc.robot.Constants.DriveTrainConstants.DEVICE_ID_LEFT_FOLLOWER;
@@ -10,15 +12,19 @@ import static frc.robot.Constants.DriveTrainConstants.DRIVE_GEAR_RATIO;
 import static frc.robot.Constants.DriveTrainConstants.DRIVE_KINEMATICS;
 import static frc.robot.Constants.DriveTrainConstants.EDGES_PER_ROTATION;
 import static frc.robot.Constants.DriveTrainConstants.FEED_FORWARD;
+import static frc.robot.Constants.DriveTrainConstants.TRACK_WIDTH_METERS;
 import static frc.robot.Constants.DriveTrainConstants.WHEEL_CIRCUMFERENCE_METERS;
+import static frc.robot.Constants.DriveTrainConstants.WHEEL_DIAMETER_INCHES;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXSimCollection;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,10 +32,18 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.system.LinearSystem;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -50,6 +64,17 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
   private final AHRS gyro = new AHRS(SPI.Port.kMXP);
   private final DifferentialDriveOdometry differentialDriveOdometry;
+
+  private final Field2d field2d = new Field2d();
+
+  // Simulation objects
+  private final TalonFXSimCollection rightSimCollection = rightLeader.getSimCollection();
+  private final TalonFXSimCollection leftSimCollection = leftLeader.getSimCollection();
+  private final LinearSystem<N2, N2, N2> drivetrainSystem = LinearSystemId.identifyDrivetrainSystem(
+    DriveTrainConstants.kV, DriveTrainConstants.kA, DriveTrainConstants.kV_ANGULAR, DriveTrainConstants.kA_ANGULAR);
+  private final DifferentialDrivetrainSim drivetrainSimulator = new DifferentialDrivetrainSim(
+      drivetrainSystem, DCMotor.getFalcon500(2), DRIVE_GEAR_RATIO, TRACK_WIDTH_METERS, WHEEL_DIAMETER_INCHES / 2, null);
+  SimDouble simGyroAngle = new SimDouble(getSimValueHandle(getSimDeviceHandle("navX-Sensor[0]"), "Yaw"));
   
   public DriveTrainSubsystem() {
     zeroDriveTrainEncoders();
@@ -97,6 +122,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
       rightLeader.setNeutralMode(NeutralMode.Coast);
       rightFollower.setNeutralMode(NeutralMode.Coast);
     }));
+    SmartDashboard.putData("Field", field2d);
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
@@ -129,6 +155,35 @@ public class DriveTrainSubsystem extends SubsystemBase {
         Rotation2d.fromDegrees(getHeading()),
         edgesToMeters(getLeftEncoderPosition()),
         edgesToMeters(getRightEncoderPosition()));
+    
+    field2d.setRobotPose(getCurrentPose());
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    // When in simulation, update the drivetrain simulation object, then use it to update the encoder speed and
+    // position, and the gyro angle
+    leftSimCollection.setBusVoltage(RobotController.getBatteryVoltage());
+    rightSimCollection.setBusVoltage(RobotController.getBatteryVoltage());
+
+    // Update the drive simulator, then it will give us encoder and gyro values
+    drivetrainSimulator.setInputs(
+        leftSimCollection.getMotorOutputLeadVoltage(),
+        -rightSimCollection.getMotorOutputLeadVoltage());
+    drivetrainSimulator.update(0.02);
+
+    // Set encoder speed and position
+    leftSimCollection.setIntegratedSensorRawPosition((int) metersToEdges(drivetrainSimulator.getLeftPositionMeters()));
+    leftSimCollection.setIntegratedSensorVelocity(
+        (int) metersPerSecToEdgesPerDecisec(drivetrainSimulator.getLeftVelocityMetersPerSecond()));
+    rightSimCollection.setIntegratedSensorRawPosition(
+        -(int) metersToEdges(drivetrainSimulator.getRightPositionMeters()));
+    rightSimCollection.setIntegratedSensorVelocity(
+        -(int) metersPerSecToEdgesPerDecisec(drivetrainSimulator.getRightVelocityMetersPerSecond()));
+
+    // Set gyro Yaw
+    // NavX expects clockwise positive, but sim outputs clockwise negative
+    simGyroAngle.set(Math.IEEEremainder(-drivetrainSimulator.getHeading().getDegrees(), 360));
   }
 
   /**

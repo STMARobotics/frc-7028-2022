@@ -32,6 +32,7 @@ import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.commands.TeleopTurretCommand;
+import frc.robot.commands.TrackTargetCommand;
 import frc.robot.commands.UnloadCargoCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -94,6 +95,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+
+    new POVButton(driverController, 90).whenPressed(
+      new TrackTargetCommand(driveTrainSubsystem::getCurrentPose));
+
     // Drivetrain
     new JoystickButton(driverController, XboxController.Button.kB.value)
         .whenPressed(teleDriveCommand::toggleSlowMode);

@@ -28,6 +28,7 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeMotor.burnFlash();
 
     compressor.enableDigital();
+    compressor.disable();
   }
   
   public void intake() {

@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
@@ -32,7 +31,6 @@ import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.commands.TeleopTurretCommand;
-import frc.robot.commands.TrackTargetCommand;
 import frc.robot.commands.UnloadCargoCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -84,6 +82,9 @@ public class RobotContainer {
     configureSubsystemCommands();
     configureSubsystemDashboard();
     configureDriverDashboard();
+
+    // Align the drivetrain and turret heading
+    turretSubsystem.resetHeadingToRobot(driveTrainSubsystem.getHeading());
   }
 
   /**
@@ -96,8 +97,8 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
 
-    new POVButton(driverController, 90).whenPressed(
-      new TrackTargetCommand(driveTrainSubsystem::getCurrentPose));
+    // new POVButton(driverController, 90).whenPressed(
+    //   new TrackTargetCommand(driveTrainSubsystem::getCurrentPose, turretSubsystem));
 
     // Drivetrain
     new JoystickButton(driverController, XboxController.Button.kB.value)
@@ -116,8 +117,8 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
         () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
 
-    // new JoystickButton(driverController, XboxController.Button.kY.value)
-    //     .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
+    new JoystickButton(driverController, XboxController.Button.kX.value)
+        .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
 
     // Detect and Chase Cargo
     // new JoystickButton(driverController, XboxController.Button.kX.value)
@@ -130,8 +131,8 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
         .whileHeld(new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
     
-    new POVButton(driverController, 0).whenPressed(intakeSubsystem::deploy);
-    new POVButton(driverController, 180).whenPressed(intakeSubsystem::retract);
+    // new POVButton(driverController, 0).whenPressed(intakeSubsystem::deploy);
+    // new POVButton(driverController, 180).whenPressed(intakeSubsystem::retract);
   }
 
   /**
@@ -167,6 +168,11 @@ public class RobotContainer {
         .withSize(2, 3).withPosition(6, 0);
     jetsonSubsystem.addDashboardWidgets(jetsonLayout);
     jetsonLayout.add(jetsonSubsystem);
+
+    var turretLayout = Dashboard.subsystemsTab.getLayout("Turret", BuiltInLayouts.kList)
+      .withSize(2, 3).withPosition(8, 0);
+    turretSubsystem.addDashboardWidgets(turretLayout);
+    turretLayout.add(turretSubsystem);
   }
 
   private void configureDriverDashboard() {

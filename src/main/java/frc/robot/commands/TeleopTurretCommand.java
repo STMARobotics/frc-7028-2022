@@ -36,7 +36,7 @@ public class TeleopTurretCommand extends CommandBase {
     }
     speed = deadbandFilter.calculate(speed);
     speed *= Math.abs(speed);
-    turretSubsystem.run(speed / 5);
+    turretSubsystem.run(speed / 2);
   }
 
   @Override

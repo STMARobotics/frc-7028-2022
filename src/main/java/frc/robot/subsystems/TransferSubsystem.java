@@ -16,6 +16,7 @@ public class TransferSubsystem extends SubsystemBase {
     transferMotor.restoreFactoryDefaults();
     transferMotor.enableVoltageCompensation(12);
     transferMotor.setIdleMode(IdleMode.kCoast);
+    transferMotor.setInverted(true);
     transferMotor.burnFlash();
   }
 

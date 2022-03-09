@@ -93,6 +93,25 @@ public final class Constants {
 
   public static final class TurretConstants {
     public static final int DEVICE_ID_TURRET = 5;
+    public static final int DEVICE_ID_PIGEON = 12;
+
+    public static final double kP_PIGEON = 1d;
+    public static final double kD_PIGEON = 0d;
+
+    public static final double kP_POTENTIOMETER = 0d;
+    public static final double kD_POTENTIOMETER = 0d;
+
+    /** Forward soft limit in native sensor units */
+    public static final int SOFT_LIMIT_FORWARD = 1023;
+    /** Reverse soft limit in native sensor units */
+    public static final int SOFT_LIMIT_REVERSE = 0;
+    /** Range of motion in degrees */
+    public static final double RANGE_OF_MOTION = 270;
+
+    public static final double CLOSED_LOOP_MAX_OUTPUT = 0.3;
+
+    /** Pigeon native units per revolution */
+    public static final double PIGEON_UNITS_PER_REVOLUTION = 8192d;
   }
 
   public static final class IndexerConstants {

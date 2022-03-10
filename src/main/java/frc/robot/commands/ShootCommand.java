@@ -68,6 +68,9 @@ public class ShootCommand extends CommandBase {
         // Turn the indexer on to put cargo in shooter. It does not have safety so it will stay on until stopped.
         indexerSubsystem.shoot();
         transferSubsystem.intake();
+      } else {
+        // Indexer can raise cargo up to the shooter while it's spinning and aiming
+        indexerSubsystem.prepareToShoot();
       }
       if (pidController.atSetpoint()) {
         // Having a wide enough tolerance and stopping the drivetrain once at the setpoint prevents

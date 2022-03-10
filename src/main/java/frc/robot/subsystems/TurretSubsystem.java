@@ -29,7 +29,7 @@ public class TurretSubsystem extends SubsystemBase {
     // Pigeon is mounted vertical. See user guide "Custom Mounting Orientation"
     pigeon.configFactoryDefault();
     var pigeonConfig = new Pigeon2Configuration();
-    pigeonConfig.MountPoseYaw = 90;
+    pigeonConfig.MountPosePitch = 90;
     pigeon.configAllSettings(pigeonConfig);
 
     turretMotor.configFactoryDefault();
@@ -38,11 +38,10 @@ public class TurretSubsystem extends SubsystemBase {
     // Potentiometer is primary PID to get soft limit support
     talonConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.Analog;
     // convert native units to degrees
-    talonConfig.primaryPID.selectedFeedbackCoefficient = 
-        TurretConstants.RANGE_OF_MOTION / (TurretConstants.SOFT_LIMIT_FORWARD - TurretConstants.SOFT_LIMIT_REVERSE);
-    talonConfig.forwardSoftLimitThreshold = TurretConstants.SOFT_LIMIT_FORWARD;
+    talonConfig.primaryPID.selectedFeedbackCoefficient = TurretConstants.POTENTIOMETER_COEFFICIENT;
+    talonConfig.forwardSoftLimitThreshold = TurretConstants.SOFT_LIMIT_FORWARD_DEGREES;
     talonConfig.forwardSoftLimitEnable = true;
-    talonConfig.reverseSoftLimitThreshold = TurretConstants.SOFT_LIMIT_REVERSE;
+    talonConfig.reverseSoftLimitThreshold = TurretConstants.SOFT_LIMIT_REVERSE_DEGREES;
     talonConfig.reverseSoftLimitEnable = true;
     
     // Pigeon is on aux PID
@@ -62,6 +61,8 @@ public class TurretSubsystem extends SubsystemBase {
     turretMotor.enableVoltageCompensation(true);
     turretMotor.overrideLimitSwitchesEnable(false);
     turretMotor.setNeutralMode(NeutralMode.Brake);
+    turretMotor.setSensorPhase(false);
+    turretMotor.setInverted(true);
     // TODO should we also use current limiting in case we DO hit the hard stop?
     turretMotor.setSafetyEnabled(true);
   }
@@ -121,11 +122,9 @@ public class TurretSubsystem extends SubsystemBase {
    * @return
    */
   public double getRobotRelativeAngle() {
-    // TODO does the sensor coefficient apply here or do we need to do the math to convert to angle?
     // TODO this needs to account for the angle of the turret on the robot, it points backwards and
     // the turret's zero will be on one side
-    return turretMotor.getSelectedSensorPosition() *
-        TurretConstants.RANGE_OF_MOTION / (TurretConstants.SOFT_LIMIT_FORWARD - TurretConstants.SOFT_LIMIT_REVERSE);
+    return turretMotor.getSelectedSensorPosition();
   }
 
   /**

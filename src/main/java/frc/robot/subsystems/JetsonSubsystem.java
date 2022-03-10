@@ -59,7 +59,7 @@ public class JetsonSubsystem extends SubsystemBase {
 
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
     // Put a chooser on the dashboard for picking which cargo to target
-    driverTab.add("Cargo Color", cargoColorChooser).withSize(1, 1).withPosition(0, 0);
+    driverTab.add("Cargo Color", cargoColorChooser).withSize(1, 1).withPosition(9, 0);
   }
 
   @Override

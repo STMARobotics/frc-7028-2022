@@ -70,11 +70,11 @@ public final class Constants {
     public static final int DEVICE_ID_SHOOTER_LEADER = 10;
     public static final int DEVICE_ID_SHOOTER_FOLLOWER = 11;
 
-    public static final double kS = 0.5196;
-    public static final double kV = 0.1;
-    public static final double kA = 0.0056284;
+    public static final double kS = 0.52864;
+    public static final double kV = 0.10689;
+    public static final double kA = 0.0064378;
 
-    public static final double kP = 0;//0.0011962;
+    public static final double kP = 0.0020087;
 
     public static final int EDGES_PER_REVOLUTION = 2048;
 
@@ -102,13 +102,24 @@ public final class Constants {
     public static final double kD_POTENTIOMETER = 0d;
 
     /** Forward soft limit in native sensor units */
-    public static final int SOFT_LIMIT_FORWARD = 1023;
+    public static final int SOFT_LIMIT_FORWARD = -130;
     /** Reverse soft limit in native sensor units */
-    public static final int SOFT_LIMIT_REVERSE = 0;
-    /** Range of motion in degrees */
-    public static final double RANGE_OF_MOTION = 270;
+    public static final int SOFT_LIMIT_REVERSE = -391;
+    
+    /** Range of motion between soft limits in degrees */
+    public static final double RANGE_OF_MOTION = 183;
 
-    public static final double CLOSED_LOOP_MAX_OUTPUT = 0.3;
+    /** Value to multiple by the native sensor value to get degrees */
+    public static final double POTENTIOMETER_COEFFICIENT = 
+        TurretConstants.RANGE_OF_MOTION / (TurretConstants.SOFT_LIMIT_FORWARD - TurretConstants.SOFT_LIMIT_REVERSE);
+    
+    /** Forward soft limit in degrees (after sensor coefficient is applied) */
+    public static final double SOFT_LIMIT_FORWARD_DEGREES = SOFT_LIMIT_FORWARD * POTENTIOMETER_COEFFICIENT;
+
+    /** Reverse soft limit in degrees (after sensor coefficient is applied) */
+    public static final double SOFT_LIMIT_REVERSE_DEGREES = SOFT_LIMIT_REVERSE * POTENTIOMETER_COEFFICIENT;
+
+    public static final double CLOSED_LOOP_MAX_OUTPUT = 0.7;
 
     /** Pigeon native units per revolution */
     public static final double PIGEON_UNITS_PER_REVOLUTION = 8192d;
@@ -116,6 +127,13 @@ public final class Constants {
 
   public static final class IndexerConstants {
     public static final int DEVICE_ID_INDEXER = 6;
+
+    public static final int PORT_ID_INTAKE_SENSOR = 3;
+    public static final int PORT_ID_SPACER_SENSOR = 4;
+    public static final int PORT_ID_FULL_SENSOR = 2;
+
+    public static final double BELT_kP = 0;
+    public static final double BELT_RUN_SPEED = 11000;
   }
 
   public static final class IntakeConstants {

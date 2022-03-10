@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
+import frc.robot.commands.IndexCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
@@ -67,8 +68,6 @@ public class RobotContainer {
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
-  private final TeleopTurretCommand teleopTurretCommand = new TeleopTurretCommand(turretSubsystem,
-    driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -129,10 +128,18 @@ public class RobotContainer {
         .whileHeld(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
 
     new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
-        .whileHeld(new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
+        .whileHeld(new LoadCargoCommand(intakeSubsystem, transferSubsystem));
     
     // new POVButton(driverController, 0).whenPressed(intakeSubsystem::deploy);
     // new POVButton(driverController, 180).whenPressed(intakeSubsystem::retract);
+    // addShootCalibrationMode();
+  }
+
+  private void configureSubsystemCommands() {
+    driveTrainSubsystem.setDefaultCommand(teleDriveCommand);
+    turretSubsystem.setDefaultCommand(new TeleopTurretCommand(
+        turretSubsystem, driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis));
+    indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
   }
 
   /**
@@ -173,6 +180,11 @@ public class RobotContainer {
       .withSize(2, 3).withPosition(8, 0);
     turretSubsystem.addDashboardWidgets(turretLayout);
     turretLayout.add(turretSubsystem);
+
+    var indexerLayout = Dashboard.subsystemsTab.getLayout("Indexer", BuiltInLayouts.kList)
+      .withSize(2, 3).withPosition(10, 0);
+    indexerSubsystem.addDashboardWidgets(indexerLayout);
+    indexerLayout.add(indexerSubsystem);
   }
 
   private void configureDriverDashboard() {
@@ -180,9 +192,9 @@ public class RobotContainer {
 
     var camera = new HttpCamera("Driver", "http://10.70.28.13:1182");
     if (camera != null) {
-      Dashboard.driverTab.add("Driver", camera).withSize(5, 3).withPosition(1, 0);
+      Dashboard.driverTab.add("Driver", camera).withSize(5, 3).withPosition(0, 0);
     }
-
+    driveTrainSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
   }
 
@@ -203,13 +215,8 @@ public class RobotContainer {
     var trajectoryCommand = driveTrainSubsystem.createCommandForTrajectory(trajectory);
 
     return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d()), driveTrainSubsystem)
-        .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem)))
+        .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)))
         .andThen(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem).withTimeout(.1))
         .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem, transferSubsystem));
-  }
-
-  private void configureSubsystemCommands() {
-    driveTrainSubsystem.setDefaultCommand(teleDriveCommand);
-    turretSubsystem.setDefaultCommand(teleopTurretCommand);
   }
 }

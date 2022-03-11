@@ -14,10 +14,8 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxAlternateEncoder.Type;
 import com.revrobotics.SparkMaxPIDController;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.MultiplexedColorSensor;
@@ -49,74 +47,19 @@ public class IndexerSubsystem extends SubsystemBase {
     pidController = indexer.getPIDController();
     pidController.setFeedbackDevice(indexerEncoder);
     indexer.burnFlash();
-
-    //add triggers for ball count management
-    // new Trigger(this::isFullSensorTripped).whenInactive(this::onFullSensorCleared);
-    // new Trigger(this::isSpacerSensorTripped).whenActive(this::onSpaceSensorTripped).whenInactive(this::onSpaceSensorCleared);
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
     var detailDashboard = dashboard.getLayout("Detail", BuiltInLayouts.kGrid)
         .withProperties(Map.of("numberOfColumns", 2, "numberOfRows", 2));
-    dashboard.addNumber("Balls", () -> ballCount).withWidget(BuiltInWidgets.kDial)
-        .withProperties(Map.of("min", 0, "max", 5));
     // detailDashboard.addBoolean("Intake", this::isIntakeSensorTripped);
     // detailDashboard.addBoolean("Spacer", this::isSpacerSensorTripped);
     // detailDashboard.addBoolean("Full", this::isFullSensorTripped);
+    // detailDashboard.addNumber("Intake Prox", intakeSensor::getProximity);
+    // detailDashboard.addNumber("Spacer Prox", intakeSensor::getProximity);
+    // detailDashboard.addNumber("Full Prox", intakeSensor::getProximity);
   }
   
-  @Override
-  public void periodic() {
-    // SmartDashboard.putNumber("Intake Prox", intakeSensor.getProximity());
-    // SmartDashboard.putNumber("Spacer Prox", intakeSensor.getProximity());
-    // SmartDashboard.putNumber("Full Prox", intakeSensor.getProximity());
-  }
-
-  /**
-   * Called when full sensor becomes clear
-   */
-  void onFullSensorCleared() {
-    if(getIndexerValue() >= 0) {
-      decrementBallCount();
-    }
-  }
-
-  /**
-   * Called when spacer sensor becomes tripped
-   */
-  void onSpaceSensorTripped() {
-    if (getIndexerValue() >= 0) {
-      incrementBallCount(); //if we're moving forward then increment count as soon as we hold a ball here
-    }
-  }
-
-  /**
-   * Called when spacer sensor becomes clear
-   */
-  void onSpaceSensorCleared() {
-    if (getIndexerValue() < 0) {
-      decrementBallCount(); //if we clear the space sensor moving in reverse we lost a ball
-    }
-  }
-
-  /**
-   * Decrements the ball count
-   */
-  private void decrementBallCount() {
-    ballCount = MathUtil.clamp(ballCount - 1, 0, 2);
-  }
-
-  /**
-   * Increments the ball count
-   */
-  private void incrementBallCount() {
-    ballCount = MathUtil.clamp(ballCount + 1, 0, 2);
-  }
-
-  private double getIndexerValue() {
-    return indexer.get();
-  }
-
   public void intake() {
     // sensors return false when something is detected
     if ((!isIntakeSensorTripped() && !isSpacerSensorTripped() && !isFullSensorTripped()) || //if all sensors are clear stop the belt

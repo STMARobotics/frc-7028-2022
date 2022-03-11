@@ -18,7 +18,7 @@ public class DriveTrainSubsystemTest {
    */
   @Test
   public void testInvertConvertEdges() {
-    assertEquals(2048d, metersToEdges(edgesToMeters(2048d)), 0d); ;
+    assertEquals(2048d, metersToEdges(edgesToMeters(2048d)), 0.001d); ;
   }
 
    /**
@@ -26,7 +26,7 @@ public class DriveTrainSubsystemTest {
    */
   @Test
   public void testInvertConvertMeters() {
-    assertEquals(2048d, edgesToMeters(metersToEdges(2048d)), 0d); ;
+    assertEquals(2048d, edgesToMeters(metersToEdges(2048d)), 0.001d); ;
   }
 
 
@@ -35,7 +35,7 @@ public class DriveTrainSubsystemTest {
    */
   @Test
   public void testInvertConvertEdgesPerDeci() {
-    assertEquals(2048d, metersPerSecToEdgesPerDecisec(edgesPerDecisecToMetersPerSec(2048d)), 0.1d);
+    assertEquals(2048d, metersPerSecToEdgesPerDecisec(edgesPerDecisecToMetersPerSec(2048d)), 0.001d);
   }
 
    /**
@@ -43,7 +43,7 @@ public class DriveTrainSubsystemTest {
    */
   @Test
   public void testInvertConvertMetersPerSec() {
-    assertEquals(2048d, edgesPerDecisecToMetersPerSec(metersPerSecToEdgesPerDecisec(2048d)), 0d);
+    assertEquals(2048d, edgesPerDecisecToMetersPerSec(metersPerSecToEdgesPerDecisec(2048d)), 0.001d);
   }
 
 }

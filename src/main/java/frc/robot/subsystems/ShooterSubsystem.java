@@ -22,11 +22,11 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
-  private static final double VOLTAGE_COMP_SATURATION = 12d;
   private final WPI_TalonFX leader = new WPI_TalonFX(DEVICE_ID_SHOOTER_LEADER);
   private final WPI_TalonFX follower = new WPI_TalonFX(DEVICE_ID_SHOOTER_FOLLOWER);
 
@@ -45,12 +45,11 @@ public class ShooterSubsystem extends SubsystemBase {
     config.slot0.kI = 0;
     config.slot0.kD = 0;
     config.closedloopRamp = RAMP_RATE;
-    config.voltageCompSaturation = VOLTAGE_COMP_SATURATION;
     leader.configAllSettings(config);
     follower.configAllSettings(config);
     
-    leader.enableVoltageCompensation(true);
-    follower.enableVoltageCompensation(true);
+    leader.enableVoltageCompensation(false);
+    follower.enableVoltageCompensation(false);
     leader.setNeutralMode(NeutralMode.Coast);
     follower.setNeutralMode(NeutralMode.Coast);
 
@@ -80,7 +79,7 @@ public class ShooterSubsystem extends SubsystemBase {
       ControlMode.Velocity, 
       speed,
       DemandType.ArbitraryFeedForward, 
-      feedForwardVolts / VOLTAGE_COMP_SATURATION);
+      feedForwardVolts / RobotController.getBatteryVoltage());
     
     targetSpeed = speed;
   }

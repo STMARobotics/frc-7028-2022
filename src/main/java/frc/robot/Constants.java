@@ -39,20 +39,20 @@ public final class Constants {
     public static final int EDGES_PER_ROTATION = 2048;
     public static final double WHEEL_DIAMETER_INCHES = 6d;
     public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(WHEEL_DIAMETER_INCHES) * Math.PI;
-    public static final double DRIVE_GEAR_RATIO = 625d / 72d;
+    public static final double DRIVE_GEAR_RATIO = 2700d / 240d;
 
-    public static final double TRACK_WIDTH_METERS = 0.7101550117116572;
+    public static final double TRACK_WIDTH_METERS = 0.60079;
     public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
         TRACK_WIDTH_METERS);
 
     /** Voltage needed to overcome the motor’s static friction. kS */
-    public static final double kS = 0.57854;
+    public static final double kS = 0.70098;
 
     /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
-    public static final double kV = 1.9308;
+    public static final double kV = 2.8143;
 
     /** Voltage needed to induce a given acceleration in the motor shaft. kA */
-    public static final double kA = 0.51442;
+    public static final double kA = 0.37041;
 
     public static final SimpleMotorFeedforward FEED_FORWARD = new SimpleMotorFeedforward(kS, kV, kA);
 
@@ -60,7 +60,7 @@ public final class Constants {
     public static final double kV_ANGULAR = 1.5;
     public static final double kA_ANGULAR = 0.3;
 
-    public static final double kP = 0;
+    public static final double kP = 0.061937;
 
     public static final double CLOSED_LOOP_RAMP = .2;
     public static final double OPEN_LOOP_RAMP = .25;
@@ -70,25 +70,29 @@ public final class Constants {
     public static final int DEVICE_ID_SHOOTER_LEADER = 10;
     public static final int DEVICE_ID_SHOOTER_FOLLOWER = 11;
 
-    public static final double kS = 0.52864;
-    public static final double kV = 0.10689;
-    public static final double kA = 0.0064378;
+    public static final double kS = 0.52411;
+    public static final double kV = 0.104625;
+    public static final double kA = 0.0068293;
 
-    public static final double kP = 0.0020087;
+    public static final double kP = 0.03;
 
     public static final int EDGES_PER_REVOLUTION = 2048;
 
-    public static final double RAMP_RATE = 0.4;
+    public static final double RAMP_RATE = 0.2;
     public static final int CLOSED_LOOP_ERROR_RANGE = 200;
 
     public static final ShootingInterpolator SHOOTING_INTERPOLATOR = new ShootingInterpolator(Map.ofEntries(
-      Map.entry(Units.inchesToMeters(55.95), 11000d),
-      Map.entry(Units.inchesToMeters(69.33), 11700d),
-      Map.entry(Units.inchesToMeters(84.90), 12200d),
-      Map.entry(Units.inchesToMeters(127.02), 13400d),
-      Map.entry(Units.inchesToMeters(134.51), 13900d),
-      Map.entry(Units.inchesToMeters(168.33), 14800d),
-      Map.entry(Units.inchesToMeters(188.35), 15300d)));
+      Map.entry(Units.inchesToMeters(40d), 11000d),
+      Map.entry(Units.inchesToMeters(60d), 11375d),
+      Map.entry(Units.inchesToMeters(80d), 12200d),
+      Map.entry(Units.inchesToMeters(100d), 13000d),
+      Map.entry(Units.inchesToMeters(120d), 14000d),
+      Map.entry(Units.inchesToMeters(140d), 14900d),
+      Map.entry(Units.inchesToMeters(160d), 15875d),
+      Map.entry(Units.inchesToMeters(180d), 17000d),
+      Map.entry(Units.inchesToMeters(200d), 18300d),
+      Map.entry(Units.inchesToMeters(220d), 19000d),
+      Map.entry(Units.inchesToMeters(240d), 20000d)));
   }
 
   public static final class TurretConstants {
@@ -98,9 +102,10 @@ public final class Constants {
     public static final double kP_PIGEON = 1d;
     public static final double kD_PIGEON = 0d;
 
-    public static final double kP_POTENTIOMETER = 0d;
+    public static final double kP_POTENTIOMETER = 1d;
     public static final double kD_POTENTIOMETER = 0d;
 
+    // Native sensor units are in range of [0,1023], or [-1023,0] when sensor phase is true (inverted)
     /** Forward soft limit in native sensor units */
     public static final int SOFT_LIMIT_FORWARD = -130;
     /** Reverse soft limit in native sensor units */
@@ -109,15 +114,21 @@ public final class Constants {
     /** Range of motion between soft limits in degrees */
     public static final double RANGE_OF_MOTION = 183;
 
-    /** Value to multiple by the native sensor value to get degrees */
+    /** Value to multiply by the potentiometer native sensor value to get degrees */
     public static final double POTENTIOMETER_COEFFICIENT = 
-        TurretConstants.RANGE_OF_MOTION / (TurretConstants.SOFT_LIMIT_FORWARD - TurretConstants.SOFT_LIMIT_REVERSE);
-    
-    /** Forward soft limit in degrees (after sensor coefficient is applied) */
-    public static final double SOFT_LIMIT_FORWARD_DEGREES = SOFT_LIMIT_FORWARD * POTENTIOMETER_COEFFICIENT;
+        TurretConstants.RANGE_OF_MOTION / (TurretConstants.SOFT_LIMIT_REVERSE - TurretConstants.SOFT_LIMIT_FORWARD);
 
-    /** Reverse soft limit in degrees (after sensor coefficient is applied) */
-    public static final double SOFT_LIMIT_REVERSE_DEGREES = SOFT_LIMIT_REVERSE * POTENTIOMETER_COEFFICIENT;
+    /**
+     *  The offset of the potentiometer reading from the robot angle. Adding this to the absolute degree reading
+     *  from the potentiometer will get the direction the turret is pointed relative to the robot drivetrain.
+     */
+    // Calculate degrees for the reverse limit from the POT. Subtract the reverse limit degrees based on the range of
+    // motion, assuming the turret is mounted straight (e.g. pointed straight backwards is 1/2 the full range of motion)
+    // This seems complex for a fixed value, but if the way the potentiometer is mounted on the robot changes, only
+    // the soft-limit values need to be updated and everything will still work.
+    public static final double POTENTIOMETER_OFFSET =
+        (360 - (TurretConstants.SOFT_LIMIT_REVERSE * TurretConstants.POTENTIOMETER_COEFFICIENT)) -
+        (180 - TurretConstants.RANGE_OF_MOTION / 2);
 
     public static final double CLOSED_LOOP_MAX_OUTPUT = 0.7;
 
@@ -140,7 +151,7 @@ public final class Constants {
     public static final int DEVICE_ID_INTAKE = 7;
     
     public static final int CHANNEL_SOLENOID_FORWARD = 1;
-    public static final int CHANNEL_SOLENOID_BACKWARD = 2;
+    public static final int CHANNEL_SOLENOID_BACKWARD = 0;
   }
 
   public static final class TransferConstants {
@@ -161,10 +172,10 @@ public final class Constants {
     public static final double TARGET_HEIGHT = Units.inchesToMeters(104);
 
     public static final LimelightConfig LIMELIGHT_CONFIG = LimelightConfig.Builder.create()
-        .withMountDepth(Units.inchesToMeters(9))
+        .withMountDepth(Units.inchesToMeters(11))
         .withMountDistanceFromCenter(Units.inchesToMeters(0))
-        .withMountingAngle(43)
-        .withMountingHeight(Units.inchesToMeters(35.875))
+        .withMountingAngle(34.28)
+        .withMountingHeight(Units.inchesToMeters(36.75))
         .withNetworkTableName("limelight")
         .build();
   }
@@ -197,7 +208,7 @@ public final class Constants {
     public static final double DEADBAND_LOW = -DEADBAND_HIGH;
 
     // Max rate of change for speed per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double SPEED_RATE_LIMIT_ARCADE = 2.25;
+    public static final double SPEED_RATE_LIMIT_ARCADE = 2;
 
     // Max rate of change for rotation per second (1 / <value> is the number of seconds allowed to go from 0 to max)
     public static final double ROTATE_RATE_LIMIT_ARCADE = 5.0;

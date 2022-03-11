@@ -27,8 +27,21 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeMotor.setIdleMode(IdleMode.kCoast);
     intakeMotor.burnFlash();
 
-    compressor.enableDigital();
+    // compressor.enableDigital();
     compressor.disable();
+  }
+
+  /**
+   * Toggles the compressor on or off
+   * @return returns the new status of the compressor
+   */
+  public boolean toggleCompressorEnabled() {
+    if (compressor.enabled()) {
+      compressor.disable();
+      return false;
+    }
+    compressor.enableDigital();
+    return true;
   }
   
   public void intake() {

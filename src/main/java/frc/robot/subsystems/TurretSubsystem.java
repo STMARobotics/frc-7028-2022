@@ -37,11 +37,9 @@ public class TurretSubsystem extends SubsystemBase {
     
     // Potentiometer is primary PID to get soft limit support
     talonConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.Analog;
-    // convert native units to degrees
-    talonConfig.primaryPID.selectedFeedbackCoefficient = TurretConstants.POTENTIOMETER_COEFFICIENT;
-    talonConfig.forwardSoftLimitThreshold = TurretConstants.SOFT_LIMIT_FORWARD_DEGREES;
+    talonConfig.forwardSoftLimitThreshold = TurretConstants.SOFT_LIMIT_FORWARD;
     talonConfig.forwardSoftLimitEnable = true;
-    talonConfig.reverseSoftLimitThreshold = TurretConstants.SOFT_LIMIT_REVERSE_DEGREES;
+    talonConfig.reverseSoftLimitThreshold = TurretConstants.SOFT_LIMIT_REVERSE;
     talonConfig.reverseSoftLimitEnable = true;
     
     // Pigeon is on aux PID
@@ -50,10 +48,11 @@ public class TurretSubsystem extends SubsystemBase {
     talonConfig.slot1.closedLoopPeakOutput =  TurretConstants.CLOSED_LOOP_MAX_OUTPUT;
     talonConfig.remoteFilter1.remoteSensorDeviceID = pigeon.getDeviceID();
     talonConfig.remoteFilter1.remoteSensorSource = RemoteSensorSource.Pigeon_Yaw;
-    // convert native units to degrees
-    talonConfig.auxiliaryPID.selectedFeedbackCoefficient = 360d / TurretConstants.PIGEON_UNITS_PER_REVOLUTION;
     talonConfig.auxiliaryPID.selectedFeedbackSensor = FeedbackDevice.RemoteSensor1;
-    
+    // We don't use Talon's sensor coefficient feature to convert native units to degrees mainly because it lowers
+    // precision since the value has to result in an integer. For example, if we use a coefficient of 0.0439 to convert
+    // pigeon units to degrees we only get 360 units per revolution vs. the native 8192.
+
     turretMotor.configAllSettings(talonConfig);
     turretMotor.selectProfileSlot(0, 0);
     turretMotor.selectProfileSlot(1, 1);
@@ -68,8 +67,8 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
-    dashboard.addNumber("Angle", this::getAngle);
-    dashboard.addNumber("Heading", this::getHeading);
+    dashboard.addNumber("Gyro Angle", this::getAngle);
+    dashboard.addNumber("Gyro Heading", this::getHeading);
     dashboard.addNumber("Angle To Robot", this::getRobotRelativeAngle);
     dashboard.addNumber("Setpoint",
         () -> turretMotor.getControlMode() == ControlMode.Position ? turretMotor.getClosedLoopTarget() : Double.NaN);
@@ -85,9 +84,20 @@ public class TurretSubsystem extends SubsystemBase {
    * the current angle or you may be attempting to turn the turret more than 360-degrees.
    * @param angle angle to set and hold
    */
-  public void positionToAngle(double angle) {
-    // Negate since WPI angle is cw+ but Pigeon Yaw is ccw+
-    turretMotor.set(TalonSRXControlMode.Position, 0, DemandType.AuxPID, -angle);
+  public void positionToAngleWithGyro(double angle) {
+    turretMotor.config_kP(0, 0);
+    turretMotor.config_kD(0, 0);
+    turretMotor.set(TalonSRXControlMode.Position, 0, DemandType.AuxPID, degreesToNativePigeonUnits(angle));
+  }
+
+  /**
+   * Positions the turret to the specified angle relative to the robot in range of [0,360]
+   * @param angle
+   */
+  public void positionToRobotAngle(double angle) {
+    turretMotor.config_kP(0, TurretConstants.kP_POTENTIOMETER);
+    turretMotor.config_kD(0, TurretConstants.kD_POTENTIOMETER);
+    turretMotor.set(TalonSRXControlMode.Position, degreesPositionToNativePot(angle));
   }
 
   /**
@@ -102,7 +112,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   /**
-   * Gets the current heading. This value is not continous.
+   * Gets the current heading compatible with Pose2d and Rotation2d. This value is not continous. CW is positive.
    * @return current heading in range of [-180, 180]
    */
   public double getHeading() {
@@ -110,21 +120,25 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   /**
-   * Gets the current angle heading. This value IS continous (continues from 360 to 361)
-   * @return the current heading (may be greater than 360)
+   * Gets the current angle heading. This value IS continous (continues from 360 to 361). CCW is positive.
+   * @return the current heading
    */
   public double getAngle() {
-    return pigeon.getAngle();
+    return pigeon.getYaw();
   }
 
   /**
-   * Gets the angle of the turret from its position on the robot.
-   * @return
+   * Gets the angle of the turret from its position on the robot. CCW is positive.
+   * For reference:
+   * <ul>
+   * <li>90 pointed left</li>
+   * <li>180 pointed straight back</li>
+   * <li>270 pointed right</li>
+   * </ul>
+   * @return angle of the turret in relation to the robot
    */
   public double getRobotRelativeAngle() {
-    // TODO this needs to account for the angle of the turret on the robot, it points backwards and
-    // the turret's zero will be on one side
-    return turretMotor.getSelectedSensorPosition();
+    return nativePotPositionToDegrees(turretMotor.getSelectedSensorPosition());
   }
 
   /**
@@ -137,6 +151,44 @@ public class TurretSubsystem extends SubsystemBase {
 
   public void stop() {
     turretMotor.set(0);
+  }
+
+  /**
+   * Converts a native potentiometer position to a position in degrees
+   * @param pot potentiometer position
+   * @return position in degrees
+   */
+  static double nativePotPositionToDegrees(double pot) {
+    return pot * TurretConstants.POTENTIOMETER_COEFFICIENT + TurretConstants.POTENTIOMETER_OFFSET;
+  }
+
+  /**
+   * Converts a position in degrees to a native potentiometer position
+   * @param degrees position in degrees
+   * @return potentiometer
+   */
+  static double degreesPositionToNativePot(double degrees) {
+    return degrees / TurretConstants.POTENTIOMETER_COEFFICIENT + TurretConstants.POTENTIOMETER_OFFSET;
+  }
+
+  /**
+   * Converts from native pigeon units to degrees
+   * @param pigeon pigeon reading
+   * @return degree reading
+   */
+  static double nativePigeonUnitsToDegrees(double pigeon) {
+    // Negate since WPI angle is cw+ but Pigeon Yaw is ccw+
+    return pigeon * (-360d / TurretConstants.PIGEON_UNITS_PER_REVOLUTION);
+  }
+
+  /**
+   * Convers from degrees to native pigeon units
+   * @param degrees degree reading
+   * @return pigeon reading
+   */
+  static double degreesToNativePigeonUnits(double degrees) {
+    // Negate since WPI angle is cw+ but Pigeon Yaw is ccw+
+    return degrees / (-360d / TurretConstants.PIGEON_UNITS_PER_REVOLUTION);
   }
 
 }

@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
@@ -130,8 +131,9 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
         .whileHeld(new LoadCargoCommand(intakeSubsystem, transferSubsystem));
     
-    // new POVButton(driverController, 0).whenPressed(intakeSubsystem::deploy);
-    // new POVButton(driverController, 180).whenPressed(intakeSubsystem::retract);
+    new POVButton(driverController, 0).whenPressed(intakeSubsystem::deploy);
+    new POVButton(driverController, 180).whenPressed(intakeSubsystem::retract);
+    new POVButton(driverController, 270).whenPressed(intakeSubsystem::toggleCompressorEnabled);
     // addShootCalibrationMode();
   }
 

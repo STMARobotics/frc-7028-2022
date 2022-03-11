@@ -47,11 +47,11 @@ public class TrackTargetCommand extends CommandBase {
     // Calculate the heading setpoint. This math is needed because the turret's Yaw is
     // continuous (it continues from 360 to 361), but our field heading is not continuous
     // [-180, 180]. This accounts for the continous yaw to calculate the new setpoint.
-    var currentAngle = turretSubsystem.getAngle();
+    var currentAngle = -turretSubsystem.getAngle();
     var headingSetpoint = currentAngle - Math.IEEEremainder(currentAngle, 360.0d) + angleToHub;
 
     // Position the turret
-    turretSubsystem.positionToAngle(headingSetpoint);
+    turretSubsystem.positionToAngleWithGyro(headingSetpoint);
 
     SmartDashboard.putNumber("Angle To Hub", Units.radiansToDegrees(angleToHub));
 

@@ -15,15 +15,18 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
@@ -109,7 +112,7 @@ public class RobotContainer {
     
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value)
-        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem, transferSubsystem));
+        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem));
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
@@ -135,6 +138,15 @@ public class RobotContainer {
     new POVButton(driverController, 180).whenPressed(intakeSubsystem::retract);
     new POVButton(driverController, 270).whenPressed(intakeSubsystem::toggleCompressorEnabled);
     // addShootCalibrationMode();
+
+    var shooterTab = Shuffleboard.getTab("Shooter");
+    var turretPosition = shooterTab.add("SET Turret Angle", 0);
+    var runCommand = 
+        new RunCommand(() -> turretSubsystem.positionToRobotAngle(turretPosition.getEntry().getDouble(0)), turretSubsystem);
+    shooterTab.addNumber("Turret Angle", turretSubsystem::getRobotRelativeAngle);
+
+    new Trigger(RobotState::isEnabled).whenActive(runCommand);
+
   }
 
   private void configureSubsystemCommands() {
@@ -150,7 +162,7 @@ public class RobotContainer {
   private void addShootCalibrationMode() {
     var shooterTab = Shuffleboard.getTab("Shooter");
     shooterSubsystem.addDashboardWidgets(shooterTab.getLayout("shooter", BuiltInLayouts.kList));
-    var shooterSpeed = shooterTab.add("Y-Button Shoot Speed", 0).withWidget(BuiltInWidgets.kNumberSlider)
+    var shooterSpeed = shooterTab.add("Y-Button Shoot Speed", 0).withWidget(BuiltInWidgets.kTextView)
         .withProperties(Map.of("Max", 21000, "Min", 0)).getEntry();
     new JoystickButton(driverController, XboxController.Button.kY.value)
         .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> shooterSpeed.getDouble(150000)));
@@ -219,6 +231,6 @@ public class RobotContainer {
     return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d()), driveTrainSubsystem)
         .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)))
         .andThen(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem).withTimeout(.1))
-        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem, transferSubsystem));
+        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem));
   }
 }

@@ -13,7 +13,9 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.sensors.Pigeon2Configuration;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.TurretConstants;
 
@@ -34,6 +36,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     turretMotor.configFactoryDefault();
     var talonConfig = new TalonSRXConfiguration();
+    talonConfig.openloopRamp = 0.2;
     
     // Potentiometer is primary PID to get soft limit support
     talonConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.Analog;
@@ -70,11 +73,15 @@ public class TurretSubsystem extends SubsystemBase {
     dashboard.addNumber("Gyro Angle", this::getAngle);
     dashboard.addNumber("Gyro Heading", this::getHeading);
     dashboard.addNumber("Angle To Robot", this::getRobotRelativeAngle);
+    dashboard.addNumber("Native Position", turretMotor::getSelectedSensorPosition);
     dashboard.addNumber("Setpoint",
         () -> turretMotor.getControlMode() == ControlMode.Position ? turretMotor.getClosedLoopTarget() : Double.NaN);
+    dashboard.addNumber("Error",
+        () -> turretMotor.getControlMode() == ControlMode.Position ? turretMotor.getClosedLoopError() : Double.NaN);
   }
 
   public void run(double speed) {
+    SmartDashboard.putNumber("Turret Power", speed);
     turretMotor.set(speed);
   }
 
@@ -91,13 +98,22 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   /**
-   * Positions the turret to the specified angle relative to the robot in range of [0,360]
-   * @param angle
+   * Positions the turret to the specified angle relative to the robot in range of [0,360], 0 is forward CCW+
+   * @param angle angle in degrees
    */
   public void positionToRobotAngle(double angle) {
     turretMotor.config_kP(0, TurretConstants.kP_POTENTIOMETER);
     turretMotor.config_kD(0, TurretConstants.kD_POTENTIOMETER);
-    turretMotor.set(TalonSRXControlMode.Position, degreesPositionToNativePot(angle));
+
+    // Get angle with zero as straight backward, CW+
+    var angleWithCenterZero = 180 - angle;
+    // Feed forward is the sine of the angle, times our feed-forwad constant
+    var feedForward = Math.sin(Units.degreesToRadians(angleWithCenterZero)) * TurretConstants.FEED_FORWARD;
+    turretMotor.set(
+        TalonSRXControlMode.Position, 
+        degreesPositionToNativePot(angle),
+        DemandType.ArbitraryFeedForward,
+        feedForward);
   }
 
   /**
@@ -168,7 +184,7 @@ public class TurretSubsystem extends SubsystemBase {
    * @return potentiometer
    */
   static double degreesPositionToNativePot(double degrees) {
-    return degrees / TurretConstants.POTENTIOMETER_COEFFICIENT + TurretConstants.POTENTIOMETER_OFFSET;
+    return (degrees - TurretConstants.POTENTIOMETER_OFFSET) / TurretConstants.POTENTIOMETER_COEFFICIENT;
   }
 
   /**

@@ -28,6 +28,8 @@ public class JustShootCommand extends CommandBase {
     shooterSubsystem.runShooter(speedSupplier.getAsDouble());
     if (shooterSubsystem.isReadyToShoot()) {
       indexerSubsystem.shoot();
+    } else {
+      indexerSubsystem.prepareToShoot();
     }
   }
 

@@ -7,7 +7,6 @@ import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterLimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.TransferSubsystem;
 
 /**
  * Command that finds a target, spins up the shooter, aims, and shoots at a the correct speed for the target distance.
@@ -18,7 +17,6 @@ public class ShootCommand extends CommandBase {
   private final ShooterLimelightSubsystem limelightSubsystem;
   private final DriveTrainSubsystem driveTrainSubsystem;
   private final IndexerSubsystem indexerSubsystem;
-  private final TransferSubsystem transferSubsystem;
 
   private final PIDController pidController = new PIDController(AimConstants.kP, 0, AimConstants.kD);
 
@@ -28,14 +26,13 @@ public class ShootCommand extends CommandBase {
       ShooterSubsystem shooterSubsystem,
       ShooterLimelightSubsystem limelightSubsystem,
       DriveTrainSubsystem driveTrainSubsystem,
-      IndexerSubsystem indexerSubsystem, TransferSubsystem transferSubsystem) {
+      IndexerSubsystem indexerSubsystem) {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
     this.driveTrainSubsystem = driveTrainSubsystem;
     this.indexerSubsystem = indexerSubsystem;
-    this.transferSubsystem = transferSubsystem;
 
-    addRequirements(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem, transferSubsystem);
+    addRequirements(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem);
 
     pidController.setTolerance(AimConstants.AIM_TOLERANCE);
   }
@@ -67,7 +64,6 @@ public class ShootCommand extends CommandBase {
       if (shooterSubsystem.isReadyToShoot() && pidController.atSetpoint()) {
         // Turn the indexer on to put cargo in shooter. It does not have safety so it will stay on until stopped.
         indexerSubsystem.shoot();
-        transferSubsystem.intake();
       } else {
         // Indexer can raise cargo up to the shooter while it's spinning and aiming
         indexerSubsystem.prepareToShoot();
@@ -97,7 +93,6 @@ public class ShootCommand extends CommandBase {
     shooterSubsystem.stop();
     driveTrainSubsystem.stop();
     indexerSubsystem.stop();
-    transferSubsystem.stop();
   }
 
 }

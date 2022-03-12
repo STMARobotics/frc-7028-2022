@@ -15,7 +15,6 @@ import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.TurretConstants;
 
@@ -81,7 +80,6 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public void run(double speed) {
-    SmartDashboard.putNumber("Turret Power", speed);
     turretMotor.set(speed);
   }
 

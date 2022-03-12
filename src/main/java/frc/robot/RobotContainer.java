@@ -15,18 +15,15 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
@@ -138,15 +135,6 @@ public class RobotContainer {
     new POVButton(driverController, 180).whenPressed(intakeSubsystem::retract);
     new POVButton(driverController, 270).whenPressed(intakeSubsystem::toggleCompressorEnabled);
     // addShootCalibrationMode();
-
-    var shooterTab = Shuffleboard.getTab("Shooter");
-    var turretPosition = shooterTab.add("SET Turret Angle", 0);
-    var runCommand = 
-        new RunCommand(() -> turretSubsystem.positionToRobotAngle(turretPosition.getEntry().getDouble(0)), turretSubsystem);
-    shooterTab.addNumber("Turret Angle", turretSubsystem::getRobotRelativeAngle);
-
-    new Trigger(RobotState::isEnabled).whenActive(runCommand);
-
   }
 
   private void configureSubsystemCommands() {

@@ -102,14 +102,17 @@ public final class Constants {
     public static final double kP_PIGEON = 1d;
     public static final double kD_PIGEON = 0d;
 
-    public static final double kP_POTENTIOMETER = 1d;
+    public static final double kP_POTENTIOMETER = 64d;
     public static final double kD_POTENTIOMETER = 0d;
+
+    /** Feed forward that is scaled to the angle of the turret to overcome wire management */
+    public static final double FEED_FORWARD = 0.1d;
 
     // Native sensor units are in range of [0,1023], or [-1023,0] when sensor phase is true (inverted)
     /** Forward soft limit in native sensor units */
-    public static final int SOFT_LIMIT_FORWARD = -130;
+    public static final int SOFT_LIMIT_FORWARD = -152;
     /** Reverse soft limit in native sensor units */
-    public static final int SOFT_LIMIT_REVERSE = -391;
+    public static final int SOFT_LIMIT_REVERSE = -400;
     
     /** Range of motion between soft limits in degrees */
     public static final double RANGE_OF_MOTION = 183;

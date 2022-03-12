@@ -1,4 +1,4 @@
-package frc.robot.util;
+package frc.robot.subsystems;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,7 +18,12 @@ public class TurretSubsystemTest {
     var actualSensorDegreesAt180 = actualSensorReadAt180 * TurretConstants.POTENTIOMETER_COEFFICIENT;
 
     // Assert that applying the offset results in 180-degrees
-    assertEquals(180, actualSensorDegreesAt180 + TurretConstants.POTENTIOMETER_OFFSET, 0);
+    assertEquals(180, actualSensorDegreesAt180 + TurretConstants.POTENTIOMETER_OFFSET, 0.6);
+  }
+
+  @Test
+  public void testConvert() {
+    assertEquals(-100d, TurretSubsystem.degreesPositionToNativePot(TurretSubsystem.nativePotPositionToDegrees(-100d)), 0.1);
   }
 
 }

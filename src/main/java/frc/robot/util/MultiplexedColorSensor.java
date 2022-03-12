@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.revrobotics.ColorSensorV3;
-import com.revrobotics.ColorSensorV3.RawColor;
 
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.I2C.Port;
@@ -31,9 +30,6 @@ public class MultiplexedColorSensor {
 
   // The actual sensor. All of the methods call this sensor to get the data.
   private ColorSensorV3 sensor;
-  
-  // What port on the multiplexer the color sensor is plugged into.
-  private final int port;
 
   /**
    * Create a multiplexed color sensor.
@@ -43,22 +39,20 @@ public class MultiplexedColorSensor {
    *                (commonly labeled SC3 and SD3 on the PCB, where 3 is the
    *                port)
    */
-  public MultiplexedColorSensor(I2C.Port i2cPort, int port) {
+  public MultiplexedColorSensor(I2C.Port i2cPort) {
     if (multiplexers.get(i2cPort) == null) {
       multiplexer = new I2C(i2cPort, kMultiplexerAddress);
       multiplexers.put(i2cPort, multiplexer);
     } else {
       multiplexer = multiplexers.get(i2cPort);
     }
-    this.port = port;
-    setChannel();
     sensor = new ColorSensorV3(i2cPort);
   }
 
   /**
    * Sets the multiplexer to the correct port before using the color sensor.
    */
-  private void setChannel() {
+  public void setChannel(int port) {
     multiplexer.write(kMultiplexerAddress, 1 << port);
   }
 
@@ -68,42 +62,11 @@ public class MultiplexedColorSensor {
   /*-----------------------------------------------------------------------*/
 
   public Color getColor() {
-    setChannel();
     return sensor.getColor();
   }
 
   public int getProximity() {
-    setChannel();
     return sensor.getProximity();
   }
 
-  public RawColor getRawColor() {
-    setChannel();
-    return sensor.getRawColor();
-  }
-
-  public int getRed() {
-    setChannel();
-    return sensor.getRed();
-  }
-
-  public int getGreen() {
-    setChannel();
-    return sensor.getGreen();
-  }
-
-  public int getBlue() {
-    setChannel();
-    return sensor.getBlue();
-  }
-
-  public int getIR() {
-    setChannel();
-    return sensor.getIR();
-  }
-
-  public boolean hasReset() {
-    setChannel();
-    return sensor.hasReset();
-  }
 }

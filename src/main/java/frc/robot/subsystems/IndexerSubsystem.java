@@ -10,6 +10,8 @@ import java.util.Map;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.ColorMatch;
+import com.revrobotics.ColorMatchResult;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxAlternateEncoder.Type;
 import com.revrobotics.SparkMaxPIDController;
@@ -17,6 +19,8 @@ import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.MultiplexedColorSensor;
 
@@ -26,9 +30,7 @@ public class IndexerSubsystem extends SubsystemBase {
   private final RelativeEncoder indexerEncoder;
   private final SparkMaxPIDController pidController;
   
-  private final MultiplexedColorSensor intakeSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_INTAKE_SENSOR);
-  private final MultiplexedColorSensor spacerSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_SPACER_SENSOR);
-  private final MultiplexedColorSensor fullSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_FULL_SENSOR);
+  private final MultiplexedColorSensor multiplexer = new MultiplexedColorSensor(Port.kMXP);
 
   // Proximity thresholds for when to trip each sensor
   private static final int THRESHOLD_INTAKE = 240;
@@ -37,6 +39,21 @@ public class IndexerSubsystem extends SubsystemBase {
 
   private boolean shooting;
   private int ballCount = 0;
+
+  private Color intakeColor;
+  private Color spacerColor;
+  private Color fullColor;
+  private int intakeProximity;
+  private int spacerProximity;
+  private int fullProximity;
+
+  private SuppliedValueWidget<Boolean> intakeColorWidget;
+  private SuppliedValueWidget<Boolean> spacerColorWidget;
+  private SuppliedValueWidget<Boolean> fullColorWidget;
+
+  private ColorMatch colorMatch = new ColorMatch();
+  private final Color kRed = new Color(1,0,0);
+  private final Color kBlue = new Color(0,0,1);
 
   public IndexerSubsystem() {
     indexer.restoreFactoryDefaults();
@@ -47,11 +64,17 @@ public class IndexerSubsystem extends SubsystemBase {
     pidController = indexer.getPIDController();
     pidController.setFeedbackDevice(indexerEncoder);
     indexer.burnFlash();
+    updateColorSensors();
+    colorMatch.addColorMatch(kRed);
+    colorMatch.addColorMatch(kBlue);
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
     var detailDashboard = dashboard.getLayout("Detail", BuiltInLayouts.kGrid)
         .withProperties(Map.of("numberOfColumns", 2, "numberOfRows", 2));
+    intakeColorWidget = dashboard.addBoolean("Intake Color", () -> true);
+    spacerColorWidget = dashboard.addBoolean("Spacer Color", () -> true);
+    fullColorWidget = dashboard.addBoolean("Full Color", () -> true);
     // detailDashboard.addBoolean("Intake", this::isIntakeSensorTripped);
     // detailDashboard.addBoolean("Spacer", this::isSpacerSensorTripped);
     // detailDashboard.addBoolean("Full", this::isFullSensorTripped);
@@ -60,6 +83,18 @@ public class IndexerSubsystem extends SubsystemBase {
     // detailDashboard.addNumber("Full Prox", intakeSensor::getProximity);
   }
   
+  private void updateColorSensors(){
+    multiplexer.setChannel(PORT_ID_INTAKE_SENSOR);
+    intakeColor = multiplexer.getColor();
+    intakeProximity = multiplexer.getProximity();
+    multiplexer.setChannel(PORT_ID_SPACER_SENSOR);
+    spacerColor = multiplexer.getColor();
+    spacerProximity = multiplexer.getProximity();
+    multiplexer.setChannel(PORT_ID_FULL_SENSOR);
+    fullColor = multiplexer.getColor();
+    fullProximity = multiplexer.getProximity();
+  }
+
   public void intake() {
     // sensors return false when something is detected
     if ((!isIntakeSensorTripped() && !isSpacerSensorTripped() && !isFullSensorTripped()) || //if all sensors are clear stop the belt
@@ -83,16 +118,54 @@ public class IndexerSubsystem extends SubsystemBase {
         || (shooting && !isIntakeSensorTripped() && !isSpacerSensorTripped());
   }
 
+  @Override
+  public void periodic() {
+    updateColorSensors();
+
+    ColorMatchResult intakeResult = colorMatch.matchClosestColor(intakeColor);
+    String intakeColorString = "Black";
+    if (!isIntakeSensorTripped()){
+      intakeColorString = "Black";
+    } else if(intakeResult.color == kRed){
+      intakeColorString = "Red";
+    } else if(intakeResult.color == kBlue){
+      intakeColorString = "Blue";
+    }
+    intakeColorWidget.withProperties(Map.of("colorWhenTrue", intakeColorString));
+
+    ColorMatchResult spacerResult = colorMatch.matchClosestColor(spacerColor);
+    String spacerColorString = "Black";
+    if(!isSpacerSensorTripped()){
+      spacerColorString = "Black";
+    } else if(spacerResult.color == kRed){
+      spacerColorString = "Red";
+    } else if(spacerResult.color == kBlue){
+      spacerColorString = "Blue";
+    }
+    spacerColorWidget.withProperties(Map.of("colorWhenTrue", spacerColorString));
+
+    ColorMatchResult fullResult = colorMatch.matchClosestColor(fullColor);
+    String fullColorString = "Black";
+    if(!isFullSensorTripped()){
+      fullColorString = "Black";
+    } else if(fullResult.color == kRed){
+      fullColorString = "Red";
+    } else if(fullResult.color == kBlue){
+      fullColorString = "Blue";
+    }
+    fullColorWidget.withProperties(Map.of("colorWhenTrue", fullColorString));
+  }
+
   public boolean isFullSensorTripped() {
-    return fullSensor.getProximity() > THRESHOLD_FULL;
+    return fullProximity > THRESHOLD_FULL;
   }
 
   private boolean isIntakeSensorTripped() {
-    return intakeSensor.getProximity() > THRESHOLD_INTAKE;
+    return intakeProximity > THRESHOLD_INTAKE;
   }
 
   public boolean isSpacerSensorTripped() {
-    return spacerSensor.getProximity() > THRESHOLD_SPACE;
+    return spacerProximity > THRESHOLD_SPACE;
   }
 
   public boolean isRunning() {

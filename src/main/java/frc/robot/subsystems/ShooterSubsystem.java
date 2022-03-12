@@ -35,16 +35,17 @@ public class ShooterSubsystem extends SubsystemBase {
   private final WPI_TalonFX leader = new WPI_TalonFX(DEVICE_ID_SHOOTER_LEADER);
   private final WPI_TalonFX follower = new WPI_TalonFX(DEVICE_ID_SHOOTER_FOLLOWER);
 
-  // Shooter feed forward from SysID. This is configured for rotations per second. Note, CTRE native velocities are in
+  // Shooter feed forward from SysID. This is configured for rotations per second.
+  // Note, CTRE native velocities are in
   // encoder edges per 100 ms.
-  private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(kS,kV, kA);
+  private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(kS, kV, kA);
   private double gain = 0;
   private double targetSpeed = 0;
 
   public ShooterSubsystem() {
     leader.configFactoryDefault();
     follower.configFactoryDefault();
-    
+
     var config = new TalonFXConfiguration();
     config.slot0.kP = kP;
     config.slot0.kI = 0;
@@ -52,7 +53,7 @@ public class ShooterSubsystem extends SubsystemBase {
     config.closedloopRamp = RAMP_RATE;
     leader.configAllSettings(config);
     follower.configAllSettings(config);
-    
+
     leader.enableVoltageCompensation(false);
     follower.enableVoltageCompensation(false);
     leader.setNeutralMode(NeutralMode.Coast);
@@ -67,11 +68,11 @@ public class ShooterSubsystem extends SubsystemBase {
     dashboard.addNumber("Velocity RPS", () -> edgesPerDecisecToRPS(leader.getSelectedSensorVelocity()));
     dashboard.addNumber("Target Velocity",
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopTarget() : 0);
-    dashboard.addNumber("Error", 
+    dashboard.addNumber("Error",
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopError() : 0);
 
-    var gainEntry = dashboard.addPersistent("Gain", 0).withWidget(BuiltInWidgets.kNumberSlider)
-        .withProperties(Map.of("Max", 100, "Min", -100)).getEntry();
+    var gainEntry = dashboard.addPersistent("Gain", 0)
+        .withProperties(Map.of("Max", 100, "Min", -100)).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
     gainEntry.addListener(this::updateGain, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
     gain = gainEntry.getDouble(0);
   }
@@ -79,22 +80,25 @@ public class ShooterSubsystem extends SubsystemBase {
   private void updateGain(EntryNotification notification) {
     gain = notification.value.getDouble();
   }
-  
+
   /**
    * Runs the shooter at the specified velocity
+   * 
    * @param speed velocity set point in native units (encoder edges per 100 ms)
    */
   public void runShooter(double speed) {
-    // Feedforward is configured for rotations per second so a conversion from native units is needed.
+    // Feedforward is configured for rotations per second so a conversion from
+    // native units is needed.
     var feedForwardVolts = feedForward.calculate(edgesPerDecisecToRPS(targetSpeed), edgesPerDecisecToRPS(speed), .02);
 
-    // Arbitrary feed forward is a value in the range [-1, 1], which is a percentage of the saturation voltage
+    // Arbitrary feed forward is a value in the range [-1, 1], which is a percentage
+    // of the saturation voltage
     leader.set(
-      ControlMode.Velocity, 
-      speed,
-      DemandType.ArbitraryFeedForward, 
-      feedForwardVolts / RobotController.getBatteryVoltage());
-    
+        ControlMode.Velocity,
+        speed,
+        DemandType.ArbitraryFeedForward,
+        feedForwardVolts / RobotController.getBatteryVoltage());
+
     targetSpeed = speed;
   }
 
@@ -105,6 +109,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * Converts from edges per decisecond to rotations per second.
+   * 
    * @param edgesPerDecisec velocity in edges per decisecond (native Talon units)
    * @return velocity in rotations per second
    */
@@ -113,8 +118,9 @@ public class ShooterSubsystem extends SubsystemBase {
     return rotationsPerDecisecond * 10;
   }
 
-    /**
+  /**
    * Converts from rotations per second to edges per decisecond.
+   * 
    * @param rps velocity in RPM
    * @return velocity in edges per decisecond (native talon units)
    */

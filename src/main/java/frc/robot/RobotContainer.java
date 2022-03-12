@@ -198,6 +198,10 @@ public class RobotContainer {
     }
     driveTrainSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
+
+    var gainsLayout = Dashboard.driverTab.getLayout("Gains", BuiltInLayouts.kList)
+    .withSize(2, 4).withPosition(6, 2);
+    shooterSubsystem.addDashboardWidgets(gainsLayout);
   }
 
   /**

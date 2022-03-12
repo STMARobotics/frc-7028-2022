@@ -15,6 +15,8 @@ import static frc.robot.Constants.ShooterConstants.kP;
 import static frc.robot.Constants.ShooterConstants.kS;
 import static frc.robot.Constants.ShooterConstants.kV;
 
+import java.util.Map;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -22,7 +24,10 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.networktables.EntryListenerFlags;
+import edu.wpi.first.networktables.EntryNotification;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -33,7 +38,7 @@ public class ShooterSubsystem extends SubsystemBase {
   // Shooter feed forward from SysID. This is configured for rotations per second. Note, CTRE native velocities are in
   // encoder edges per 100 ms.
   private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(kS,kV, kA);
-
+  private double gain = 0;
   private double targetSpeed = 0;
 
   public ShooterSubsystem() {
@@ -64,8 +69,17 @@ public class ShooterSubsystem extends SubsystemBase {
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopTarget() : 0);
     dashboard.addNumber("Error", 
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopError() : 0);
+
+    var gainEntry = dashboard.addPersistent("Gain", 0).withWidget(BuiltInWidgets.kNumberSlider)
+        .withProperties(Map.of("Max", 100, "Min", -100)).getEntry();
+    gainEntry.addListener(this::updateGain, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+    gain = gainEntry.getDouble(0);
   }
 
+  private void updateGain(EntryNotification notification) {
+    gain = notification.value.getDouble();
+  }
+  
   /**
    * Runs the shooter at the specified velocity
    * @param speed velocity set point in native units (encoder edges per 100 ms)
@@ -85,7 +99,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void prepareToShoot(double distance) {
-    var speed = SHOOTING_INTERPOLATOR.interpolate(distance);
+    var speed = SHOOTING_INTERPOLATOR.interpolate(distance + gain);
     runShooter(speed);
   }
 

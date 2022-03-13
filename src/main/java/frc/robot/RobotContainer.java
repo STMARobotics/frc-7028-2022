@@ -108,7 +108,7 @@ public class RobotContainer {
     
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value)
-        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem::getCurrentPose));
+        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem, true));
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
@@ -219,7 +219,6 @@ public class RobotContainer {
 
     return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d()), driveTrainSubsystem)
         .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)))
-        .andThen(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem).withTimeout(.1))
-        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem::getCurrentPose));
+        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem, 2));
   }
 }

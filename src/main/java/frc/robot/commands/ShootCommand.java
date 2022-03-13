@@ -1,12 +1,11 @@
 package frc.robot.commands;
 
-import java.util.function.Supplier;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AimConstants;
+import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterLimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -21,11 +20,16 @@ public class ShootCommand extends CommandBase {
   private static final Pose2d hubPose = 
       new Pose2d(Units.inchesToMeters(54 * 12) / 2, Units.inchesToMeters(27 * 12) / 2, new Rotation2d());
 
+  private static final Pose2d fieldOriginOnHubPlane = 
+      new Pose2d(-hubPose.getX(), -hubPose.getY(), new Rotation2d());
+
   private final ShooterSubsystem shooterSubsystem;
   private final ShooterLimelightSubsystem limelightSubsystem;
   private final TurretSubsystem turretSubsystem;
   private final IndexerSubsystem indexerSubsystem;
-  private final Supplier<Pose2d> poseSupplier;
+  private final DriveTrainSubsystem driveTrainSubsystem;
+  private final boolean resetPose;
+  private final int ballsToShoot;
 
   private double lastTargetDistance = 0;
   private double lastTurretPosition = 0;
@@ -35,15 +39,38 @@ public class ShootCommand extends CommandBase {
       ShooterLimelightSubsystem limelightSubsystem,
       TurretSubsystem turretSubsytem,
       IndexerSubsystem indexerSubsystem,
-      Supplier<Pose2d> poseSupplier) {
+      DriveTrainSubsystem driveTrainSubsystem,
+      int ballsToShoot) {
+    this(shooterSubsystem, limelightSubsystem, turretSubsytem, indexerSubsystem, driveTrainSubsystem, false, ballsToShoot);
+  }
+
+  public ShootCommand(
+      ShooterSubsystem shooterSubsystem,
+      ShooterLimelightSubsystem limelightSubsystem,
+      TurretSubsystem turretSubsytem,
+      IndexerSubsystem indexerSubsystem,
+      DriveTrainSubsystem driveTrainSubsystem,
+      boolean resetPose) {
+    this(shooterSubsystem, limelightSubsystem, turretSubsytem, indexerSubsystem, driveTrainSubsystem, resetPose, Integer.MAX_VALUE);
+  }
+
+  public ShootCommand(
+      ShooterSubsystem shooterSubsystem,
+      ShooterLimelightSubsystem limelightSubsystem,
+      TurretSubsystem turretSubsytem,
+      IndexerSubsystem indexerSubsystem,
+      DriveTrainSubsystem driveTrainSubsystem,
+      boolean resetPose,
+      int ballsToShoot) {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
     this.turretSubsystem = turretSubsytem;
     this.indexerSubsystem = indexerSubsystem;
-    this.poseSupplier = poseSupplier;
+    this.driveTrainSubsystem = driveTrainSubsystem;
+    this.resetPose = resetPose;
+    this.ballsToShoot = ballsToShoot;
 
     addRequirements(shooterSubsystem, limelightSubsystem, turretSubsytem, indexerSubsystem);
-
   }
 
   @Override
@@ -55,6 +82,7 @@ public class ShootCommand extends CommandBase {
 
   @Override
   public void execute() {
+    driveTrainSubsystem.stop();
     // If the target is visible, get the new distance. If the target isn't visible we'll use the last known distance.
     if (limelightSubsystem.getTargetAcquired()) {
       lastTargetDistance = limelightSubsystem.getDistanceToTarget();
@@ -66,7 +94,8 @@ public class ShootCommand extends CommandBase {
       // We're not going to worry about losing the target for rotation because Limelight returns target X of 0 when no
       // target is visible, so we just won't rotate when no target is visible (although we may shoot since we're at
       // the setpoint)
-      var atTarget = Math.abs(limelightSubsystem.getTargetX()) < AimConstants.AIM_TOLERANCE;
+      final var targetX = limelightSubsystem.getTargetX();
+      final var atTarget = Math.abs(targetX) < AimConstants.AIM_TOLERANCE;
       if (shooterSubsystem.isReadyToShoot() && atTarget) {
         // Turn the indexer on to put cargo in shooter. It does not have safety so it will stay on until stopped.
         indexerSubsystem.shoot();
@@ -77,14 +106,24 @@ public class ShootCommand extends CommandBase {
 
       // Move the turret if it is outside of the aiming tolerance, otherwise hold the current position to prevent jitter
       if (!atTarget) {
-        lastTurretPosition = turretSubsystem.getAngleToRobot() - limelightSubsystem.getTargetX();
+        lastTurretPosition = turretSubsystem.getAngleToRobot() - targetX;
       }
       turretSubsystem.positionToRobotAngle(lastTurretPosition);
+      if (atTarget && resetPose) {
+        // Reset robot pose
+        final var gyroAngle = driveTrainSubsystem.getCurrentPose().getRotation().getDegrees();
+        final var turretAngle = turretSubsystem.getAngleToRobot();
+        var newPose = new Pose2d(
+          lastTargetDistance * Math.cos(Units.degreesToRadians(gyroAngle + turretAngle - targetX - 180)),
+          lastTargetDistance * Math.sin(Units.degreesToRadians(gyroAngle + turretAngle - targetX - 180)),
+          Rotation2d.fromDegrees(gyroAngle));
+        driveTrainSubsystem.setCurrentPose(newPose.relativeTo(fieldOriginOnHubPlane));
+      }
     } else {
       // No target has ever been visible, so point the turret where the target should be
       shooterSubsystem.stop();
       pointTurretTowardTarget();
-    }    
+    }
   }
 
   /**
@@ -96,7 +135,7 @@ public class ShootCommand extends CommandBase {
     // way across the field. CCW rotation is positive.
 
     // The robot's pose is on a coordinate grid with (0,0) at the bottom left corner.
-    var robotCurrentPose = poseSupplier.get();
+    var robotCurrentPose = driveTrainSubsystem.getCurrentPose();
 
     // Get the robot's pose relative to the target. This will be the pose of the robot on a grid with the hub in the
     // center at (0,0)

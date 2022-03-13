@@ -162,6 +162,7 @@ bin/
 *-window.json
 simgui.json
 simgui-ds.json
+networktables.ini
 
 # Merge conflict diff files
 *.orig

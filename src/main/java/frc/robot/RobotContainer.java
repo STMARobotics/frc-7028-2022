@@ -32,7 +32,7 @@ import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
-import frc.robot.commands.TrackTargetCommand;
+import frc.robot.commands.TeleopTurretCommand;
 import frc.robot.commands.UnloadCargoCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -108,7 +108,7 @@ public class RobotContainer {
     
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value)
-        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem));
+        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem::getCurrentPose));
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
@@ -138,7 +138,8 @@ public class RobotContainer {
 
   private void configureSubsystemCommands() {
     driveTrainSubsystem.setDefaultCommand(teleDriveCommand);
-    turretSubsystem.setDefaultCommand(new TrackTargetCommand(driveTrainSubsystem::getCurrentPose, turretSubsystem));
+    turretSubsystem.setDefaultCommand(new TeleopTurretCommand(
+        turretSubsystem, driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis));
     indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
   }
 
@@ -219,6 +220,6 @@ public class RobotContainer {
     return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d()), driveTrainSubsystem)
         .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)))
         .andThen(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem).withTimeout(.1))
-        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem));
+        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem::getCurrentPose));
   }
 }

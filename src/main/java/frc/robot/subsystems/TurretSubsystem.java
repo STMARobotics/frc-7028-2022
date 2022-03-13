@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.TurretConstants.DEVICE_ID_TURRET;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
@@ -13,7 +12,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.sensors.Pigeon2Configuration;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.TurretConstants;
@@ -43,6 +41,8 @@ public class TurretSubsystem extends SubsystemBase {
     talonConfig.forwardSoftLimitEnable = true;
     talonConfig.reverseSoftLimitThreshold = TurretConstants.SOFT_LIMIT_REVERSE;
     talonConfig.reverseSoftLimitEnable = true;
+    talonConfig.slot0.kP = TurretConstants.kP_POTENTIOMETER;
+    talonConfig.slot0.kD = TurretConstants.kD_POTENTIOMETER;
     
     // Pigeon is on aux PID
     talonConfig.slot1.kP = TurretConstants.kP_PIGEON;
@@ -69,9 +69,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
-    dashboard.addNumber("Gyro Angle", this::getAngle);
-    dashboard.addNumber("Gyro Heading", this::getHeading);
-    dashboard.addNumber("Angle To Robot", this::getRobotRelativeAngle);
+    dashboard.addNumber("Angle To Robot", this::getAngleToRobot);
     dashboard.addNumber("Native Position", turretMotor::getSelectedSensorPosition);
     dashboard.addNumber("Setpoint",
         () -> turretMotor.getControlMode() == ControlMode.Position ? turretMotor.getClosedLoopTarget() : Double.NaN);
@@ -79,20 +77,12 @@ public class TurretSubsystem extends SubsystemBase {
         () -> turretMotor.getControlMode() == ControlMode.Position ? turretMotor.getClosedLoopError() : Double.NaN);
   }
 
+  /**
+   * Runs the turret motor at the set percentage output
+   * @param speed speed to set [-1,1]
+   */
   public void run(double speed) {
     turretMotor.set(speed);
-  }
-
-  /**
-   * Positions the turret to the specified angle and holds it. NOTE: The angle is the
-   * continuous angle (continues from 360 to 361) so the setpoint needs to account for
-   * the current angle or you may be attempting to turn the turret more than 360-degrees.
-   * @param angle angle to set and hold
-   */
-  public void positionToAngleWithGyro(double angle) {
-    turretMotor.config_kP(0, 0);
-    turretMotor.config_kD(0, 0);
-    turretMotor.set(TalonSRXControlMode.Position, 0, DemandType.AuxPID, degreesToNativePigeonUnits(angle));
   }
 
   /**
@@ -100,45 +90,7 @@ public class TurretSubsystem extends SubsystemBase {
    * @param angle angle in degrees
    */
   public void positionToRobotAngle(double angle) {
-    turretMotor.config_kP(0, TurretConstants.kP_POTENTIOMETER);
-    turretMotor.config_kD(0, TurretConstants.kD_POTENTIOMETER);
-
-    // Get angle with zero as straight backward, CW+
-    var angleWithCenterZero = 180 - angle;
-    // Feed forward is the sine of the angle, times our feed-forwad constant
-    var feedForward = Math.sin(Units.degreesToRadians(angleWithCenterZero)) * TurretConstants.FEED_FORWARD;
-    turretMotor.set(
-        TalonSRXControlMode.Position, 
-        degreesPositionToNativePot(angle),
-        DemandType.ArbitraryFeedForward,
-        feedForward);
-  }
-
-  /**
-   * Sets the current heading to the specified value. This is used to tell the turret
-   * what it's current heading is, not to move the turret to a heading.
-   * @param heading new heading value
-   */
-  public void resetHeading(double heading) {
-    // Stop first, in case we're currently trying to hold a heading since the reference is changing
-    stop();
-    pigeon.setYaw(-heading);
-  }
-
-  /**
-   * Gets the current heading compatible with Pose2d and Rotation2d. This value is not continous. CW is positive.
-   * @return current heading in range of [-180, 180]
-   */
-  public double getHeading() {
-    return Math.IEEEremainder(pigeon.getAngle(), 360.0d);
-  }
-
-  /**
-   * Gets the current angle heading. This value IS continous (continues from 360 to 361). CCW is positive.
-   * @return the current heading
-   */
-  public double getAngle() {
-    return pigeon.getYaw();
+    turretMotor.set(TalonSRXControlMode.Position, degreesPositionToNativePot(angle));
   }
 
   /**
@@ -151,18 +103,13 @@ public class TurretSubsystem extends SubsystemBase {
    * </ul>
    * @return angle of the turret in relation to the robot
    */
-  public double getRobotRelativeAngle() {
+  public double getAngleToRobot() {
     return nativePotPositionToDegrees(turretMotor.getSelectedSensorPosition());
   }
 
   /**
-   * Resets the heading of the turret based on the heading of the robot.
-   * @param robotHeading heading of the robot (drivetrain)
+   * Turns off the turret motor
    */
-  public void resetHeadingToRobot(double robotHeading) {
-    resetHeading(robotHeading + getRobotRelativeAngle());
-  }
-
   public void stop() {
     turretMotor.set(0);
   }

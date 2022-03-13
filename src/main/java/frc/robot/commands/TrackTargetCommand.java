@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.TurretSubsystem;
 
@@ -34,27 +33,33 @@ public class TrackTargetCommand extends CommandBase {
 
   @Override
   public void execute() {
+    // For all measurements, the grid is on the field with the X axis running the long way across the field, with the
+    // the blue alliance on the lesser X side, and the red alliance on the greater X side. The Y axis runs the shot
+    // way across the field. CCW rotation is positive.
+
     // The robot's pose is on a coordinate grid with (0,0) at the bottom left corner.
-    var currentPose = poseSupplier.get();
+    var robotCurrentPose = poseSupplier.get();
 
     // Get the robot's pose relative to the target. This will be the pose of the robot on a grid with the hub in the
     // center at (0,0)
-    var relativePose = currentPose.relativeTo(hubPose);
+    var relativePose = robotCurrentPose.relativeTo(hubPose);
 
-    // Use atan2 to get the angle (in radians) from the robot to the hub
-    var angleToHub = Math.atan2(relativePose.getY(), relativePose.getX());
+    // Get the angle to the hub from the robot's position
+    var angleToHub = Math.atan(relativePose.getY() / relativePose.getX());
 
-    // Calculate the heading setpoint. This math is needed because the turret's Yaw is
-    // continuous (it continues from 360 to 361), but our field heading is not continuous
-    // [-180, 180]. This accounts for the continous yaw to calculate the new setpoint.
-    var currentAngle = -turretSubsystem.getAngle();
-    var headingSetpoint = currentAngle - Math.IEEEremainder(currentAngle, 360.0d) + angleToHub;
+    // Calculate the direction to turn the turret, considering the direction the robot's drivetrain is in
+    double headingSetpoint = Units.radiansToDegrees(angleToHub) - robotCurrentPose.getRotation().getDegrees();
+
+    // Deal with quadrants where X is > 0 (the robot is to the right of the hub)
+    if (relativePose.getX() > 0) {
+      headingSetpoint += 180;
+    }
+
+    // Deal with quadrants that result in a negative or out of range value
+    headingSetpoint = (headingSetpoint + 360) % 360;
 
     // Position the turret
-    turretSubsystem.positionToAngleWithGyro(headingSetpoint);
-
-    SmartDashboard.putNumber("Angle To Hub", Units.radiansToDegrees(angleToHub));
-
+    turretSubsystem.positionToRobotAngle(headingSetpoint);
   }
   
 }

@@ -32,7 +32,7 @@ import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
-import frc.robot.commands.TeleopTurretCommand;
+import frc.robot.commands.TrackTargetCommand;
 import frc.robot.commands.UnloadCargoCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -83,8 +83,10 @@ public class RobotContainer {
     configureSubsystemDashboard();
     configureDriverDashboard();
 
-    // Align the drivetrain and turret heading
-    turretSubsystem.resetHeadingToRobot(driveTrainSubsystem.getHeading());
+    // Debug code to set the robot starting position on enable
+    // new Trigger(RobotState::isEnabled).whenActive(
+    //     () -> driveTrainSubsystem.setCurrentPose(
+    //         new Pose2d(Units.inchesToMeters(27 * 12), Units.inchesToMeters(119), Rotation2d.fromDegrees(-90))));
   }
 
   /**
@@ -97,9 +99,6 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
 
-    // new POVButton(driverController, 90).whenPressed(
-    //   new TrackTargetCommand(driveTrainSubsystem::getCurrentPose, turretSubsystem));
-
     // Drivetrain
     new JoystickButton(driverController, XboxController.Button.kB.value)
         .whenPressed(teleDriveCommand::toggleSlowMode);
@@ -109,7 +108,7 @@ public class RobotContainer {
     
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value)
-        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem));
+        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem));
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
@@ -139,8 +138,7 @@ public class RobotContainer {
 
   private void configureSubsystemCommands() {
     driveTrainSubsystem.setDefaultCommand(teleDriveCommand);
-    turretSubsystem.setDefaultCommand(new TeleopTurretCommand(
-        turretSubsystem, driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis));
+    turretSubsystem.setDefaultCommand(new TrackTargetCommand(driveTrainSubsystem::getCurrentPose, turretSubsystem));
     indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
   }
 
@@ -197,11 +195,9 @@ public class RobotContainer {
       Dashboard.driverTab.add("Driver", camera).withSize(5, 3).withPosition(0, 0);
     }
     driveTrainSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
-    Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
+    // Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
 
-    var gainsLayout = Dashboard.driverTab.getLayout("Gains", BuiltInLayouts.kList)
-    .withSize(2, 4).withPosition(6, 2);
-    shooterSubsystem.addDashboardWidgets(gainsLayout);
+    shooterSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
   }
 
   /**
@@ -223,6 +219,6 @@ public class RobotContainer {
     return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d()), driveTrainSubsystem)
         .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)))
         .andThen(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem).withTimeout(.1))
-        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, driveTrainSubsystem, indexerSubsystem));
+        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem));
   }
 }

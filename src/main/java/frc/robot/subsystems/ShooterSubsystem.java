@@ -4,7 +4,7 @@
 
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.ShooterConstants.CLOSED_LOOP_ERROR_RANGE;
+import static frc.robot.Constants.ShooterConstants.CLOSED_LOOP_ERROR_TOLERANCE;
 import static frc.robot.Constants.ShooterConstants.DEVICE_ID_SHOOTER_FOLLOWER;
 import static frc.robot.Constants.ShooterConstants.DEVICE_ID_SHOOTER_LEADER;
 import static frc.robot.Constants.ShooterConstants.EDGES_PER_REVOLUTION;
@@ -24,11 +24,13 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.EntryNotification;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
@@ -70,15 +72,17 @@ public class ShooterSubsystem extends SubsystemBase {
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopTarget() : 0);
     dashboard.addNumber("Error",
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopError() : 0);
+  }
 
-    var gainEntry = dashboard.addPersistent("Gain", 0)
+  public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
+    var gainEntry = driverTab.addPersistent("Gain", 0)
         .withProperties(Map.of("Max", 100, "Min", -100)).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
     gainEntry.addListener(this::updateGain, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
     gain = gainEntry.getDouble(0);
   }
 
   private void updateGain(EntryNotification notification) {
-    gain = notification.value.getDouble();
+    gain = Units.inchesToMeters(notification.value.getDouble());
   }
 
   /**
@@ -130,7 +134,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public boolean isReadyToShoot() {
-    return Math.abs(leader.getSelectedSensorVelocity() - targetSpeed) <= CLOSED_LOOP_ERROR_RANGE;
+    return Math.abs(leader.getSelectedSensorVelocity() - targetSpeed) <= CLOSED_LOOP_ERROR_TOLERANCE;
   }
 
   public void stop() {

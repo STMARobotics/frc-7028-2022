@@ -7,15 +7,15 @@ import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.I2C.Port;
-import edu.wpi.first.wpilibj.util.Color;
 
 /**
- * This is a wrapper for the REV Color Sensor V3, allowing multiple ones to be
- * used on a multiplexer board (this was tested using the Adafruit TCA9548A).
+ * This is a wrapper for the REV Color Sensor V3, allowing multiple sensors to be
+ * used with a multiplexer board (this was tested using the Adafruit TCA9548A).
  * 
- * <p>
- * This helper class was originally developed by Team 4776. <b>Go S.C.O.T.S. Bots!</b>
- * </p>
+ * This class only exposes a single {@link #getValues()} method to get both the color
+ * and proximity. For our purposes, we only need these two values, and we want both of
+ * them for every robot loop. Combining them into a single method allows us to minimize
+ * the writes to switch ports on the multiplexer.
  */
 public class MultiplexedColorSensor {
   // Static map of multiplexers by I2C port. This is static because it is shared by all color sensors
@@ -28,8 +28,11 @@ public class MultiplexedColorSensor {
   // I2C for the multiplexer
   private final I2C multiplexer;
 
-  // The actual sensor. All of the methods call this sensor to get the data.
+  // The actual sensor
   private ColorSensorV3 sensor;
+  
+  // What port on the multiplexer the color sensor is plugged into.
+  private final int port;
 
   /**
    * Create a multiplexed color sensor.
@@ -39,34 +42,33 @@ public class MultiplexedColorSensor {
    *                (commonly labeled SC3 and SD3 on the PCB, where 3 is the
    *                port)
    */
-  public MultiplexedColorSensor(I2C.Port i2cPort) {
+  public MultiplexedColorSensor(I2C.Port i2cPort, int port) {
     if (multiplexers.get(i2cPort) == null) {
       multiplexer = new I2C(i2cPort, kMultiplexerAddress);
       multiplexers.put(i2cPort, multiplexer);
     } else {
       multiplexer = multiplexers.get(i2cPort);
     }
+    this.port = port;
+    // Set the channel before constructing the ColorSensorV3 because the constructor initalizes the sensor
+    setChannel();
     sensor = new ColorSensorV3(i2cPort);
   }
 
   /**
    * Sets the multiplexer to the correct port before using the color sensor.
    */
-  public void setChannel(int port) {
+  private void setChannel() {
     multiplexer.write(kMultiplexerAddress, 1 << port);
   }
 
-  /*-----------------------------------------------------------------------*/
-  /* Below are all of the methods used for the color sensor. */
-  /* All this does is set the channel, then run the command on the sensor. */
-  /*-----------------------------------------------------------------------*/
-
-  public Color getColor() {
-    return sensor.getColor();
-  }
-
-  public int getProximity() {
-    return sensor.getProximity();
+  /**
+   * Get the color and proximity values from the color sensor
+   * @return color and proximity values
+   */
+  public ColorSensorValues getValues() {
+    setChannel();
+    return new ColorSensorValues(sensor.getColor(), sensor.getProximity());
   }
 
 }

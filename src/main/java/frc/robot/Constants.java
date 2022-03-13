@@ -79,7 +79,7 @@ public final class Constants {
     public static final int EDGES_PER_REVOLUTION = 2048;
 
     public static final double RAMP_RATE = 0.2;
-    public static final int CLOSED_LOOP_ERROR_RANGE = 200;
+    public static final int CLOSED_LOOP_ERROR_TOLERANCE = 200;
 
     public static final ShootingInterpolator SHOOTING_INTERPOLATOR = new ShootingInterpolator(Map.ofEntries(
       Map.entry(Units.inchesToMeters(40d), 11000d),
@@ -104,9 +104,6 @@ public final class Constants {
 
     public static final double kP_POTENTIOMETER = 64d;
     public static final double kD_POTENTIOMETER = 0d;
-
-    /** Feed forward that is scaled to the angle of the turret to overcome wire management */
-    public static final double FEED_FORWARD = 0.1d;
 
     // Native sensor units are in range of [0,1023], or [-1023,0] when sensor phase is true (inverted)
     /** Forward soft limit in native sensor units */
@@ -221,7 +218,7 @@ public final class Constants {
 
     public static final double kP = 0.023;
     public static final double kD = 0.0;
-    public static final double AIM_TOLERANCE = 1.75;
+    public static final double AIM_TOLERANCE = 1;
 
     public static final double SLOW_MODE_SPEED_MULTIPLIER = .6;
     public static final double SLOW_MODE_ROTATION_MULTIPLIER = .9;

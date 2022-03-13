@@ -30,8 +30,10 @@ public class IndexerSubsystem extends SubsystemBase {
   private final RelativeEncoder indexerEncoder;
   private final SparkMaxPIDController pidController;
   
-  private final MultiplexedColorSensor multiplexer = new MultiplexedColorSensor(Port.kMXP);
-
+  private final MultiplexedColorSensor intakeColorSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_INTAKE_SENSOR);
+  private final MultiplexedColorSensor spacerColorSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_SPACER_SENSOR);
+  private final MultiplexedColorSensor fullColorSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_FULL_SENSOR);
+  
   // Proximity thresholds for when to trip each sensor
   private static final int THRESHOLD_INTAKE = 240;
   private static final int THRESHOLD_SPACE = 400;
@@ -75,24 +77,21 @@ public class IndexerSubsystem extends SubsystemBase {
     intakeColorWidget = dashboard.addBoolean("Intake Color", () -> true);
     spacerColorWidget = dashboard.addBoolean("Spacer Color", () -> true);
     fullColorWidget = dashboard.addBoolean("Full Color", () -> true);
-    // detailDashboard.addBoolean("Intake", this::isIntakeSensorTripped);
-    // detailDashboard.addBoolean("Spacer", this::isSpacerSensorTripped);
-    // detailDashboard.addBoolean("Full", this::isFullSensorTripped);
-    // detailDashboard.addNumber("Intake Prox", intakeSensor::getProximity);
-    // detailDashboard.addNumber("Spacer Prox", intakeSensor::getProximity);
-    // detailDashboard.addNumber("Full Prox", intakeSensor::getProximity);
+    detailDashboard.addNumber("Intake Prox", () -> intakeProximity);
+    detailDashboard.addNumber("Spacer Prox", () -> spacerProximity);
+    detailDashboard.addNumber("Full Prox", () -> fullProximity);
   }
   
   private void updateColorSensors(){
-    multiplexer.setChannel(PORT_ID_INTAKE_SENSOR);
-    intakeColor = multiplexer.getColor();
-    intakeProximity = multiplexer.getProximity();
-    multiplexer.setChannel(PORT_ID_SPACER_SENSOR);
-    spacerColor = multiplexer.getColor();
-    spacerProximity = multiplexer.getProximity();
-    multiplexer.setChannel(PORT_ID_FULL_SENSOR);
-    fullColor = multiplexer.getColor();
-    fullProximity = multiplexer.getProximity();
+    var intakeValues = intakeColorSensor.getValues();
+    intakeColor = intakeValues.color;
+    intakeProximity = intakeValues.proximity;
+    var spacerValues = spacerColorSensor.getValues();
+    spacerColor = spacerValues.color;
+    spacerProximity = spacerValues.proximity;
+    var fullValues = fullColorSensor.getValues();
+    fullColor = fullValues.color;
+    fullProximity = fullValues.proximity;
   }
 
   public void intake() {

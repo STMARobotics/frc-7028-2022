@@ -28,6 +28,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.EntryNotification;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -66,17 +67,22 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
-    dashboard.addNumber("Velocity", leader::getSelectedSensorVelocity);
-    dashboard.addNumber("Velocity RPS", () -> edgesPerDecisecToRPS(leader.getSelectedSensorVelocity()));
-    dashboard.addNumber("Target Velocity",
+    var detailLayout = dashboard.getLayout("Detail", BuiltInLayouts.kGrid)
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 1)).withPosition(0, 0);
+    detailLayout.addNumber("Raw Velocity", leader::getSelectedSensorVelocity);
+    detailLayout.addNumber("Velocity RPS", () -> edgesPerDecisecToRPS(leader.getSelectedSensorVelocity()));
+    detailLayout.addNumber("Target Velocity",
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopTarget() : 0);
-    dashboard.addNumber("Error",
+    detailLayout.addNumber("Error",
         () -> leader.getControlMode() == ControlMode.Velocity ? leader.getClosedLoopError() : 0);
+    
+    dashboard.add(this).withPosition(0, 1);
   }
 
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
     var gainEntry = driverTab.addPersistent("Gain", 0)
-        .withProperties(Map.of("Max", 100, "Min", -100)).withWidget(BuiltInWidgets.kNumberSlider).getEntry();
+        .withProperties(Map.of("Max", 60, "Min", -60)).withWidget(BuiltInWidgets.kNumberSlider)
+        .withSize(2, 1).withPosition(5, 2).getEntry();
     gainEntry.addListener(this::updateGain, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
     gain = gainEntry.getDouble(0);
   }

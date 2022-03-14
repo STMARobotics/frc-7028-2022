@@ -48,18 +48,21 @@ public class JetsonSubsystem extends SubsystemBase {
     cargoColorChooser.addOption("BlueCargo", CargoColor.Blue);
   }
 
-  public ShuffleboardLayout addDashboardWidgets(ShuffleboardLayout dashboard) {
+  public void addDashboardWidgets(ShuffleboardLayout dashboard) {
     var detailDashboard = dashboard.getLayout("Target", BuiltInLayouts.kGrid)
-        .withProperties(Map.of("numberOfColumns", 2, "numberOfRows", 2));
-    detailDashboard.addBoolean("Acquired", () -> getClosestDetection() != null).withPosition(0, 1);
-    detailDashboard.addNumber("X", () -> getClosestDetection() == null ? 0 : getClosestDetection().targetX).withPosition(0, 0);
-    detailDashboard.addNumber("Y", () -> getClosestDetection() == null ? 0 : getClosestDetection().targetY).withPosition(1, 0);
-    return detailDashboard;
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 2)).withPosition(0, 0);
+    detailDashboard.addBoolean("Acquired", () -> getClosestDetection() != null).withPosition(0, 0);
+    detailDashboard.addNumber("X", () -> getClosestDetection() == null ? 0 : getClosestDetection().targetX)
+        .withPosition(0, 1);
+    detailDashboard.addNumber("Y", () -> getClosestDetection() == null ? 0 : getClosestDetection().targetY)
+        .withPosition(1, 1);
+
+    dashboard.add(this).withPosition(0, 1);
   }
 
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
     // Put a chooser on the dashboard for picking which cargo to target
-    driverTab.add("Cargo Color", cargoColorChooser).withSize(1, 1).withPosition(9, 0);
+    driverTab.add("Pickup Color", cargoColorChooser).withSize(1, 1).withPosition(7, 0);
   }
 
   @Override

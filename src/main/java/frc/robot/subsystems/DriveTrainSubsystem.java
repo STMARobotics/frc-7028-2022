@@ -16,6 +16,8 @@ import static frc.robot.Constants.DriveTrainConstants.TRACK_WIDTH_METERS;
 import static frc.robot.Constants.DriveTrainConstants.WHEEL_CIRCUMFERENCE_METERS;
 import static frc.robot.Constants.DriveTrainConstants.WHEEL_DIAMETER_INCHES;
 
+import java.util.Map;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -40,6 +42,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
@@ -125,13 +128,23 @@ public class DriveTrainSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
-    dashboard.addString("Pose", () -> differentialDriveOdometry.getPoseMeters().toString());
-    dashboard.addNumber("Speed", () -> getCurrentChassisSpeeds().vxMetersPerSecond);
-    dashboard.addNumber("Rotation", () -> getCurrentChassisSpeeds().omegaRadiansPerSecond);
+    var detailLayout = dashboard.getLayout("Detail", BuiltInLayouts.kGrid)
+      .withProperties(Map.of("Number of columns", 2, "Number of rows", 2)).withPosition(0, 0);
+    detailLayout.addNumber("Speed", () -> getCurrentChassisSpeeds().vxMetersPerSecond).withPosition(0, 0);
+    detailLayout.addNumber("Rotation", () -> getCurrentChassisSpeeds().omegaRadiansPerSecond).withPosition(1, 0);
+    detailLayout.addString("Pose (X, Y)", this::getFomattedPose).withPosition(0, 1);
+    detailLayout.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 1);
+    dashboard.add(this).withPosition(0, 1);
+  }
+
+  private String getFomattedPose() {
+    var pose = getCurrentPose();
+    return "(" + pose.getX() + ", " + pose.getY() + ") ";
   }
 
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
-    driverTab.add("Field", field2d).withSize(4, 3).withPosition(4, 0);
+    // This does not automatically appear on the driver tab. See https://github.com/wpilibsuite/shuffleboard/issues/724
+    driverTab.add("Field", field2d);
   }
 
   /**

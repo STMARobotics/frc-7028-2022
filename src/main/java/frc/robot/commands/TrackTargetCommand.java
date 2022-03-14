@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.TurretSubsystem;
 
@@ -47,6 +48,8 @@ public class TrackTargetCommand extends CommandBase {
     // Get the angle to the hub from the robot's position
     var angleToHub = Math.atan(relativePose.getY() / relativePose.getX());
 
+    SmartDashboard.putNumber("Distance to Target", Math.sqrt(Math.pow(relativePose.getY(), 2) + Math.pow(relativePose.getX(), 2)));
+
     // Calculate the direction to turn the turret, considering the direction the robot's drivetrain is in
     double headingSetpoint = Units.radiansToDegrees(angleToHub) - robotCurrentPose.getRotation().getDegrees();
 
@@ -57,6 +60,8 @@ public class TrackTargetCommand extends CommandBase {
 
     // Deal with quadrants that result in a negative or out of range value
     headingSetpoint = (headingSetpoint + 360) % 360;
+
+    SmartDashboard.putBoolean("Turret Can See", headingSetpoint > 90 && headingSetpoint < 270);
 
     // Position the turret
     turretSubsystem.positionToRobotAngle(headingSetpoint);

@@ -136,7 +136,17 @@ public class DriveTrainSubsystem extends SubsystemBase {
     detailLayout.addNumber("Rotation", () -> getCurrentChassisSpeeds().omegaRadiansPerSecond).withPosition(1, 0);
     detailLayout.addString("Pose (X, Y)", this::getFomattedPose).withPosition(0, 1);
     detailLayout.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 1);
+    detailLayout.addNumber("X Velocity", this::getVelocityXComponent);
+    detailLayout.addNumber("Y Velocity", this::getVelocityYComponent);
     dashboard.add(this).withPosition(0, 1);
+  }
+
+  public double getVelocityXComponent() {
+    return getCurrentChassisSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getCos();
+  }
+
+  public double getVelocityYComponent() {
+    return getCurrentChassisSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getSin();
   }
 
   private String getFomattedPose() {

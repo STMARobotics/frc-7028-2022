@@ -5,6 +5,7 @@ import static frc.robot.Constants.TurretConstants.SOFT_LIMIT_FORWARD;
 import static frc.robot.Constants.TurretConstants.SOFT_LIMIT_REVERSE;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -17,6 +18,8 @@ import com.ctre.phoenix.sensors.Pigeon2Configuration;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,10 +30,12 @@ import frc.robot.Constants.TurretConstants;
  */
 public class TurretSubsystem extends SubsystemBase {
   
+  private final Supplier<Pose2d> robotPoseSupplier;
   private final WPI_TalonSRX turretMotor = new WPI_TalonSRX(DEVICE_ID_TURRET);
   private final WPI_Pigeon2 pigeon = new WPI_Pigeon2(TurretConstants.DEVICE_ID_PIGEON);
 
-  public TurretSubsystem() {
+  public TurretSubsystem(Supplier<Pose2d> robotPoseSupplier) {
+    this.robotPoseSupplier = robotPoseSupplier;
     // Pigeon is mounted vertical. See user guide "Custom Mounting Orientation"
     pigeon.configFactoryDefault();
     var pigeonConfig = new Pigeon2Configuration();
@@ -105,6 +110,29 @@ public class TurretSubsystem extends SubsystemBase {
   public void positionToRobotAngle(double angle) {
     var safeAngle = MathUtil.clamp(angle, SOFT_LIMIT_REVERSE + 1, SOFT_LIMIT_FORWARD - 1);
     turretMotor.set(TalonSRXControlMode.Position, degreesPositionToNativePot(safeAngle));
+  }
+
+  public double positionToTurretAngle(Pose2d target) {
+    var robotCurrentPose = robotPoseSupplier.get();
+
+    // Get the robot's pose relative to the target. This will be the pose of the robot on a grid with the hub in the
+    // center at (0,0)
+    var relativePose = robotCurrentPose.relativeTo(target);
+
+    // Get the angle to the hub from the robot's position
+    var angleToHub = Math.atan(relativePose.getY() / relativePose.getX());
+
+    // Calculate the direction to turn the turret, considering the direction the robot's drivetrain is in
+    var headingSetpoint = Units.radiansToDegrees(angleToHub) - robotCurrentPose.getRotation().getDegrees();
+
+    // Deal with quadrants where X is > 0 (the robot is to the right of the hub)
+    if (relativePose.getX() > 0) {
+      headingSetpoint += 180;
+    }
+    
+    // Deal with quadrants that result in a negative or out of range value
+    headingSetpoint = (headingSetpoint + 360) % 360;
+    return headingSetpoint;
   }
 
   /**

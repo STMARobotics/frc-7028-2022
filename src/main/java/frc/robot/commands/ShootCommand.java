@@ -113,9 +113,10 @@ public class ShootCommand extends CommandBase {
         // Reset robot pose
         final var gyroAngle = driveTrainSubsystem.getCurrentPose().getRotation().getDegrees();
         final var turretAngle = turretSubsystem.getAngleToRobot();
+        final var distanceToTargetCenter = lastTargetDistance + AimConstants.HUB_TARGET_RADIUS;
         var newPose = new Pose2d(
-          lastTargetDistance * Math.cos(Units.degreesToRadians(gyroAngle + turretAngle - targetX - 180)),
-          lastTargetDistance * Math.sin(Units.degreesToRadians(gyroAngle + turretAngle - targetX - 180)),
+          distanceToTargetCenter * Math.cos(Units.degreesToRadians(gyroAngle + turretAngle - targetX - 180)),
+          distanceToTargetCenter * Math.sin(Units.degreesToRadians(gyroAngle + turretAngle - targetX - 180)),
           Rotation2d.fromDegrees(gyroAngle));
         driveTrainSubsystem.setCurrentPose(newPose.relativeTo(fieldOriginOnHubPlane));
       }

@@ -225,6 +225,9 @@ public final class Constants {
 
     public static final double DEADBAND_HIGH = 0.12;
     public static final double DEADBAND_LOW = -DEADBAND_HIGH;
+
+    /** The radius of the hub upper target ring */
+    public static final double HUB_TARGET_RADIUS = Units.inchesToMeters(49.375 / 2d);
   }
 
   public static final class ArcadeConstants {

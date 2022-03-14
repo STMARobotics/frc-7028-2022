@@ -58,10 +58,12 @@ public class LimelightSubsystem extends SubsystemBase {
 
   public ShuffleboardLayout addDashboardWidgets(ShuffleboardLayout dashboard) {
     var detailDashboard = dashboard.getLayout("Target", BuiltInLayouts.kGrid)
-        .withProperties(Map.of("numberOfColumns", 2, "numberOfRows", 2));
-    detailDashboard.addBoolean("Acquired", this::getTargetAcquired);
-    detailDashboard.addNumber("X", this::getTargetX);
-    detailDashboard.addNumber("Y", this::getTargetY);
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 2)).withPosition(0, 0);
+    detailDashboard.addBoolean("Acquired", this::getTargetAcquired).withPosition(0, 0);
+    detailDashboard.addNumber("X", this::getTargetX).withPosition(0, 1);
+    detailDashboard.addNumber("Y", this::getTargetY).withPosition(1, 1);
+    
+    dashboard.add(this).withPosition(0, 1);
     return detailDashboard;
   }
 

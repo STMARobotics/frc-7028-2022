@@ -18,7 +18,7 @@ public class ShooterLimelightSubsystem extends LimelightSubsystem {
   @Override
   public ShuffleboardLayout addDashboardWidgets(ShuffleboardLayout dashboard) {
     var detailDashboard = super.addDashboardWidgets(dashboard);
-    detailDashboard.addNumber("Distance", () -> Units.metersToInches(getDistanceToTarget()));
+    detailDashboard.addNumber("Distance", () -> Units.metersToInches(getDistanceToTarget())).withPosition(0, 0);
     return detailDashboard;
   }
 

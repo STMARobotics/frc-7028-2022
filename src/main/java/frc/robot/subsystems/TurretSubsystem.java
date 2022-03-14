@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.TurretConstants.DEVICE_ID_TURRET;
 
+import java.util.Map;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -12,6 +14,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.sensors.Pigeon2Configuration;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.TurretConstants;
@@ -69,12 +72,19 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
-    dashboard.addNumber("Angle To Robot", this::getAngleToRobot);
-    dashboard.addNumber("Native Position", turretMotor::getSelectedSensorPosition);
-    dashboard.addNumber("Setpoint",
-        () -> turretMotor.getControlMode() == ControlMode.Position ? turretMotor.getClosedLoopTarget() : Double.NaN);
-    dashboard.addNumber("Error",
-        () -> turretMotor.getControlMode() == ControlMode.Position ? turretMotor.getClosedLoopError() : Double.NaN);
+    var detailDashboard = dashboard.getLayout("Detail", BuiltInLayouts.kGrid)
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 2)).withPosition(0, 0);
+
+    detailDashboard.addNumber("Angle To Robot", this::getAngleToRobot).withPosition(0, 0);
+    detailDashboard.addNumber("Native Position", turretMotor::getSelectedSensorPosition).withPosition(1, 0);
+    detailDashboard.addNumber("Setpoint",
+        () -> turretMotor.getControlMode() == ControlMode.Position ? turretMotor.getClosedLoopTarget() : Double.NaN)
+        .withPosition(0, 1);
+    detailDashboard.addNumber("Error",
+        () -> turretMotor.getControlMode() == ControlMode.Position ? turretMotor.getClosedLoopError() : Double.NaN)
+        .withPosition(1, 1);
+
+    dashboard.add(this).withPosition(0, 1);
   }
 
   /**

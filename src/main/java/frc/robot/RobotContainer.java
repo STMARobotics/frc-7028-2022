@@ -16,6 +16,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -156,48 +157,41 @@ public class RobotContainer {
   }
 
   private void configureSubsystemDashboard() {
-    var drivetrainLayout = Dashboard.subsystemsTab.getLayout("Drivetrain", BuiltInLayouts.kList)
-        .withSize(2, 3).withPosition(0, 0);
+    LiveWindow.disableAllTelemetry();
+    var drivetrainLayout = Dashboard.subsystemsTab.getLayout("Drivetrain", BuiltInLayouts.kGrid)
+        .withSize(2, 2).withPosition(0, 0);
     driveTrainSubsystem.addDashboardWidgets(drivetrainLayout);
-    drivetrainLayout.add(driveTrainSubsystem);
 
-    var shooterLayout = Dashboard.subsystemsTab.getLayout("Shooter", BuiltInLayouts.kList)
-        .withSize(2, 3).withPosition(2, 0);
+    var shooterLayout = Dashboard.subsystemsTab.getLayout("Shooter", BuiltInLayouts.kGrid)
+        .withSize(2, 2).withPosition(2, 0);
     shooterSubsystem.addDashboardWidgets(shooterLayout);
-    shooterLayout.add(shooterSubsystem);
 
-    var limelightLayout = Dashboard.subsystemsTab.getLayout("Limelight", BuiltInLayouts.kList)
-        .withSize(2, 3).withPosition(4, 0);
+    var limelightLayout = Dashboard.subsystemsTab.getLayout("Limelight", BuiltInLayouts.kGrid)
+        .withSize(2, 2).withPosition(4, 0);
     limelightSubsystem.addDashboardWidgets(limelightLayout);
-    limelightLayout.add(limelightSubsystem);
 
-    var jetsonLayout = Dashboard.subsystemsTab.getLayout("Jetson", BuiltInLayouts.kList)
-        .withSize(2, 3).withPosition(6, 0);
+    var jetsonLayout = Dashboard.subsystemsTab.getLayout("Jetson", BuiltInLayouts.kGrid)
+        .withSize(2, 2).withPosition(4, 2);
     jetsonSubsystem.addDashboardWidgets(jetsonLayout);
-    jetsonLayout.add(jetsonSubsystem);
 
-    var turretLayout = Dashboard.subsystemsTab.getLayout("Turret", BuiltInLayouts.kList)
-      .withSize(2, 3).withPosition(8, 0);
+    var turretLayout = Dashboard.subsystemsTab.getLayout("Turret", BuiltInLayouts.kGrid)
+      .withSize(2, 2).withPosition(6, 0);
     turretSubsystem.addDashboardWidgets(turretLayout);
-    turretLayout.add(turretSubsystem);
 
-    var indexerLayout = Dashboard.subsystemsTab.getLayout("Indexer", BuiltInLayouts.kList)
-      .withSize(2, 3).withPosition(10, 0);
+    var indexerLayout = Dashboard.subsystemsTab.getLayout("Indexer", BuiltInLayouts.kGrid)
+      .withSize(2, 2).withPosition(8, 0);
     indexerSubsystem.addDashboardWidgets(indexerLayout);
-    indexerLayout.add(indexerSubsystem);
   }
 
   private void configureDriverDashboard() {
-    jetsonSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
-
     var camera = new HttpCamera("Driver", "http://10.70.28.13:1182");
     if (camera != null) {
-      Dashboard.driverTab.add("Driver", camera).withSize(5, 3).withPosition(0, 0);
+      Dashboard.driverTab.add("Driver Camera", camera).withSize(5, 3).withPosition(0, 0);
     }
-    driveTrainSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
-    // Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
-
     shooterSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
+    indexerSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
+    jetsonSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
+    // Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
   }
 
   /**

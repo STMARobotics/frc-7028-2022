@@ -11,7 +11,6 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ColorMatch;
-import com.revrobotics.ColorMatchResult;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxAlternateEncoder.Type;
 import com.revrobotics.SparkMaxPIDController;
@@ -19,6 +18,7 @@ import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -73,15 +73,27 @@ public class IndexerSubsystem extends SubsystemBase {
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
     var detailDashboard = dashboard.getLayout("Detail", BuiltInLayouts.kGrid)
-        .withProperties(Map.of("numberOfColumns", 2, "numberOfRows", 2));
-    intakeColorWidget = dashboard.addBoolean("Intake Color", () -> true);
-    spacerColorWidget = dashboard.addBoolean("Spacer Color", () -> true);
-    fullColorWidget = dashboard.addBoolean("Full Color", () -> true);
-    detailDashboard.addNumber("Intake Prox", () -> intakeProximity);
-    detailDashboard.addNumber("Spacer Prox", () -> spacerProximity);
-    detailDashboard.addNumber("Full Prox", () -> fullProximity);
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 2)).withPosition(0, 0);
+    detailDashboard.addNumber("Intake Prox", () -> intakeProximity).withPosition(0, 0);
+    detailDashboard.addNumber("Spacer Prox", () -> spacerProximity).withPosition(1, 0);
+    detailDashboard.addNumber("Full Prox", () -> fullProximity).withPosition(0, 1);
+    
+    dashboard.add(this).withPosition(0, 1);
   }
+
+  public void addDriverDashboardWidgets(ShuffleboardTab dashboard) {
+    var colorSensorLayout = dashboard.getLayout("Indexer Color", BuiltInLayouts.kGrid)
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 2))
+        .withSize(2, 2).withPosition(5, 0);
+    intakeColorWidget = colorSensorLayout.addBoolean("Intake", () -> true).withPosition(0, 0);
+    spacerColorWidget = colorSensorLayout.addBoolean("Spacer", () -> true).withPosition(1, 0);
+    fullColorWidget = colorSensorLayout.addBoolean("Full", () -> true).withPosition(0, 1);
+  }
+
   
+  /**
+   * Updates the color sensor values. We do this only once per period to avoid flooding I2C.
+   */
   private void updateColorSensors(){
     var intakeValues = intakeColorSensor.getValues();
     intakeColor = intakeValues.color;
@@ -119,40 +131,26 @@ public class IndexerSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Read color sensor values
     updateColorSensors();
 
-    ColorMatchResult intakeResult = colorMatch.matchClosestColor(intakeColor);
+    // Update the dashboard with color indicators
+    intakeColorWidget.withProperties(Map.of("colorWhenTrue", getColorMatchString(intakeColor)));
+    spacerColorWidget.withProperties(Map.of("colorWhenTrue", getColorMatchString(spacerColor)));
+    fullColorWidget.withProperties(Map.of("colorWhenTrue", getColorMatchString(fullColor)));
+  }
+
+  private String getColorMatchString(Color color) {
+    var colorMatchResult = colorMatch.matchClosestColor(color);
     String intakeColorString = "Black";
     if (!isIntakeSensorTripped()){
       intakeColorString = "Black";
-    } else if(intakeResult.color == kRed){
+    } else if(colorMatchResult.color == kRed){
       intakeColorString = "Red";
-    } else if(intakeResult.color == kBlue){
+    } else if(colorMatchResult.color == kBlue){
       intakeColorString = "Blue";
     }
-    intakeColorWidget.withProperties(Map.of("colorWhenTrue", intakeColorString));
-
-    ColorMatchResult spacerResult = colorMatch.matchClosestColor(spacerColor);
-    String spacerColorString = "Black";
-    if(!isSpacerSensorTripped()){
-      spacerColorString = "Black";
-    } else if(spacerResult.color == kRed){
-      spacerColorString = "Red";
-    } else if(spacerResult.color == kBlue){
-      spacerColorString = "Blue";
-    }
-    spacerColorWidget.withProperties(Map.of("colorWhenTrue", spacerColorString));
-
-    ColorMatchResult fullResult = colorMatch.matchClosestColor(fullColor);
-    String fullColorString = "Black";
-    if(!isFullSensorTripped()){
-      fullColorString = "Black";
-    } else if(fullResult.color == kRed){
-      fullColorString = "Red";
-    } else if(fullResult.color == kBlue){
-      fullColorString = "Blue";
-    }
-    fullColorWidget.withProperties(Map.of("colorWhenTrue", fullColorString));
+    return intakeColorString;
   }
 
   public boolean isFullSensorTripped() {

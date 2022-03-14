@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
 import static frc.robot.Constants.TurretConstants.DEVICE_ID_TURRET;
+import static frc.robot.Constants.TurretConstants.SOFT_LIMIT_FORWARD;
+import static frc.robot.Constants.TurretConstants.SOFT_LIMIT_REVERSE;
 
 import java.util.Map;
 
@@ -14,6 +16,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.sensors.Pigeon2Configuration;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -40,9 +43,9 @@ public class TurretSubsystem extends SubsystemBase {
     
     // Potentiometer is primary PID to get soft limit support
     talonConfig.primaryPID.selectedFeedbackSensor = FeedbackDevice.Analog;
-    talonConfig.forwardSoftLimitThreshold = TurretConstants.SOFT_LIMIT_FORWARD;
+    talonConfig.forwardSoftLimitThreshold = SOFT_LIMIT_FORWARD;
     talonConfig.forwardSoftLimitEnable = true;
-    talonConfig.reverseSoftLimitThreshold = TurretConstants.SOFT_LIMIT_REVERSE;
+    talonConfig.reverseSoftLimitThreshold = SOFT_LIMIT_REVERSE;
     talonConfig.reverseSoftLimitEnable = true;
     talonConfig.slot0.kP = TurretConstants.kP_POTENTIOMETER;
     talonConfig.slot0.kD = TurretConstants.kD_POTENTIOMETER;
@@ -100,7 +103,18 @@ public class TurretSubsystem extends SubsystemBase {
    * @param angle angle in degrees
    */
   public void positionToRobotAngle(double angle) {
-    turretMotor.set(TalonSRXControlMode.Position, degreesPositionToNativePot(angle));
+    var safeAngle = MathUtil.clamp(angle, SOFT_LIMIT_REVERSE + 1, SOFT_LIMIT_FORWARD - 1);
+    turretMotor.set(TalonSRXControlMode.Position, degreesPositionToNativePot(safeAngle));
+  }
+
+  /**
+   * Returns true if the specified angle is within the range of the turret for {@link #positionToRobotAngle(double)}
+   * @param angle angle to check
+   * @return true if in range, false if out of range
+   */
+  public static boolean isInRange(double angle) {
+    var nativePosition = degreesPositionToNativePot(angle);
+    return nativePosition < SOFT_LIMIT_FORWARD && nativePosition > SOFT_LIMIT_REVERSE;
   }
 
   /**

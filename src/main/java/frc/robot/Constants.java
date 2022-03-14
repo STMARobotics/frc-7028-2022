@@ -16,6 +16,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.subsystems.LimelightConfig;
 import frc.robot.util.ShootingInterpolator;
 
@@ -145,6 +146,12 @@ public final class Constants {
 
     public static final double BELT_kP = 0;
     public static final double BELT_RUN_SPEED = 11000;
+
+    /** Color of red cargo */
+    public static final Color RED = new Color(1,0,0);
+
+    /** Color of blue cargo */
+    public static final Color BLUE = new Color(0,0,1);
   }
 
   public static final class IntakeConstants {

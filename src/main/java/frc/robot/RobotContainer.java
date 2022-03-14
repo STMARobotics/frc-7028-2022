@@ -34,6 +34,7 @@ import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.commands.TeleopTurretCommand;
+import frc.robot.commands.TrackTargetCommand;
 import frc.robot.commands.UnloadCargoCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -70,6 +71,7 @@ public class RobotContainer {
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
+  private final TrackTargetCommand trackTargetCommand = new TrackTargetCommand(driveTrainSubsystem::getCurrentPose);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -83,6 +85,8 @@ public class RobotContainer {
     configureSubsystemCommands();
     configureSubsystemDashboard();
     configureDriverDashboard();
+
+    trackTargetCommand.schedule();
 
     // Debug code to set the robot starting position on enable
     // new Trigger(RobotState::isEnabled).whenActive(
@@ -109,7 +113,8 @@ public class RobotContainer {
     
     // Shooting and Limelight
     new JoystickButton(driverController, XboxController.Button.kA.value)
-        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem, true));
+        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
+            driveTrainSubsystem, trackTargetCommand::getAngleToTarget, true));
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
@@ -192,6 +197,7 @@ public class RobotContainer {
     shooterSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     indexerSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     jetsonSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
+    trackTargetCommand.addDriverDashboardWidgets(Dashboard.driverTab);
     // Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
   }
 
@@ -213,6 +219,7 @@ public class RobotContainer {
 
     return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d()), driveTrainSubsystem)
         .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)))
-        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem, 2));
+        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
+            driveTrainSubsystem, trackTargetCommand::getAngleToTarget, 2));
   }
 }

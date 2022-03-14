@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.IndexerConstants;
 import frc.robot.util.MultiplexedColorSensor;
 
 public class IndexerSubsystem extends SubsystemBase {
@@ -54,8 +55,6 @@ public class IndexerSubsystem extends SubsystemBase {
   private SuppliedValueWidget<Boolean> fullColorWidget;
 
   private ColorMatch colorMatch = new ColorMatch();
-  private final Color kRed = new Color(1,0,0);
-  private final Color kBlue = new Color(0,0,1);
 
   public IndexerSubsystem() {
     indexer.restoreFactoryDefaults();
@@ -67,8 +66,8 @@ public class IndexerSubsystem extends SubsystemBase {
     pidController.setFeedbackDevice(indexerEncoder);
     indexer.burnFlash();
     updateColorSensors();
-    colorMatch.addColorMatch(kRed);
-    colorMatch.addColorMatch(kBlue);
+    colorMatch.addColorMatch(IndexerConstants.RED);
+    colorMatch.addColorMatch(IndexerConstants.BLUE);
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
@@ -145,12 +144,45 @@ public class IndexerSubsystem extends SubsystemBase {
     String intakeColorString = "Black";
     if (!isIntakeSensorTripped()){
       intakeColorString = "Black";
-    } else if(colorMatchResult.color == kRed){
+    } else if(colorMatchResult.color == IndexerConstants.RED){
       intakeColorString = "Red";
-    } else if(colorMatchResult.color == kBlue){
+    } else if(colorMatchResult.color == IndexerConstants.BLUE){
       intakeColorString = "Blue";
     }
     return intakeColorString;
+  }
+
+  /**
+   * Returns the color detected by the intake sensor if there is something in front of it, otherwise null.
+   * @return the color detected or null if nothing in front of the sensor
+   */
+  public Color getIntakeColor() {
+    if (isIntakeSensorTripped()) {
+      return colorMatch.matchClosestColor(intakeColor).color;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the color detected by the spacer sensor if there is something in front of it, otherwise null.
+   * @return the color detected or null if nothing in front of the sensor
+   */
+  public Color getSpacerColor() {
+    if (isSpacerSensorTripped()) {
+      return colorMatch.matchClosestColor(spacerColor).color;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the color detected by the full sensor if there is something in front of it, otherwise null.
+   * @return the color detected or null if nothing in front of the sensor
+   */
+  public Color getFullColor() {
+    if (isFullSensorTripped()) {
+      return colorMatch.matchClosestColor(fullColor).color;
+    }
+    return null;
   }
 
   public boolean isFullSensorTripped() {

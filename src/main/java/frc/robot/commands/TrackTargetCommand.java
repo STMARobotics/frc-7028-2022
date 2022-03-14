@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.TurretSubsystem;
 
@@ -19,17 +19,15 @@ public class TrackTargetCommand extends CommandBase {
       new Pose2d(Units.inchesToMeters(54 * 12) / 2, Units.inchesToMeters(27 * 12) / 2, new Rotation2d());
 
   private final Supplier<Pose2d> poseSupplier;
-  private final TurretSubsystem turretSubsystem;
+  private double angleToTarget;
+  private double distanceToTarget;
 
   /**
    * Constructs a TrackTargetCommand
    * @param poseSupplier supplier to use to get the robot's current pose
    */
-  public TrackTargetCommand(Supplier<Pose2d> poseSupplier, TurretSubsystem turretSubsystem) {
+  public TrackTargetCommand(Supplier<Pose2d> poseSupplier) {
     this.poseSupplier = poseSupplier;
-    this.turretSubsystem = turretSubsystem;
-
-    addRequirements(turretSubsystem);
   }
 
   @Override
@@ -48,23 +46,37 @@ public class TrackTargetCommand extends CommandBase {
     // Get the angle to the hub from the robot's position
     var angleToHub = Math.atan(relativePose.getY() / relativePose.getX());
 
-    SmartDashboard.putNumber("Distance to Target", Math.sqrt(Math.pow(relativePose.getY(), 2) + Math.pow(relativePose.getX(), 2)));
-
     // Calculate the direction to turn the turret, considering the direction the robot's drivetrain is in
-    double headingSetpoint = Units.radiansToDegrees(angleToHub) - robotCurrentPose.getRotation().getDegrees();
-
+    var headingSetpoint = Units.radiansToDegrees(angleToHub) - robotCurrentPose.getRotation().getDegrees();
+    
     // Deal with quadrants where X is > 0 (the robot is to the right of the hub)
     if (relativePose.getX() > 0) {
       headingSetpoint += 180;
     }
-
+    
     // Deal with quadrants that result in a negative or out of range value
     headingSetpoint = (headingSetpoint + 360) % 360;
 
-    SmartDashboard.putBoolean("Turret Can See", headingSetpoint > 90 && headingSetpoint < 270);
+    angleToTarget = headingSetpoint;
+    distanceToTarget = Math.sqrt(Math.pow(relativePose.getY(), 2) + Math.pow(relativePose.getX(), 2));
+  }
 
-    // Position the turret
-    turretSubsystem.positionToRobotAngle(headingSetpoint);
+  public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
+    driverTab.addBoolean("Target Distance", () -> distanceToTarget > Units.inchesToMeters(48)).withPosition(5, 2);
+    driverTab.addBoolean("Target Reachable", () -> TurretSubsystem.isInRange(angleToTarget)).withPosition(6, 2);
+  }
+
+  /**
+   * Gets the angle to the target, relative to the robot. Range is [0,360], 0 is robot front, CCW is positive.
+   * @return angle to the target
+   */
+  public double getAngleToTarget() {
+    return angleToTarget;
+  }
+
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
   }
   
 }

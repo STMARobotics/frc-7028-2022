@@ -6,9 +6,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AimConstants;
 import frc.robot.Constants.IndexerConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterLimelightSubsystem;
@@ -34,11 +36,25 @@ public class ShootCommand extends CommandBase {
   private final DriveTrainSubsystem driveTrainSubsystem;
   private final DoubleSupplier targetAngleProvider;
   private final boolean resetPose;
-  private final int ballsToShoot;
+  private final int cargoToShoot;
 
+  private int cargoShot = 0;
+  private boolean wasFull = false;
+  private Timer endTimer = new Timer();
   private double lastTargetDistance = 0;
   private double lastTurretPosition = 0;
+  private boolean wrongColor = false;
 
+  /**
+   * Constructs a shoot command that will shoot at least the specified number of cargo
+   * @param shooterSubsystem shooter subsystem
+   * @param limelightSubsystem limelight subsystem
+   * @param turretSubsytem turret subsystem
+   * @param indexerSubsystem indexer subsystem
+   * @param driveTrainSubsystem drivertrain subsystem
+   * @param targetAngleProvider provider for predicted angle to the target (probably provided by odometry)
+   * @param cargoToShoot number of cargo to shoot
+   */
   public ShootCommand(
       ShooterSubsystem shooterSubsystem,
       ShooterLimelightSubsystem limelightSubsystem,
@@ -46,11 +62,21 @@ public class ShootCommand extends CommandBase {
       IndexerSubsystem indexerSubsystem,
       DriveTrainSubsystem driveTrainSubsystem,
       DoubleSupplier targetAngleProvider,
-      int ballsToShoot) {
+      int cargoToShoot) {
     this(shooterSubsystem, limelightSubsystem, turretSubsytem, indexerSubsystem, driveTrainSubsystem,
-        targetAngleProvider, false, ballsToShoot);
+        targetAngleProvider, false, cargoToShoot);
   }
 
+  /**
+   * Constructs a shoot command that will reset the robot's pose when the target is visible
+   * @param shooterSubsystem shooter subsystem
+   * @param limelightSubsystem limelight subsystem
+   * @param turretSubsytem turret subsystem
+   * @param indexerSubsystem indexer subsystem
+   * @param driveTrainSubsystem drivertrain subsystem
+   * @param targetAngleProvider provider for predicted angle to the target (probably provided by odometry)
+   * @param resetPose true to reset the robot's pose when a target is found
+   */
   public ShootCommand(
       ShooterSubsystem shooterSubsystem,
       ShooterLimelightSubsystem limelightSubsystem,
@@ -63,6 +89,18 @@ public class ShootCommand extends CommandBase {
         targetAngleProvider, resetPose, Integer.MAX_VALUE);
   }
 
+  /**
+   * Constructs a shoot command that will shoot at least the specified number of cargo, and will
+   * reset the robot's pose when the target is visible
+   * @param shooterSubsystem shooter subsystem
+   * @param limelightSubsystem limelight subsystem
+   * @param turretSubsytem turret subsystem
+   * @param indexerSubsystem indexer subsystem
+   * @param driveTrainSubsystem drivertrain subsystem
+   * @param targetAngleProvider provider for predicted angle to the target (probably provided by odometry)
+   * @param resetPose true to reset the robot's pose when a target is found
+   * @param cargoToShoot number of cargo to shoot
+   */
   public ShootCommand(
       ShooterSubsystem shooterSubsystem,
       ShooterLimelightSubsystem limelightSubsystem,
@@ -71,7 +109,7 @@ public class ShootCommand extends CommandBase {
       DriveTrainSubsystem driveTrainSubsystem,
       DoubleSupplier targetAngleProvider,
       boolean resetPose,
-      int ballsToShoot) {
+      int cargoToShoot) {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
     this.turretSubsystem = turretSubsytem;
@@ -79,7 +117,7 @@ public class ShootCommand extends CommandBase {
     this.driveTrainSubsystem = driveTrainSubsystem;
     this.targetAngleProvider = targetAngleProvider;
     this.resetPose = resetPose;
-    this.ballsToShoot = ballsToShoot;
+    this.cargoToShoot = cargoToShoot;
 
     addRequirements(shooterSubsystem, limelightSubsystem, turretSubsytem, indexerSubsystem);
   }
@@ -89,6 +127,9 @@ public class ShootCommand extends CommandBase {
     limelightSubsystem.enable();
     lastTargetDistance = 0;
     lastTurretPosition = 0;
+    cargoShot = 0;
+    wasFull = indexerSubsystem.isFullSensorTripped();
+    endTimer.reset();
   }
 
   @Override
@@ -120,7 +161,6 @@ public class ShootCommand extends CommandBase {
         lastTurretPosition = turretSubsystem.getAngleToRobot() - targetX;
       }
       var alliance = DriverStation.getAlliance();
-      boolean wrongColor;
       switch(alliance) {
         case Blue:
           wrongColor = indexerSubsystem.getFullColor() != IndexerConstants.BLUE;
@@ -129,14 +169,23 @@ public class ShootCommand extends CommandBase {
           wrongColor = indexerSubsystem.getFullColor() != IndexerConstants.RED;
           break;
         default:
-          wrongColor = false;
+          // don't change the wrong color value until a color is seen again
       }
       if (wrongColor) {
         // Point 3-degrees off to miss the shot
+        // This might need to hold this position longer, it might snap back to position before the ball is shot
         turretSubsystem.positionToRobotAngle(lastTurretPosition - 3);
       } else {
         turretSubsystem.positionToRobotAngle(lastTurretPosition);
       }
+
+      var isFull = indexerSubsystem.isFullSensorTripped();
+      if ((wasFull && !isFull) && (++cargoShot >= cargoToShoot)) {
+        System.out.println("Shot " + cargoShot + " cargo, waiting for timeout");
+        endTimer.start();
+      }
+      wasFull = isFull;
+      
       if (atTarget && resetPose) {
         // Reset robot pose
         final var gyroAngle = driveTrainSubsystem.getCurrentPose().getRotation().getDegrees();
@@ -157,7 +206,7 @@ public class ShootCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return false;
+    return (cargoShot >= cargoToShoot && endTimer.hasElapsed(ShooterConstants.SHOOT_TIME));
   }
 
   @Override

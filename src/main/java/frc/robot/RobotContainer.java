@@ -29,6 +29,7 @@ import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.IndexCommand;
+import frc.robot.commands.JetsonCargoCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
@@ -122,12 +123,10 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
         () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
 
-    new JoystickButton(driverController, XboxController.Button.kX.value)
-        .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
-
     // Detect and Chase Cargo
-    // new JoystickButton(driverController, XboxController.Button.kX.value)
-    //    .whileHeld(new JetsonCargoCommand(driveTrainSubsystem, jetsonSubsystem, intakeSubsystem, transferSubsystem, indexerSubsystem));
+    new JoystickButton(driverController, XboxController.Button.kX.value)
+        .whileHeld(new JetsonCargoCommand(driveTrainSubsystem, jetsonSubsystem)
+          .alongWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)));
 
     // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)

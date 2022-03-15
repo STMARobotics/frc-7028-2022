@@ -15,6 +15,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxAlternateEncoder.Type;
 import com.revrobotics.SparkMaxPIDController;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IndexerConstants;
 import frc.robot.util.MultiplexedColorSensor;
 
@@ -41,7 +43,7 @@ public class IndexerSubsystem extends SubsystemBase {
   private static final int THRESHOLD_FULL = 300;
 
   private boolean shooting;
-  private int ballCount = 0;
+  private int cargoCount = 0;
 
   private Color intakeColor;
   private Color spacerColor;
@@ -68,6 +70,11 @@ public class IndexerSubsystem extends SubsystemBase {
     updateColorSensors();
     colorMatch.addColorMatch(IndexerConstants.RED);
     colorMatch.addColorMatch(IndexerConstants.BLUE);
+
+    //add triggers for cargo count management
+    new Trigger(this::isFullSensorTripped).whenInactive(this::fullSensorCleared);
+    new Trigger(this::isSpacerSensorTripped).whenActive(this::spaceSensorTripped).whenInactive(this::spaceSensorCleared);
+    
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
@@ -76,12 +83,13 @@ public class IndexerSubsystem extends SubsystemBase {
     detailDashboard.addNumber("Intake Prox", () -> intakeProximity).withPosition(0, 0);
     detailDashboard.addNumber("Spacer Prox", () -> spacerProximity).withPosition(1, 0);
     detailDashboard.addNumber("Full Prox", () -> fullProximity).withPosition(0, 1);
+    detailDashboard.addNumber("Cargo Count", this::getCargoCount).withPosition(1, 1);
     
     dashboard.add(this).withPosition(0, 1);
   }
 
   public void addDriverDashboardWidgets(ShuffleboardTab dashboard) {
-    var colorSensorLayout = dashboard.getLayout("Indexer Color", BuiltInLayouts.kGrid)
+    var colorSensorLayout = dashboard.getLayout("Indexer", BuiltInLayouts.kGrid)
         .withProperties(Map.of("Number of columns", 2, "Number of rows", 2))
         .withSize(2, 2).withPosition(5, 0);
     intakeColorWidget = colorSensorLayout.addBoolean("Intake", () -> true).withPosition(0, 0);
@@ -90,6 +98,32 @@ public class IndexerSubsystem extends SubsystemBase {
   }
 
   
+  void fullSensorCleared() {
+    if(indexer.getOutputCurrent() >= 0) {
+      decrementCargoCount();
+    }
+  }
+
+  void spaceSensorTripped() {
+    if (indexer.getOutputCurrent() >= 0) {
+      incrementCargoCount(); //if indexer moving forward then increment count as soon as we hold a cargo here
+    }
+  }
+
+  void spaceSensorCleared() {
+    if (indexer.getOutputCurrent() < 0) {
+      decrementCargoCount(); //if cargo clears the space sensor moving in reverse we lost a cargo
+    }
+  }
+
+  private void decrementCargoCount() {
+    cargoCount = MathUtil.clamp(cargoCount - 1, 0, 2);
+  }
+
+  private void incrementCargoCount() {
+    cargoCount = MathUtil.clamp(cargoCount + 1, 0, 2);
+  }
+
   /**
    * Updates the color sensor values. We do this only once per period to avoid flooding I2C.
    */
@@ -123,7 +157,7 @@ public class IndexerSubsystem extends SubsystemBase {
     }
   }
 
-  public boolean isReadyForBall() {
+  public boolean isReadyForCargo() {
     return (!isIntakeSensorTripped() && !isSpacerSensorTripped() && !isFullSensorTripped())
         || (shooting && !isIntakeSensorTripped() && !isSpacerSensorTripped());
   }
@@ -201,12 +235,12 @@ public class IndexerSubsystem extends SubsystemBase {
     return indexer.getOutputCurrent() != 0;
   }
 
-  public int getBallCount() {
-    return ballCount;
+  public int getCargoCount() {
+    return cargoCount;
   }
 
-  public void resetBallCount(int ballCount) {
-    this.ballCount = ballCount;
+  public void resetCargoCount(int cargoCount) {
+    this.cargoCount = cargoCount;
   }
 
   public void load() {

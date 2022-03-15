@@ -251,5 +251,13 @@ public final class Constants {
 
     public static final Pose2d hubPose = 
       new Pose2d(Units.inchesToMeters(54 * 12) / 2, Units.inchesToMeters(27 * 12) / 2, new Rotation2d());
+
+  }
+
+  public static final class ClimbConstants {
+
+    public static final int DEVICE_ID_FIRST_STAGE_CLIMB = 12;
+    public static final int DEVICE_ID_SECOND_STAGE_CLIMB = 13;
+
   }
 }

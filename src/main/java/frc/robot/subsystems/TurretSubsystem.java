@@ -26,7 +26,7 @@ import frc.robot.Constants.TurretConstants;
  * Subsystem for the turret.
  */
 public class TurretSubsystem extends SubsystemBase {
-  
+
   private final WPI_TalonSRX turretMotor = new WPI_TalonSRX(DEVICE_ID_TURRET);
   private final WPI_Pigeon2 pigeon = new WPI_Pigeon2(TurretConstants.DEVICE_ID_PIGEON);
 

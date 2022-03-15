@@ -13,6 +13,8 @@ import static frc.robot.Constants.DriveTrainConstants.FEED_FORWARD;
 import java.util.Map;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.math.util.Units;
@@ -245,5 +247,11 @@ public final class Constants {
 
     // Max angular velocity in teleop in radians per second
     public static final double MAX_ANGULAR_VEL_ARCADE = Units.degreesToRadians(270);
+  }
+
+  public static final class FieldConstants {
+
+    public static final Pose2d hubPose = 
+      new Pose2d(Units.inchesToMeters(54 * 12) / 2, Units.inchesToMeters(27 * 12) / 2, new Rotation2d());
   }
 }

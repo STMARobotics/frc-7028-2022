@@ -65,7 +65,7 @@ public class RobotContainer {
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
-  private final TurretSubsystem turretSubsystem = new TurretSubsystem(driveTrainSubsystem::getCurrentPose);
+  private final TurretSubsystem turretSubsystem = new TurretSubsystem();
   private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
   private final ShooterLimelightSubsystem limelightSubsystem = new ShooterLimelightSubsystem(
       LimeLightConstants.LIMELIGHT_CONFIG);

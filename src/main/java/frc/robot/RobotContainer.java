@@ -28,12 +28,12 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
-import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.IndexCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
+import frc.robot.commands.TeleopClimbCommand;
 import frc.robot.commands.TeleopTurretCommand;
 import frc.robot.commands.TrackTargetCommand;
 import frc.robot.commands.UnloadCargoCommand;
@@ -154,7 +154,7 @@ public class RobotContainer {
     turretSubsystem.setDefaultCommand(new TeleopTurretCommand(
         turretSubsystem, driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis));
     indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
-    climbSubsystem.setDefaultCommand(new ClimbCommand(climbSubsystem, operatorController::getLeftY, operatorController::getRightY));
+    climbSubsystem.setDefaultCommand(new TeleopClimbCommand(climbSubsystem, operatorController::getLeftY, operatorController::getRightY));
   }
 
   /**

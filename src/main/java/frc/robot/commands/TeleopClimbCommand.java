@@ -5,13 +5,16 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ClimbSubsystem;
 
-public class ClimbCommand extends CommandBase {
+public class TeleopClimbCommand extends CommandBase {
 
   private final ClimbSubsystem climbSubsystem;
   private final Supplier<Double> firstStageSupplier;
   private final Supplier<Double> secondStageSupplier;
 
-  public ClimbCommand(ClimbSubsystem climbSubsystem, Supplier<Double> firstStageSupplier, Supplier<Double> secondStageSupplier) {
+  public TeleopClimbCommand(
+      ClimbSubsystem climbSubsystem,
+      Supplier<Double> firstStageSupplier,
+      Supplier<Double> secondStageSupplier) {
     this.climbSubsystem = climbSubsystem;
     this.firstStageSupplier = firstStageSupplier;
     this.secondStageSupplier = secondStageSupplier;
@@ -23,11 +26,6 @@ public class ClimbCommand extends CommandBase {
   public void execute() {
     climbSubsystem.setFirstStage(firstStageSupplier.get());
     climbSubsystem.setSecondStage(secondStageSupplier.get());
-  }
-
-  @Override
-  public boolean isFinished() {
-    return false;
   }
 
   @Override

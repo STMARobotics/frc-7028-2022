@@ -34,9 +34,11 @@ import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
+import frc.robot.commands.TeleopClimbCommand;
 import frc.robot.commands.TeleopTurretCommand;
 import frc.robot.commands.TrackTargetCommand;
 import frc.robot.commands.UnloadCargoCommand;
+import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -59,6 +61,7 @@ import frc.robot.subsystems.TurretSubsystem;
 public class RobotContainer {
 
   private final XboxController driverController = new XboxController(0);
+  private final XboxController operatorController = new XboxController(1);
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();
@@ -66,6 +69,7 @@ public class RobotContainer {
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
   private final TurretSubsystem turretSubsystem = new TurretSubsystem();
+  private final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
   private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
   private final ShooterLimelightSubsystem limelightSubsystem = new ShooterLimelightSubsystem(
       LimeLightConstants.LIMELIGHT_CONFIG);
@@ -123,6 +127,9 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
         () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
 
+    new JoystickButton(operatorController, XboxController.Button.kA.value)
+        .toggleWhenPressed(new StartEndCommand(() -> turretSubsystem.positionToRobotAngle(180), turretSubsystem::stop, turretSubsystem));
+
     // Detect and Chase Cargo
     new JoystickButton(driverController, XboxController.Button.kX.value)
         .whileHeld(new JetsonCargoCommand(driveTrainSubsystem, jetsonSubsystem)
@@ -146,6 +153,8 @@ public class RobotContainer {
     turretSubsystem.setDefaultCommand(new TeleopTurretCommand(
         turretSubsystem, driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis));
     indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
+    climbSubsystem.setDefaultCommand(new TeleopClimbCommand(climbSubsystem,
+      () -> -operatorController.getLeftY(), () -> operatorController.getRightY()));
   }
 
   /**

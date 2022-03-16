@@ -173,6 +173,10 @@ public final class Constants {
     public static final int PORT_ID_DRIVER_CONTROLLER = 0;
     public static final int PORT_ID_OPERATOR_CONSOLE = 1;
   }
+
+  public static final class JetsonConstants {
+    public static final double AREA_THRESHOLD = 80d;
+  }
   
   public static final class LimeLightConstants {
 

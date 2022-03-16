@@ -1,7 +1,9 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants.JetsonConstants;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.JetsonSubsystem;
 
@@ -29,6 +31,9 @@ public class JetsonCargoCommand extends CommandBase {
 
     yPidController.setSetpoint(0);
     yPidController.setTolerance(1);
+
+    NetworkTableInstance.getDefault().getTable("JetsonDetect")
+        .getEntry("AreaThreshold").setNumber(JetsonConstants.AREA_THRESHOLD);
   }
 
   @Override

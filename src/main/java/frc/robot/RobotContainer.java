@@ -154,7 +154,8 @@ public class RobotContainer {
     turretSubsystem.setDefaultCommand(new TeleopTurretCommand(
         turretSubsystem, driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis));
     indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
-    climbSubsystem.setDefaultCommand(new TeleopClimbCommand(climbSubsystem, operatorController::getLeftY, operatorController::getRightY));
+    climbSubsystem.setDefaultCommand(new TeleopClimbCommand(climbSubsystem,
+      () -> -operatorController.getLeftY(), () -> operatorController.getRightY()));
   }
 
   /**

@@ -5,6 +5,7 @@ package frc.robot;
 
 import static edu.wpi.first.math.util.Units.inchesToMeters;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
@@ -221,5 +222,13 @@ public class RobotContainer {
         .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)))
         .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
             driveTrainSubsystem, trackTargetCommand::getAngleToTarget, 2));
+  }
+
+  public Command[] getTestCommands() {
+    ArrayList<Command> commands = new ArrayList<>();
+
+    
+
+    return (Command[]) commands.toArray();
   }
 }

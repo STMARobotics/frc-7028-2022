@@ -82,7 +82,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
     var gainEntry = driverTab.addPersistent("Gain", 0)
         .withProperties(Map.of("Max", 60, "Min", -60)).withWidget(BuiltInWidgets.kNumberSlider)
-        .withSize(2, 1).withPosition(5, 2).getEntry();
+        .withSize(2, 1).withPosition(6, 1).getEntry();
     gainEntry.addListener(this::updateGain, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
     gain = gainEntry.getDouble(0);
   }

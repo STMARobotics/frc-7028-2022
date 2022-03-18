@@ -91,11 +91,11 @@ public class IndexerSubsystem extends SubsystemBase {
 
   public void addDriverDashboardWidgets(ShuffleboardTab dashboard) {
     var colorSensorLayout = dashboard.getLayout("Indexer", BuiltInLayouts.kGrid)
-        .withProperties(Map.of("Number of columns", 2, "Number of rows", 2))
-        .withSize(2, 2).withPosition(5, 0);
-    intakeColorWidget = colorSensorLayout.addBoolean("Intake", () -> true).withPosition(0, 0);
-    spacerColorWidget = colorSensorLayout.addBoolean("Spacer", () -> true).withPosition(1, 0);
-    fullColorWidget = colorSensorLayout.addBoolean("Full", () -> true).withPosition(0, 1);
+        .withProperties(Map.of("Number of columns", 1, "Number of rows", 3))
+        .withSize(1, 3).withPosition(5, 0);
+    fullColorWidget = colorSensorLayout.addBoolean("Full", () -> true).withPosition(0, 0);
+    spacerColorWidget = colorSensorLayout.addBoolean("Spacer", () -> true).withPosition(0, 1);
+    intakeColorWidget = colorSensorLayout.addBoolean("Intake", () -> true).withPosition(0, 2);
   }
 
   

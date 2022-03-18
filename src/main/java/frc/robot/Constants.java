@@ -266,7 +266,8 @@ public final class Constants {
   public static final class ClimbConstants {
 
     public static final int DEVICE_ID_FIRST_STAGE_CLIMB = 12;
-    public static final int DEVICE_ID_SECOND_STAGE_CLIMB = 13;
 
+    public static final double SOFT_LIMIT_FIRST_STAGE_FWD = Double.MAX_VALUE;
+    public static final double SOFT_LIMIT_FIRST_STAGE_REV = 0;
   }
 }

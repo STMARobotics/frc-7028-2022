@@ -3,16 +3,9 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
-import static edu.wpi.first.math.util.Units.inchesToMeters;
-
-import java.util.Collections;
 import java.util.Map;
 
 import edu.wpi.first.cscore.HttpCamera;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -21,14 +14,11 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
-import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.IndexCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
@@ -77,8 +67,11 @@ public class RobotContainer {
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
   private final TeleopClimbCommand teleopClimbCommand = new TeleopClimbCommand(
     climbSubsystem, () -> -operatorController.getLeftY());
-
   private final TrackTargetCommand trackTargetCommand = new TrackTargetCommand(driveTrainSubsystem::getCurrentPose);
+
+  private final AutonomousBuilder autoBuilder = new AutonomousBuilder(
+    driveTrainSubsystem, indexerSubsystem, intakeSubsystem, limelightSubsystem, shooterSubsystem, transferSubsystem, 
+    turretSubsystem, trackTargetCommand);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -146,7 +139,11 @@ public class RobotContainer {
         .whenPressed(intakeSubsystem::retract);
    
     new JoystickButton(operatorController, XboxController.Button.kStart.value)
-      .whenPressed(intakeSubsystem::toggleCompressorEnabled);
+        .whenPressed(intakeSubsystem::toggleCompressorEnabled);
+
+    // TODO remove this when we have a proper sensor on the climb
+    new JoystickButton(operatorController, XboxController.Button.kBack.value)
+        .whileHeld(new StartEndCommand(climbSubsystem::disableLimits, climbSubsystem::resetAndEnableLimits));
     // addShootCalibrationMode();
   }
 
@@ -185,10 +182,6 @@ public class RobotContainer {
         .withSize(2, 2).withPosition(4, 0);
     limelightSubsystem.addDashboardWidgets(limelightLayout);
 
-    var jetsonLayout = Dashboard.subsystemsTab.getLayout("Jetson", BuiltInLayouts.kGrid)
-        .withSize(2, 2).withPosition(4, 2);
-    jetsonSubsystem.addDashboardWidgets(jetsonLayout);
-
     var turretLayout = Dashboard.subsystemsTab.getLayout("Turret", BuiltInLayouts.kGrid)
       .withSize(2, 2).withPosition(6, 0);
     turretSubsystem.addDashboardWidgets(turretLayout);
@@ -205,9 +198,8 @@ public class RobotContainer {
     }
     shooterSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     indexerSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
-    jetsonSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     trackTargetCommand.addDriverDashboardWidgets(Dashboard.driverTab);
-    // Shuffleboard.selectTab(Dashboard.driverTab.getTitle());
+    autoBuilder.addDashboardWidgets(Dashboard.driverTab);
   }
 
   /**
@@ -216,19 +208,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    var endPose = new Pose2d(inchesToMeters(72), 0, new Rotation2d(0));
-    var trajectory = TrajectoryGenerator.generateTrajectory(
-        new Pose2d(),
-        Collections.emptyList(),
-        endPose,
-        new TrajectoryConfig(TrajectoryConstants.MAX_SPEED_AUTO * .5, TrajectoryConstants.MAX_ACCELERATION_AUTO * .5)
-            .setKinematics(DriveTrainConstants.DRIVE_KINEMATICS)
-            .addConstraint(TrajectoryConstants.VOLTAGE_CONSTRAINT));
-    var trajectoryCommand = driveTrainSubsystem.createCommandForTrajectory(trajectory);
-
-    return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d()), driveTrainSubsystem)
-        .andThen(trajectoryCommand.deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)))
-        .andThen(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
-            driveTrainSubsystem, trackTargetCommand::getAngleToTarget, 2));
+    return autoBuilder.getAutonomousCommand();
   }
 }

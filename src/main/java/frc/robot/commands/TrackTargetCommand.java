@@ -1,10 +1,12 @@
 package frc.robot.commands;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.TurretSubsystem;
@@ -62,8 +64,11 @@ public class TrackTargetCommand extends CommandBase {
   }
 
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
-    driverTab.addBoolean("Target Distance", () -> distanceToTarget > Units.inchesToMeters(48)).withPosition(5, 2);
-    driverTab.addBoolean("Target Reachable", () -> TurretSubsystem.isInRange(angleToTarget)).withPosition(6, 2);
+    var targetLayout = driverTab.getLayout("Target", BuiltInLayouts.kGrid)
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 1))
+        .withPosition(6, 0).withSize(2, 1);
+    targetLayout.addBoolean("Distance", () -> distanceToTarget > Units.inchesToMeters(48)).withPosition(0, 0);
+    targetLayout.addBoolean("Turret", () -> TurretSubsystem.isInRange(angleToTarget)).withPosition(1, 0);
   }
 
   /**

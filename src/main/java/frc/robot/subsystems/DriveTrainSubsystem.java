@@ -39,6 +39,7 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.SPI;
@@ -139,6 +140,28 @@ public class DriveTrainSubsystem extends SubsystemBase {
     detailLayout.addNumber("X Velocity", this::getVelocityXComponent);
     detailLayout.addNumber("Y Velocity", this::getVelocityYComponent);
     dashboard.add(this).withPosition(0, 1);
+  }
+
+  public double getRelativeAngle(Pose2d target) {
+
+    // Get the robot's pose relative to the target. This will be the pose of the robot on a grid with the hub in the
+    // center at (0,0)
+    var relativePose = getCurrentPose().relativeTo(target);
+
+    // Get the angle to the hub from the robot's position
+    var angleToHub = Math.atan(relativePose.getY() / relativePose.getX());
+
+    // Calculate the direction to turn the turret, considering the direction the robot's drivetrain is in
+    var headingSetpoint = Units.radiansToDegrees(angleToHub) - getCurrentPose().getRotation().getDegrees();
+
+    // Deal with quadrants where X is > 0 (the robot is to the right of the hub)
+    if (relativePose.getX() > 0) {
+      headingSetpoint += 180;
+    }
+    
+    // Deal with quadrants that result in a negative or out of range value
+    headingSetpoint = (headingSetpoint + 360) % 360;
+    return headingSetpoint;
   }
 
   public double getVelocityXComponent() {

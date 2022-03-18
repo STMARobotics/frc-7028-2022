@@ -130,6 +130,7 @@ public class ShootCommand extends CommandBase {
     cargoShot = 0;
     wasFull = indexerSubsystem.isFullSensorTripped();
     endTimer.reset();
+    wrongColor = false;
   }
 
   @Override
@@ -148,7 +149,22 @@ public class ShootCommand extends CommandBase {
       // the setpoint)
       final var targetX = limelightSubsystem.getTargetX();
       final var atTarget = Math.abs(targetX) < AimConstants.AIM_TOLERANCE;
-      if (shooterSubsystem.isReadyToShoot() && atTarget) {
+
+      var alliance = DriverStation.getAlliance();
+      if (indexerSubsystem.getFullColor() != IndexerConstants.COLOR_NONE) {
+        switch(alliance) {
+          case Blue:
+            wrongColor = indexerSubsystem.getFullColor() != IndexerConstants.COLOR_BLUE;
+            break;
+          case Red:
+            wrongColor = indexerSubsystem.getFullColor() != IndexerConstants.COLOR_RED;
+            break;
+          default:
+            // don't change the wrong color value until a color is seen again
+        }
+      }
+
+      if (shooterSubsystem.isReadyToShoot() && (wrongColor || atTarget)) {
         // Turn the indexer on to put cargo in shooter. It does not have safety so it will stay on until stopped.
         indexerSubsystem.shoot();
       } else {
@@ -160,21 +176,11 @@ public class ShootCommand extends CommandBase {
       if (!atTarget) {
         lastTurretPosition = turretSubsystem.getAngleToRobot() - targetX;
       }
-      var alliance = DriverStation.getAlliance();
-      switch(alliance) {
-        case Blue:
-          wrongColor = indexerSubsystem.getFullColor() != IndexerConstants.BLUE;
-          break;
-        case Red:
-          wrongColor = indexerSubsystem.getFullColor() != IndexerConstants.RED;
-          break;
-        default:
-          // don't change the wrong color value until a color is seen again
-      }
       if (wrongColor) {
         // Point 3-degrees off to miss the shot
         // This might need to hold this position longer, it might snap back to position before the ball is shot
-        turretSubsystem.positionToRobotAngle(lastTurretPosition - 3);
+        var adjust = turretSubsystem.getAngleToRobot() > 180 ? 15 : -15;
+        turretSubsystem.positionToRobotAngle(lastTurretPosition - adjust);
       } else {
         turretSubsystem.positionToRobotAngle(lastTurretPosition);
       }
@@ -186,7 +192,7 @@ public class ShootCommand extends CommandBase {
       }
       wasFull = isFull;
       
-      if (atTarget && resetPose) {
+      if (atTarget&& resetPose) {
         // Reset robot pose
         final var gyroAngle = driveTrainSubsystem.getCurrentPose().getRotation().getDegrees();
         final var turretAngle = turretSubsystem.getAngleToRobot();

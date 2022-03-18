@@ -41,21 +41,21 @@ public final class Constants {
 
     public static final int EDGES_PER_ROTATION = 2048;
     public static final double WHEEL_DIAMETER_INCHES = 6d;
-    public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(WHEEL_DIAMETER_INCHES) * Math.PI;
+    public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(19.5d);
     public static final double DRIVE_GEAR_RATIO = 2700d / 240d;
 
-    public static final double TRACK_WIDTH_METERS = 0.60079;
+    public static final double TRACK_WIDTH_METERS = 0.6608;
     public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
         TRACK_WIDTH_METERS);
 
     /** Voltage needed to overcome the motor’s static friction. kS */
-    public static final double kS = 0.70098;
+    public static final double kS = 0.70888;
 
     /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
-    public static final double kV = 2.8143;
+    public static final double kV = 2.4834;
 
     /** Voltage needed to induce a given acceleration in the motor shaft. kA */
-    public static final double kA = 0.37041;
+    public static final double kA = 0.29679;
 
     public static final SimpleMotorFeedforward FEED_FORWARD = new SimpleMotorFeedforward(kS, kV, kA);
 
@@ -63,7 +63,7 @@ public final class Constants {
     public static final double kV_ANGULAR = 1.5;
     public static final double kA_ANGULAR = 0.3;
 
-    public static final double kP = 0.061937;
+    public static final double kP = 0.049615;
 
     public static final double CLOSED_LOOP_RAMP = .2;
     public static final double OPEN_LOOP_RAMP = .25;
@@ -152,10 +152,13 @@ public final class Constants {
     public static final double BELT_RUN_SPEED = 11000;
 
     /** Color of red cargo */
-    public static final Color RED = new Color(1,0,0);
+    public static final Color COLOR_RED = new Color(0.510009765625, 0.365234375, 0.125);
 
     /** Color of blue cargo */
-    public static final Color BLUE = new Color(0,0,1);
+    public static final Color COLOR_BLUE = new Color(0.15283203125, 0.407958984375, 0.439453125);
+
+    /** Color of no cargo */
+    public static final Color COLOR_NONE = new Color(0.252197265625, 0.491455078125, 0.2568359375);
   }
 
   public static final class IntakeConstants {

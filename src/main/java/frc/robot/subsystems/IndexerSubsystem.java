@@ -68,8 +68,9 @@ public class IndexerSubsystem extends SubsystemBase {
     pidController.setFeedbackDevice(indexerEncoder);
     indexer.burnFlash();
     updateColorSensors();
-    colorMatch.addColorMatch(IndexerConstants.RED);
-    colorMatch.addColorMatch(IndexerConstants.BLUE);
+    colorMatch.addColorMatch(IndexerConstants.COLOR_RED);
+    colorMatch.addColorMatch(IndexerConstants.COLOR_BLUE);
+    colorMatch.addColorMatch(IndexerConstants.COLOR_NONE);
 
     //add triggers for cargo count management
     new Trigger(this::isFullSensorTripped).whenInactive(this::fullSensorCleared);
@@ -176,11 +177,11 @@ public class IndexerSubsystem extends SubsystemBase {
   private String getColorMatchString(Color color) {
     var colorMatchResult = colorMatch.matchClosestColor(color);
     String intakeColorString = "Black";
-    if (!isIntakeSensorTripped()){
+    if (colorMatchResult.color == IndexerConstants.COLOR_NONE){
       intakeColorString = "Black";
-    } else if(colorMatchResult.color == IndexerConstants.RED){
+    } else if(colorMatchResult.color == IndexerConstants.COLOR_RED){
       intakeColorString = "Red";
-    } else if(colorMatchResult.color == IndexerConstants.BLUE){
+    } else if(colorMatchResult.color == IndexerConstants.COLOR_BLUE){
       intakeColorString = "Blue";
     }
     return intakeColorString;
@@ -191,10 +192,7 @@ public class IndexerSubsystem extends SubsystemBase {
    * @return the color detected or null if nothing in front of the sensor
    */
   public Color getIntakeColor() {
-    if (isIntakeSensorTripped()) {
-      return colorMatch.matchClosestColor(intakeColor).color;
-    }
-    return null;
+    return colorMatch.matchClosestColor(intakeColor).color;
   }
 
   /**
@@ -202,10 +200,7 @@ public class IndexerSubsystem extends SubsystemBase {
    * @return the color detected or null if nothing in front of the sensor
    */
   public Color getSpacerColor() {
-    if (isSpacerSensorTripped()) {
-      return colorMatch.matchClosestColor(spacerColor).color;
-    }
-    return null;
+     return colorMatch.matchClosestColor(spacerColor).color;
   }
 
   /**
@@ -213,10 +208,7 @@ public class IndexerSubsystem extends SubsystemBase {
    * @return the color detected or null if nothing in front of the sensor
    */
   public Color getFullColor() {
-    if (isFullSensorTripped()) {
-      return colorMatch.matchClosestColor(fullColor).color;
-    }
-    return null;
+    return colorMatch.matchClosestColor(fullColor).color;
   }
 
   public boolean isFullSensorTripped() {

@@ -94,11 +94,6 @@ public class RobotContainer {
     configureDriverDashboard();
 
     trackTargetCommand.schedule();
-
-    // Debug code to set the robot starting position on enable
-    // new Trigger(RobotState::isEnabled).whenActive(
-    //     () -> driveTrainSubsystem.setCurrentPose(
-    //         new Pose2d(Units.inchesToMeters(27 * 12), Units.inchesToMeters(119), Rotation2d.fromDegrees(-90))));
   }
 
   /**

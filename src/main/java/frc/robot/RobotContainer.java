@@ -22,14 +22,14 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.IndexCommand;
-import frc.robot.commands.JetsonCargoCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
@@ -43,7 +43,6 @@ import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.JetsonSubsystem;
-import frc.robot.subsystems.Profile;
 import frc.robot.subsystems.ShooterLimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
@@ -76,6 +75,9 @@ public class RobotContainer {
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
+  private final TeleopClimbCommand teleopClimbCommand = new TeleopClimbCommand(
+    climbSubsystem, () -> -operatorController.getLeftY());
+
   private final TrackTargetCommand trackTargetCommand = new TrackTargetCommand(driveTrainSubsystem::getCurrentPose);
 
   /**
@@ -109,31 +111,26 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
 
+    // Driver
     // Drivetrain
     new JoystickButton(driverController, XboxController.Button.kB.value)
         .whenPressed(teleDriveCommand::toggleSlowMode);
 
-    new JoystickButton(driverController, XboxController.Button.kY.value).toggleWhenPressed(new StartEndCommand(
-        () -> teleDriveCommand.setReverseMode(true), () -> teleDriveCommand.setReverseMode(false)));
-    
+    var toggleReverse = new StartEndCommand(
+        () -> teleDriveCommand.setReverseMode(true), () -> teleDriveCommand.setReverseMode(false));
+    new JoystickButton(driverController, XboxController.Button.kX.value).toggleWhenPressed(toggleReverse);
+    new JoystickButton(driverController, XboxController.Button.kA.value).toggleWhenPressed(toggleReverse);
+  
     // Shooting and Limelight
-    new JoystickButton(driverController, XboxController.Button.kA.value)
-        .whileHeld(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
+    new Trigger(() -> driverController.getRightTriggerAxis() > .5)
+      .whileActiveContinuous(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
             driveTrainSubsystem, trackTargetCommand::getAngleToTarget, true));
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
-
-    new JoystickButton(driverController, XboxController.Button.kBack.value).toggleWhenPressed(new StartEndCommand(
-        () -> limelightSubsystem.setProfile(Profile.NEAR), () -> limelightSubsystem.setProfile(Profile.FAR)));
-
-    new JoystickButton(operatorController, XboxController.Button.kA.value)
-        .toggleWhenPressed(new StartEndCommand(() -> turretSubsystem.positionToRobotAngle(180), turretSubsystem::stop, turretSubsystem));
-
-    // Detect and Chase Cargo
-    new JoystickButton(driverController, XboxController.Button.kX.value)
-        .whileHeld(new JetsonCargoCommand(driveTrainSubsystem, jetsonSubsystem)
-          .alongWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem)));
+    
+    new Trigger(() -> driverController.getLeftTriggerAxis() > .5).whileActiveContinuous(
+        new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
 
     // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
@@ -141,20 +138,29 @@ public class RobotContainer {
 
     new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
         .whileHeld(new LoadCargoCommand(intakeSubsystem, transferSubsystem));
+
+    // Operator
+    new JoystickButton(operatorController, XboxController.Button.kA.value).toggleWhenPressed(
+        new RunCommand(() -> turretSubsystem.positionToRobotAngle(180), turretSubsystem)
+            .andThen(turretSubsystem::stop, turretSubsystem));
     
-    new POVButton(driverController, 0).whenPressed(intakeSubsystem::deploy);
-    new POVButton(driverController, 180).whenPressed(intakeSubsystem::retract);
-    new POVButton(driverController, 270).whenPressed(intakeSubsystem::toggleCompressorEnabled);
+    new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
+        .whenPressed(intakeSubsystem::deploy);
+    
+    new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
+        .whenPressed(intakeSubsystem::retract);
+   
+    new JoystickButton(operatorController, XboxController.Button.kStart.value)
+      .whenPressed(intakeSubsystem::toggleCompressorEnabled);
     // addShootCalibrationMode();
   }
 
   private void configureSubsystemCommands() {
     driveTrainSubsystem.setDefaultCommand(teleDriveCommand);
     turretSubsystem.setDefaultCommand(new TeleopTurretCommand(
-        turretSubsystem, driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis));
+        turretSubsystem, operatorController::getRightTriggerAxis, operatorController::getLeftTriggerAxis));
     indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
-    climbSubsystem.setDefaultCommand(new TeleopClimbCommand(climbSubsystem,
-      () -> -operatorController.getLeftY(), () -> operatorController.getRightY()));
+    climbSubsystem.setDefaultCommand(teleopClimbCommand);
   }
 
   /**

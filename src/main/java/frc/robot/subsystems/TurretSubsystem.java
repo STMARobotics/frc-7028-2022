@@ -103,8 +103,10 @@ public class TurretSubsystem extends SubsystemBase {
    * @param angle angle in degrees
    */
   public void positionToRobotAngle(double angle) {
-    var safeAngle = MathUtil.clamp(angle, SOFT_LIMIT_REVERSE + 1, SOFT_LIMIT_FORWARD - 1);
-    turretMotor.set(TalonSRXControlMode.Position, degreesPositionToNativePot(safeAngle));
+    var position = degreesPositionToNativePot(angle);
+    turretMotor.set(
+        TalonSRXControlMode.Position, 
+        MathUtil.clamp(position, TurretConstants.SOFT_LIMIT_REVERSE + 1, SOFT_LIMIT_FORWARD - 1));
   }
 
   /**

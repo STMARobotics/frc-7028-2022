@@ -13,16 +13,13 @@ public class TeleopClimbCommand extends CommandBase {
 
   private final ClimbSubsystem climbSubsystem;
   private final Supplier<Double> firstStageSupplier;
-  private final Supplier<Double> secondStageSupplier;
   private final DeadbandFilter deadbandFilter = new DeadbandFilter(DEADBAND_LOW, DEADBAND_HIGH);
 
   public TeleopClimbCommand(
       ClimbSubsystem climbSubsystem,
-      Supplier<Double> firstStageSupplier,
-      Supplier<Double> secondStageSupplier) {
+      Supplier<Double> firstStageSupplier) {
     this.climbSubsystem = climbSubsystem;
     this.firstStageSupplier = firstStageSupplier;
-    this.secondStageSupplier = secondStageSupplier;
     
     addRequirements(climbSubsystem);
   }
@@ -30,13 +27,11 @@ public class TeleopClimbCommand extends CommandBase {
   @Override
   public void execute() {
     climbSubsystem.setFirstStage(deadbandFilter.calculate(firstStageSupplier.get()));
-    climbSubsystem.setSecondStage(deadbandFilter.calculate(secondStageSupplier.get()));
   }
 
   @Override
   public void end(boolean interrupted) {
     climbSubsystem.stopFirstStage();
-    climbSubsystem.stopSecondStage();
   }
   
 }

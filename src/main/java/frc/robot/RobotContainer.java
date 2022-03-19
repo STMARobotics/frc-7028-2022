@@ -113,7 +113,7 @@ public class RobotContainer {
     // Shooting and Limelight
     new Trigger(() -> driverController.getRightTriggerAxis() > .5)
       .whileActiveContinuous(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
-            driveTrainSubsystem, trackTargetCommand::getAngleToTarget, true));
+            driveTrainSubsystem, trackTargetCommand::getAngleToTarget, driverController::setRumble, true));
 
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));

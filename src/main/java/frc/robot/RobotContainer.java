@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.commands.ClimbTurretSafetyCommand;
@@ -115,6 +116,7 @@ public class RobotContainer {
       .whileActiveContinuous(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
             driveTrainSubsystem, trackTargetCommand::getAngleToTarget, driverController::setRumble, true));
 
+    // Limelight
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
     
@@ -133,15 +135,11 @@ public class RobotContainer {
         new RunCommand(() -> turretSubsystem.positionToRobotAngle(180), turretSubsystem)
             .andThen(turretSubsystem::stop, turretSubsystem));
     
-    new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
-        .whenPressed(intakeSubsystem::deploy);
-    
-    new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
-        .whenPressed(intakeSubsystem::retract);
-   
     new JoystickButton(operatorController, XboxController.Button.kStart.value)
         .whenPressed(intakeSubsystem::toggleCompressorEnabled);
 
+    new POVButton(operatorController, 0).whenPressed(intakeSubsystem::deploy);
+    new POVButton(operatorController, 180).whenPressed(intakeSubsystem::retract);
 
     // Position the turret to 180 degrees when the climb is up or the operator is trying to move the climb
     new Trigger(

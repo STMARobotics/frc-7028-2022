@@ -90,6 +90,7 @@ public final class Constants {
       Map.entry(Units.inchesToMeters(40d), 11000d),
       Map.entry(Units.inchesToMeters(60d), 11375d),
       Map.entry(Units.inchesToMeters(80d), 12200d),
+      Map.entry(Units.inchesToMeters(90d), 12800d),
       Map.entry(Units.inchesToMeters(100d), 13000d),
       Map.entry(Units.inchesToMeters(120d), 14000d),
       Map.entry(Units.inchesToMeters(140d), 14900d),
@@ -148,8 +149,9 @@ public final class Constants {
     public static final int PORT_ID_SPACER_SENSOR = 4;
     public static final int PORT_ID_FULL_SENSOR = 2;
 
-    public static final double BELT_kP = 0;
-    public static final double BELT_RUN_SPEED = 11000;
+    public static final double BELT_kP = 0.00005;
+    public static final double BELT_RUN_SPEED = 6000;
+    public static final double BELT_SHOOT_SPEED = 8000;
 
     /** Color of red cargo */
     public static final Color COLOR_RED = new Color(0.510009765625, 0.365234375, 0.125);

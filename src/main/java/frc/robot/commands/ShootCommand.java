@@ -152,7 +152,9 @@ public class ShootCommand extends CommandBase {
 
     // If we have a target distance, spin up and shoot
     if (lastTargetDistance > 0) {
-      rumble.accept(RumbleType.kRightRumble, 0d);
+      if (rumble != null) {
+        rumble.accept(RumbleType.kLeftRumble, 0d);
+      }
       shooterSubsystem.prepareToShoot(lastTargetDistance);
       // We're not going to worry about losing the target for rotation because Limelight returns target X of 0 when no
       // target is visible, so we just won't rotate when no target is visible (although we may shoot since we're at
@@ -196,7 +198,9 @@ public class ShootCommand extends CommandBase {
       }
     } else {
       // No target has ever been visible, so point the turret where the target should be
-      rumble.accept(RumbleType.kLeftRumble, 1d);
+      if (rumble != null) {
+        rumble.accept(RumbleType.kLeftRumble, 1d);
+      }
       shooterSubsystem.stop();
       turretSubsystem.positionToRobotAngle(targetAngleProvider.getAsDouble());
     }
@@ -242,11 +246,12 @@ public class ShootCommand extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    limelightSubsystem.disable();
     shooterSubsystem.stop();
     turretSubsystem.stop();
     indexerSubsystem.stop();
-    rumble.accept(RumbleType.kRightRumble, 0d);
+    if (rumble != null) {
+      rumble.accept(RumbleType.kLeftRumble, 0d);
+    }
   }
 
 }

@@ -12,14 +12,17 @@ import java.util.Arrays;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.LoadCargoAutoCommand;
+import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TrackTargetCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
@@ -105,13 +108,13 @@ public class AutonomousBuilder {
     var command = drivePickupShootTwo(
       new Pose2d(inchesToMeters(72), inchesToMeters(15), new Rotation2d(degreesToRadians(0))),
       new Pose2d(inchesToMeters(148), inchesToMeters(15), new Rotation2d(degreesToRadians(0))));
-    autoChooser.addOption("BLUE - Tarmac 2", command);
+    autoChooser.addOption("BLUE - Tarmac 2", shoot(2));
   }
 
   private void buildBlueTarmacThree() {
     var command = drivePickupShootTwo(
-      new Pose2d(inchesToMeters(72), inchesToMeters(15), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(148), inchesToMeters(15), new Rotation2d(degreesToRadians(0))));
+      new Pose2d(7.586, Units.inchesToMeters(71.75), new Rotation2d(degreesToRadians(-90))),
+      new Pose2d(7.586, Units.inchesToMeters(24 + 7.5), new Rotation2d(degreesToRadians(-90))));
     autoChooser.addOption("BLUE - Tarmac 3", command);
   }
 
@@ -138,16 +141,16 @@ public class AutonomousBuilder {
 
   private void buildBlueFourCargo() {
     var command = fourCargo(
-      new Pose2d(inchesToMeters(300), inchesToMeters(36), new Rotation2d(degreesToRadians(180))),
-      new Pose2d(inchesToMeters(200), inchesToMeters(34), new Rotation2d(degreesToRadians(180))),
-      new Pose2d(inchesToMeters(10), inchesToMeters(24), new Rotation2d(degreesToRadians(180))),
-      new Pose2d(inchesToMeters(100), inchesToMeters(30), new Rotation2d(degreesToRadians(-175))));
+      new Pose2d(inchesToMeters(242), inchesToMeters(96), new Rotation2d(degreesToRadians(-153))),
+      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))),
+      new Pose2d(inchesToMeters(41.36), inchesToMeters(42), new Rotation2d(degreesToRadians(-158.15))),
+      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))));
     autoChooser.addOption("BLUE - 4-cargo", command);
   }
 
   private void buildBlueFiveCargo() {
     var command = fiveCargo(
-      new Pose2d(inchesToMeters(300), inchesToMeters(36), new Rotation2d(degreesToRadians(-90))),
+      new Pose2d(7.586, 1.835, new Rotation2d(degreesToRadians(-90))),
       new Pose2d(inchesToMeters(330), inchesToMeters(20), new Rotation2d(degreesToRadians(180))),
       new Pose2d(inchesToMeters(200), inchesToMeters(34), new Rotation2d(degreesToRadians(180))),
       new Pose2d(inchesToMeters(10), inchesToMeters(24), new Rotation2d(degreesToRadians(180))),
@@ -185,11 +188,14 @@ public class AutonomousBuilder {
    * @return command for the routine
    */
   private Command drivePickupShootTwo(Pose2d startPose, Pose2d endPose) {
-    return setPose(startPose).alongWith(setCargoCount(1))
-        .alongWith(deployIntake())
-        .andThen(drive(withSpeedAndAcceleration(0.5, 0.5), startPose, endPose).deadlineWith(loadCargo()))
-        .andThen(waitForCargoCount(2).withTimeout(2))
-        .andThen(shoot(2));
+    return new PrintCommand("Starting auto")
+        .andThen(setPose(startPose).alongWith(setCargoCount(1)).alongWith(deployIntake()))
+        .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, endPose).deadlineWith(loadCargo()))
+        .andThen(new PrintCommand("Done driving"))
+        // .andThen(waitForCargoCount(2).withTimeout(2))
+        .andThen(new PrintCommand("Done waiting"))
+        .andThen(shoot(2).deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, null)))
+        .andThen(new PrintCommand("Done with auto"));
   }
 
   /**
@@ -213,7 +219,7 @@ public class AutonomousBuilder {
         .andThen(drive(withSpeedAndAcceleration(1, 1), cargoOnePose, cargoTwoPose).deadlineWith(loadCargo())
         .andThen(waitForCargoCount(2).withTimeout(2)))
         .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoTwoPose, shootPose))
-        .andThen(shoot(2).withTimeout(4));
+        .andThen(shoot(Integer.MAX_VALUE));
   }
 
  /**
@@ -286,7 +292,9 @@ public class AutonomousBuilder {
   }
 
   private Command waitForCargoCount(int count) {
-    return (new WaitUntilCommand(() -> indexerSubsystem.getCargoCount() > count).deadlineWith(loadCargo()));
+    return (
+        new WaitUntilCommand(() -> indexerSubsystem.getCargoCount() >= count || indexerSubsystem.isFullSensorTripped())
+          .deadlineWith(loadCargo()));
   }
 
 }

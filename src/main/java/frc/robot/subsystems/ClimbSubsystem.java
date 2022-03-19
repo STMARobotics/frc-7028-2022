@@ -64,7 +64,7 @@ public class ClimbSubsystem extends SubsystemBase {
   }
 
   public boolean isFirstStageRaised() {
-    return firstStageClimb.getSelectedSensorPosition() > 5;
+    return firstStageClimb.getSelectedSensorPosition() > 3000;
   }
 
   /**

@@ -8,11 +8,10 @@ import static frc.robot.Constants.IndexerConstants.PORT_ID_SPACER_SENSOR;
 import java.util.Map;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ColorMatch;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxAlternateEncoder.Type;
 import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.math.MathUtil;
@@ -30,7 +29,6 @@ import frc.robot.util.MultiplexedColorSensor;
 public class IndexerSubsystem extends SubsystemBase {
 
   private final CANSparkMax indexer = new CANSparkMax(DEVICE_ID_INDEXER, MotorType.kBrushless);
-  private final RelativeEncoder indexerEncoder;
   private final SparkMaxPIDController pidController;
   
   private final MultiplexedColorSensor intakeColorSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_INTAKE_SENSOR);
@@ -40,7 +38,7 @@ public class IndexerSubsystem extends SubsystemBase {
   // Proximity thresholds for when to trip each sensor
   private static final int THRESHOLD_INTAKE = 240;
   private static final int THRESHOLD_SPACE = 400;
-  private static final int THRESHOLD_FULL = 300;
+  private static final int THRESHOLD_FULL = 225;
 
   private boolean shooting;
   private int cargoCount = 0;
@@ -63,9 +61,9 @@ public class IndexerSubsystem extends SubsystemBase {
     indexer.enableVoltageCompensation(12);
     indexer.setIdleMode(IdleMode.kCoast);
     indexer.setOpenLoopRampRate(0.1);
-    indexerEncoder = indexer.getAlternateEncoder(Type.kQuadrature, 8192);
     pidController = indexer.getPIDController();
-    pidController.setFeedbackDevice(indexerEncoder);
+    pidController.setP(0);//IndexerConstants.BELT_kP);
+    pidController.setFF(0.00009);
     indexer.burnFlash();
     updateColorSensors();
     colorMatch.addColorMatch(IndexerConstants.COLOR_RED);
@@ -80,11 +78,14 @@ public class IndexerSubsystem extends SubsystemBase {
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
     var detailDashboard = dashboard.getLayout("Detail", BuiltInLayouts.kGrid)
-        .withProperties(Map.of("Number of columns", 2, "Number of rows", 2)).withPosition(0, 0);
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 3)).withPosition(0, 0);
     detailDashboard.addNumber("Intake Prox", () -> intakeProximity).withPosition(0, 0);
     detailDashboard.addNumber("Spacer Prox", () -> spacerProximity).withPosition(1, 0);
     detailDashboard.addNumber("Full Prox", () -> fullProximity).withPosition(0, 1);
     detailDashboard.addNumber("Cargo Count", this::getCargoCount).withPosition(1, 1);
+    detailDashboard.addNumber("Velocity", () -> indexer.getEncoder().getVelocity()).withPosition(0, 2);
+    detailDashboard.addNumber("Error", () -> IndexerConstants.BELT_RUN_SPEED - indexer.getEncoder().getVelocity())
+        .withPosition(1, 2);
     
     dashboard.add(this).withPosition(0, 1);
   }
@@ -236,7 +237,7 @@ public class IndexerSubsystem extends SubsystemBase {
   }
 
   public void load() {
-    indexer.set(.5);
+    pidController.setReference(IndexerConstants.BELT_RUN_SPEED, ControlType.kVelocity);
     shooting = false;
   }
 
@@ -246,12 +247,12 @@ public class IndexerSubsystem extends SubsystemBase {
   }
 
   public void shoot() {
-    indexer.set(.7);
+    pidController.setReference(IndexerConstants.BELT_SHOOT_SPEED, ControlType.kVelocity);
     shooting = true;
   }
 
   public void stop() {
-    indexer.set(0);
+    pidController.setReference(0, ControlType.kVelocity);
     shooting = false;
   }
 

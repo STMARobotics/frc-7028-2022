@@ -30,10 +30,12 @@ public class LoadCargoCommand extends CommandBase {
 
   @Override
   public void execute() {
-    if (isIndexerFull.getAsBoolean()) {
-      rumble.accept(RumbleType.kLeftRumble, 1d);
-    } else {
-      rumble.accept(RumbleType.kLeftRumble, 0d);
+    if (rumble != null) {
+      if (isIndexerFull.getAsBoolean()) {
+        rumble.accept(RumbleType.kLeftRumble, 1d);
+      } else {
+        rumble.accept(RumbleType.kLeftRumble, 0d);
+      }
     }
     intakeSubsystem.intake();
     transferSubsystem.intake();
@@ -41,7 +43,9 @@ public class LoadCargoCommand extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    rumble.accept(RumbleType.kLeftRumble, 0d);
+    if (rumble != null) {
+      rumble.accept(RumbleType.kLeftRumble, 0d);
+    }
     intakeSubsystem.stop();
     transferSubsystem.stop();
   }

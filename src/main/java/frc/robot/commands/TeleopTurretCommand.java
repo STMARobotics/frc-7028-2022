@@ -1,19 +1,16 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.DriverConstants.DEADBAND_HIGH;
+import static frc.robot.Constants.DriverConstants.DEADBAND_FILTER;
 
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants.DriverConstants;
-import frc.robot.DeadbandFilter;
 import frc.robot.subsystems.TurretSubsystem;
 
 /**
  * Command to manually run the turret.
  */
 public class TeleopTurretCommand extends CommandBase {
-  private final DeadbandFilter deadbandFilter = new DeadbandFilter(DriverConstants.DEADBAND_LOW, DEADBAND_HIGH);
   private final DoubleSupplier rightSupplier;
   private final DoubleSupplier leftSupplier;
   private final TurretSubsystem turretSubsystem;
@@ -34,7 +31,7 @@ public class TeleopTurretCommand extends CommandBase {
     } else {
       speed = -leftSupplier.getAsDouble();
     }
-    speed = deadbandFilter.calculate(speed);
+    speed = DEADBAND_FILTER.calculate(speed);
     speed *= Math.abs(speed);
     turretSubsystem.run(speed);
   }

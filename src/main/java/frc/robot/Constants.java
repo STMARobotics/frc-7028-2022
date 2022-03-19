@@ -41,7 +41,7 @@ public final class Constants {
 
     public static final int EDGES_PER_ROTATION = 2048;
     public static final double WHEEL_DIAMETER_INCHES = 6d;
-    public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(19.5d);
+    public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(19.65d);
     public static final double DRIVE_GEAR_RATIO = 2700d / 240d;
 
     public static final double TRACK_WIDTH_METERS = 0.6608;
@@ -63,7 +63,7 @@ public final class Constants {
     public static final double kV_ANGULAR = 1.5;
     public static final double kA_ANGULAR = 0.3;
 
-    public static final double kP = 0.049615;
+    public static final double kP = 0.15;
 
     public static final double CLOSED_LOOP_RAMP = .2;
     public static final double OPEN_LOOP_RAMP = .25;
@@ -201,7 +201,7 @@ public final class Constants {
   public static final class TrajectoryConstants {
 
     // Max speed in meters per second
-    public static final double MAX_SPEED_AUTO = 3;
+    public static final double MAX_SPEED_AUTO = 3.5;
 
     // Max acceleration in meters per second per second
     public static final double MAX_ACCELERATION_AUTO = 2;
@@ -225,11 +225,13 @@ public final class Constants {
     public static final double DEADBAND_HIGH = 0.12;
     public static final double DEADBAND_LOW = -DEADBAND_HIGH;
 
+    public static final DeadbandFilter DEADBAND_FILTER = new DeadbandFilter(DEADBAND_LOW, DEADBAND_HIGH);
+
     // Max rate of change for speed per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double SPEED_RATE_LIMIT_ARCADE = 2;
+    public static final double SPEED_RATE_LIMIT_ARCADE = 1.5;
 
     // Max rate of change for rotation per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double ROTATE_RATE_LIMIT_ARCADE = 5.0;
+    public static final double ROTATE_RATE_LIMIT_ARCADE = 4.0;
   }
 
   public static final class AimConstants {
@@ -267,7 +269,7 @@ public final class Constants {
 
     public static final int DEVICE_ID_FIRST_STAGE_CLIMB = 12;
 
-    public static final double SOFT_LIMIT_FIRST_STAGE_FWD = Double.MAX_VALUE;
+    public static final double SOFT_LIMIT_FIRST_STAGE_FWD = 430000;
     public static final double SOFT_LIMIT_FIRST_STAGE_REV = 0;
   }
 }

@@ -5,8 +5,8 @@ package frc.robot;
  */
 public class DeadbandFilter {
 
-  private double low;
-  private double high;
+  private final double low;
+  private final double high;
 
   /**
    * Constructor. Values above the low low and below high limit are filtered to zero.
@@ -19,27 +19,11 @@ public class DeadbandFilter {
   }
 
   /**
-   * Sets the high limit
-   * @param high values above this value and below the low are filtered to zero
-   */
-  public void setHigh(double high) {
-    this.high = high;
-  }
-
-  /**
    * Gets the high limit
    * @return the high limit
    */
   public double getHigh() {
     return high;
-  }
-
-  /**
-   * Sets the low limit
-   * @param zoneLow values below this value and above the high are filtered to zero
-   */
-  public void setZoneLow(double low) {
-    this.low = low;
   }
 
   /**

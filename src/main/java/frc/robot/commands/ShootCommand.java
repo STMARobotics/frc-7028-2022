@@ -49,7 +49,7 @@ public class ShootCommand extends CommandBase {
    * Constructs a shoot command that will shoot at least the specified number of cargo
    * @param shooterSubsystem shooter subsystem
    * @param limelightSubsystem limelight subsystem
-   * @param turretSubsytem turret subsystem
+   * @param turretSubsystem turret subsystem
    * @param indexerSubsystem indexer subsystem
    * @param driveTrainSubsystem drivertrain subsystem
    * @param targetAngleProvider provider for predicted angle to the target (probably provided by odometry)
@@ -58,12 +58,12 @@ public class ShootCommand extends CommandBase {
   public ShootCommand(
       ShooterSubsystem shooterSubsystem,
       ShooterLimelightSubsystem limelightSubsystem,
-      TurretSubsystem turretSubsytem,
+      TurretSubsystem turretSubsystem,
       IndexerSubsystem indexerSubsystem,
       DriveTrainSubsystem driveTrainSubsystem,
       DoubleSupplier targetAngleProvider,
       int cargoToShoot) {
-    this(shooterSubsystem, limelightSubsystem, turretSubsytem, indexerSubsystem, driveTrainSubsystem,
+    this(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem,
         targetAngleProvider, false, cargoToShoot);
   }
 
@@ -71,7 +71,7 @@ public class ShootCommand extends CommandBase {
    * Constructs a shoot command that will reset the robot's pose when the target is visible
    * @param shooterSubsystem shooter subsystem
    * @param limelightSubsystem limelight subsystem
-   * @param turretSubsytem turret subsystem
+   * @param turretSubsystem turret subsystem
    * @param indexerSubsystem indexer subsystem
    * @param driveTrainSubsystem drivertrain subsystem
    * @param targetAngleProvider provider for predicted angle to the target (probably provided by odometry)
@@ -80,12 +80,12 @@ public class ShootCommand extends CommandBase {
   public ShootCommand(
       ShooterSubsystem shooterSubsystem,
       ShooterLimelightSubsystem limelightSubsystem,
-      TurretSubsystem turretSubsytem,
+      TurretSubsystem turretSubsystem,
       IndexerSubsystem indexerSubsystem,
       DriveTrainSubsystem driveTrainSubsystem,
       DoubleSupplier targetAngleProvider,
       boolean resetPose) {
-    this(shooterSubsystem, limelightSubsystem, turretSubsytem, indexerSubsystem, driveTrainSubsystem,
+    this(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem,
         targetAngleProvider, resetPose, Integer.MAX_VALUE);
   }
 
@@ -94,7 +94,7 @@ public class ShootCommand extends CommandBase {
    * reset the robot's pose when the target is visible
    * @param shooterSubsystem shooter subsystem
    * @param limelightSubsystem limelight subsystem
-   * @param turretSubsytem turret subsystem
+   * @param turretSubsystem turret subsystem
    * @param indexerSubsystem indexer subsystem
    * @param driveTrainSubsystem drivertrain subsystem
    * @param targetAngleProvider provider for predicted angle to the target (probably provided by odometry)
@@ -104,7 +104,7 @@ public class ShootCommand extends CommandBase {
   public ShootCommand(
       ShooterSubsystem shooterSubsystem,
       ShooterLimelightSubsystem limelightSubsystem,
-      TurretSubsystem turretSubsytem,
+      TurretSubsystem turretSubsystem,
       IndexerSubsystem indexerSubsystem,
       DriveTrainSubsystem driveTrainSubsystem,
       DoubleSupplier targetAngleProvider,
@@ -112,14 +112,14 @@ public class ShootCommand extends CommandBase {
       int cargoToShoot) {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
-    this.turretSubsystem = turretSubsytem;
+    this.turretSubsystem = turretSubsystem;
     this.indexerSubsystem = indexerSubsystem;
     this.driveTrainSubsystem = driveTrainSubsystem;
     this.targetAngleProvider = targetAngleProvider;
     this.resetPose = resetPose;
     this.cargoToShoot = cargoToShoot;
 
-    addRequirements(shooterSubsystem, limelightSubsystem, turretSubsytem, indexerSubsystem);
+    addRequirements(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem);
   }
 
   @Override

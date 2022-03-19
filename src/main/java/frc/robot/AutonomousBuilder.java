@@ -186,7 +186,8 @@ public class AutonomousBuilder {
    */
   private Command drivePickupShootTwo(Pose2d startPose, Pose2d endPose) {
     return setPose(startPose).alongWith(setCargoCount(1))
-        .andThen(drive(withSpeedAndAccelleration(0.5, 0.5), startPose, endPose).deadlineWith(loadCargo()))
+        .alongWith(deployIntake())
+        .andThen(drive(withSpeedAndAcceleration(0.5, 0.5), startPose, endPose).deadlineWith(loadCargo()))
         .andThen(waitForCargoCount(2).withTimeout(2))
         .andThen(shoot(2));
   }
@@ -209,9 +210,9 @@ public class AutonomousBuilder {
    */
   private Command fourCargo(Pose2d startPose, Pose2d cargoOnePose, Pose2d cargoTwoPose, Pose2d shootPose) {
     return drivePickupShootTwo(startPose, cargoOnePose).withTimeout(5)
-        .andThen(drive(withSpeedAndAccelleration(1, 1), cargoOnePose, cargoTwoPose).deadlineWith(loadCargo())
+        .andThen(drive(withSpeedAndAcceleration(1, 1), cargoOnePose, cargoTwoPose).deadlineWith(loadCargo())
         .andThen(waitForCargoCount(2).withTimeout(2)))
-        .andThen(drive(withSpeedAndAccelleration(1, 1).setReversed(true), cargoTwoPose, shootPose))
+        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoTwoPose, shootPose))
         .andThen(shoot(2).withTimeout(4));
   }
 
@@ -236,13 +237,17 @@ public class AutonomousBuilder {
    */
   private Command fiveCargo(Pose2d startPose, Pose2d cargoOnePose, Pose2d cargoTwoPose, Pose2d cargoThreePose, Pose2d shootPose) {
     return drivePickupShootTwo(startPose, cargoOnePose).withTimeout(5)
-        .andThen(drive(withSpeedAndAccelleration(1, 1), cargoOnePose, cargoTwoPose).deadlineWith(loadCargo()))
+        .andThen(drive(withSpeedAndAcceleration(1, 1), cargoOnePose, cargoTwoPose).deadlineWith(loadCargo()))
         .andThen(waitForCargoCount(1).withTimeout(2))
         .andThen(shoot(1).withTimeout(3))
-        .andThen(drive(withSpeedAndAccelleration(1, 1), cargoTwoPose, cargoThreePose).deadlineWith(loadCargo())
+        .andThen(drive(withSpeedAndAcceleration(1, 1), cargoTwoPose, cargoThreePose).deadlineWith(loadCargo())
         .andThen(waitForCargoCount(2).withTimeout(2)))
-        .andThen(drive(withSpeedAndAccelleration(1, 1).setReversed(true), cargoThreePose, shootPose))
+        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoThreePose, shootPose))
         .andThen(shoot(2).withTimeout(4));
+  }
+
+  private Command deployIntake() {
+    return new InstantCommand(intakeSubsystem::deploy);
   }
 
   private Command drive(TrajectoryConfig config, Pose2d... waypoints) {
@@ -256,7 +261,7 @@ public class AutonomousBuilder {
    * @param maxAccelerationPercent max acceleration as a percentage of the max constant
    * @return trajectory config
    */
-  private TrajectoryConfig withSpeedAndAccelleration(double maxSpeedPercent, double maxAccelerationPercent) {
+  private TrajectoryConfig withSpeedAndAcceleration(double maxSpeedPercent, double maxAccelerationPercent) {
     return new TrajectoryConfig(
         MAX_SPEED_AUTO * clamp(maxSpeedPercent, 0, 1), MAX_ACCELERATION_AUTO * clamp(maxAccelerationPercent, 0, 1))
       .setKinematics(DriveTrainConstants.DRIVE_KINEMATICS)

@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.DriverConstants.DEADBAND_HIGH;
-import static frc.robot.Constants.DriverConstants.DEADBAND_LOW;
+import static frc.robot.Constants.DriverConstants.DEADBAND_FILTER;
 import static frc.robot.Constants.DriverConstants.ROTATE_RATE_LIMIT_ARCADE;
 import static frc.robot.Constants.DriverConstants.SLOW_MODE_ROTATION_MULTIPLIER;
 import static frc.robot.Constants.DriverConstants.SLOW_MODE_SPEED_MULTIPLIER;
@@ -13,15 +12,12 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.DeadbandFilter;
 import frc.robot.subsystems.DriveTrainSubsystem;
 
 /**
  * TeleDriveCommand
  */
 public class TeleDriveCommand extends CommandBase {
-
-  private final DeadbandFilter deadbandFilter = new DeadbandFilter(DEADBAND_LOW, DEADBAND_HIGH);
 
   private final DoubleSupplier speedSupplier;
   private final DoubleSupplier rotationSupplier;
@@ -58,7 +54,7 @@ public class TeleDriveCommand extends CommandBase {
   }
 
   private double getSpeed() {
-    double speed = deadbandFilter.calculate(speedSupplier.getAsDouble());
+    double speed = DEADBAND_FILTER.calculate(speedSupplier.getAsDouble());
     if (isSlowMode()) {
       speed *= SLOW_MODE_SPEED_MULTIPLIER;
     }
@@ -69,7 +65,7 @@ public class TeleDriveCommand extends CommandBase {
   }
 
   private double getRotation() {
-    double rotation = deadbandFilter.calculate(rotationSupplier.getAsDouble());
+    double rotation = DEADBAND_FILTER.calculate(rotationSupplier.getAsDouble());
     if (isSlowMode()) {
       rotation *= SLOW_MODE_ROTATION_MULTIPLIER;
     }

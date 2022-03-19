@@ -3,6 +3,8 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import static frc.robot.Constants.DriverConstants.DEADBAND_FILTER;
+
 import java.util.Map;
 
 import edu.wpi.first.cscore.HttpCamera;
@@ -19,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.LimeLightConstants;
+import frc.robot.commands.ClimbTurretSafetyCommand;
 import frc.robot.commands.IndexCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
@@ -32,7 +35,6 @@ import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.JetsonSubsystem;
 import frc.robot.subsystems.ShooterLimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
@@ -58,15 +60,14 @@ public class RobotContainer {
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
   private final TurretSubsystem turretSubsystem = new TurretSubsystem();
-  private final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
-  private final JetsonSubsystem jetsonSubsystem = new JetsonSubsystem();
+  private final ClimbSubsystem climbSubsystem = new ClimbSubsystem(turretSubsystem::isClearOfClimb);
   private final ShooterLimelightSubsystem limelightSubsystem = new ShooterLimelightSubsystem(
       LimeLightConstants.LIMELIGHT_CONFIG);
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
   private final TeleopClimbCommand teleopClimbCommand = new TeleopClimbCommand(
-    climbSubsystem, () -> -operatorController.getLeftY());
+    climbSubsystem, () -> -operatorController.getLeftY(), operatorController::setRumble, turretSubsystem::isClearOfClimb);
   private final TrackTargetCommand trackTargetCommand = new TrackTargetCommand(driveTrainSubsystem::getCurrentPose);
 
   private final AutonomousBuilder autoBuilder = new AutonomousBuilder(
@@ -79,7 +80,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Forward ports for USB access
     PortForwarder.add(8811, "10.70.28.11", 5801); // Limelight
-    PortForwarder.add(8813, "10.70.28.13", 1181); // Jetson
+    PortForwarder.add(8813, "10.70.28.13", 1182); // Jetson
 
     configureButtonBindings();
     configureSubsystemCommands();
@@ -141,6 +142,12 @@ public class RobotContainer {
     new JoystickButton(operatorController, XboxController.Button.kStart.value)
         .whenPressed(intakeSubsystem::toggleCompressorEnabled);
 
+
+    // Position the turret to 180 degrees when the climb is up or the operator is trying to move the climb
+    new Trigger(
+        () -> climbSubsystem.isFirstStageRaised() || DEADBAND_FILTER.calculate(operatorController.getLeftY()) != 0)
+      .whileActiveContinuous(new ClimbTurretSafetyCommand(turretSubsystem));
+
     // TODO remove this when we have a proper sensor on the climb
     new JoystickButton(operatorController, XboxController.Button.kBack.value)
         .whileHeld(new StartEndCommand(climbSubsystem::disableLimits, climbSubsystem::resetAndEnableLimits));
@@ -189,6 +196,11 @@ public class RobotContainer {
     var indexerLayout = Dashboard.subsystemsTab.getLayout("Indexer", BuiltInLayouts.kGrid)
       .withSize(2, 2).withPosition(8, 0);
     indexerSubsystem.addDashboardWidgets(indexerLayout);
+
+    var climbLayout = Dashboard.subsystemsTab.getLayout("Climb", BuiltInLayouts.kGrid)
+      .withProperties(Map.of("Number of columns", 1, "Number of rows", 2))
+      .withSize(2, 2).withPosition(10, 0);
+    climbSubsystem.addDashboardWidgets(climbLayout);
   }
 
   private void configureDriverDashboard() {

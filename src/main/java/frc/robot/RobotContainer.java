@@ -125,8 +125,8 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
         .whileHeld(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
 
-    new JoystickButton(driverController, XboxController.Button.kRightBumper.value)
-        .whileHeld(new LoadCargoCommand(intakeSubsystem, transferSubsystem));
+    new JoystickButton(driverController, XboxController.Button.kRightBumper.value).whileHeld(new LoadCargoCommand(
+        intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, driverController::setRumble));
 
     // Operator
     new JoystickButton(operatorController, XboxController.Button.kA.value).toggleWhenPressed(

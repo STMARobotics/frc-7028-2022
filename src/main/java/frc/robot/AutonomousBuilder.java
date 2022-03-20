@@ -18,13 +18,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.LoadCargoAutoCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
+import frc.robot.commands.SpinupShooterCommand;
 import frc.robot.commands.TrackTargetCommand;
+import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -68,17 +71,11 @@ public class AutonomousBuilder {
     this.turretSubsystem = turretSubsystem;
     this.trackTargetCommand = trackTargetCommand;
 
-    buildBlueTarmacOne();
-    buildBlueTarmacTwo();
-    buildBlueTarmacThree();
-    buildBlueFourCargo();
-    buildBlueFiveCargo();
-
-    buildRedTarmacOne();
-    buildRedTarmacTwo();
-    buildRedTarmacThree();
-    buildRedFourCargo();
-    buildRedFiveCargo();
+    buildTarmacOne();
+    buildTarmacTwo();
+    buildTarmacThree();
+    buildFourCargo();
+    fiveCargo();
   }
 
   /**
@@ -97,84 +94,34 @@ public class AutonomousBuilder {
     return autoChooser.getSelected();
   }
 
-  private void buildBlueTarmacOne() {
+  private void buildTarmacOne() {
     var command = drivePickupShootTwo(
       new Pose2d(inchesToMeters(72), inchesToMeters(15), new Rotation2d(degreesToRadians(0))),
       new Pose2d(inchesToMeters(148), inchesToMeters(15), new Rotation2d(degreesToRadians(0))));
-    autoChooser.setDefaultOption("BLUE - Tarmac 1", command);
+    autoChooser.setDefaultOption("Tarmac 1", command);
   }
 
-  private void buildBlueTarmacTwo() {
+  private void buildTarmacTwo() {
     var command = drivePickupShootTwo(
-      new Pose2d(inchesToMeters(72), inchesToMeters(15), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(148), inchesToMeters(15), new Rotation2d(degreesToRadians(0))));
-    autoChooser.addOption("BLUE - Tarmac 2", shoot(2));
+      new Pose2d(inchesToMeters(242), inchesToMeters(96), new Rotation2d(degreesToRadians(-153))), // starting
+      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153)))); // ball 1
+    autoChooser.addOption("Tarmac 2", command);
   }
 
-  private void buildBlueTarmacThree() {
+  private void buildTarmacThree() {
     var command = drivePickupShootTwo(
       new Pose2d(7.586, Units.inchesToMeters(71.75), new Rotation2d(degreesToRadians(-90))),
       new Pose2d(7.586, Units.inchesToMeters(24 + 7.5), new Rotation2d(degreesToRadians(-90))));
-    autoChooser.addOption("BLUE - Tarmac 3", command);
+    autoChooser.addOption("Tarmac 3", command);
   }
 
-  private void buildRedTarmacOne() {
-    var command = drivePickupShootTwo(
-      new Pose2d(inchesToMeters(72), inchesToMeters(15), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(148), inchesToMeters(15), new Rotation2d(degreesToRadians(0))));
-    autoChooser.addOption("RED - Tarmac 1", command);
-  }
-
-  private void buildRedTarmacTwo() {
-    var command = drivePickupShootTwo(
-      new Pose2d(inchesToMeters(72), inchesToMeters(15), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(148), inchesToMeters(15), new Rotation2d(degreesToRadians(0))));
-    autoChooser.addOption("RED - Tarmac 2", command);
-  }
-
-  private void buildRedTarmacThree() {
-    var command = drivePickupShootTwo(
-      new Pose2d(inchesToMeters(72), inchesToMeters(15), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(148), inchesToMeters(15), new Rotation2d(degreesToRadians(0))));
-    autoChooser.addOption("RED - Tarmac 3", command);
-  }
-
-  private void buildBlueFourCargo() {
+  private void buildFourCargo() {
     var command = fourCargo(
-      new Pose2d(inchesToMeters(242), inchesToMeters(96), new Rotation2d(degreesToRadians(-153))),
-      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))),
-      new Pose2d(inchesToMeters(41.36), inchesToMeters(42), new Rotation2d(degreesToRadians(-158.15))),
-      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))));
-    autoChooser.addOption("BLUE - 4-cargo", command);
-  }
-
-  private void buildBlueFiveCargo() {
-    var command = fiveCargo(
-      new Pose2d(7.586, 1.835, new Rotation2d(degreesToRadians(-90))),
-      new Pose2d(inchesToMeters(330), inchesToMeters(20), new Rotation2d(degreesToRadians(180))),
-      new Pose2d(inchesToMeters(200), inchesToMeters(34), new Rotation2d(degreesToRadians(180))),
-      new Pose2d(inchesToMeters(10), inchesToMeters(24), new Rotation2d(degreesToRadians(180))),
-      new Pose2d(inchesToMeters(100), inchesToMeters(30), new Rotation2d(degreesToRadians(-175))));
-    autoChooser.addOption("BLUE - 5-cargo", command);
-  }
-
-  private void buildRedFourCargo() {
-    var command = fourCargo(
-      new Pose2d(inchesToMeters(400), inchesToMeters(286), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(500), inchesToMeters(284), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(690), inchesToMeters(274), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(600), inchesToMeters(280), new Rotation2d(degreesToRadians(5))));
-    autoChooser.addOption("RED - 4-cargo", command);
-  }
-
-  private void buildRedFiveCargo() {
-    var command = fiveCargo(
-      new Pose2d(inchesToMeters(400), inchesToMeters(286), new Rotation2d(degreesToRadians(90))),
-      new Pose2d(inchesToMeters(400), inchesToMeters(320), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(500), inchesToMeters(284), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(690), inchesToMeters(274), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(600), inchesToMeters(280), new Rotation2d(degreesToRadians(5))));
-    autoChooser.addOption("RED - 5-cargo", command);
+      new Pose2d(inchesToMeters(242), inchesToMeters(96), new Rotation2d(degreesToRadians(-153))), // starting
+      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))), // ball 1
+      new Pose2d(inchesToMeters(41.36), inchesToMeters(42), new Rotation2d(degreesToRadians(-151))), // human player
+      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153)))); // shoot
+    autoChooser.addOption("4-cargo", command);
   }
 
   /**
@@ -190,12 +137,10 @@ public class AutonomousBuilder {
   private Command drivePickupShootTwo(Pose2d startPose, Pose2d endPose) {
     return new PrintCommand("Starting auto")
         .andThen(setPose(startPose).alongWith(setCargoCount(1)).alongWith(deployIntake()))
-        .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, endPose).deadlineWith(loadCargo()))
+        .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, endPose).deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92))))
         .andThen(new PrintCommand("Done driving"))
-        // .andThen(waitForCargoCount(2).withTimeout(2))
-        .andThen(new PrintCommand("Done waiting"))
-        .andThen(shoot(2).deadlineWith(new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, null)))
-        .andThen(new PrintCommand("Done with auto"));
+        .andThen(shoot(2).withTimeout(3).deadlineWith(loadCargoWithoutIndexer()))
+        .andThen(new PrintCommand("Done shooting 2"));
   }
 
   /**
@@ -216,9 +161,13 @@ public class AutonomousBuilder {
    */
   private Command fourCargo(Pose2d startPose, Pose2d cargoOnePose, Pose2d cargoTwoPose, Pose2d shootPose) {
     return drivePickupShootTwo(startPose, cargoOnePose).withTimeout(5)
-        .andThen(drive(withSpeedAndAcceleration(1, 1), cargoOnePose, cargoTwoPose).deadlineWith(loadCargo())
+        .andThen(drive(withSpeedAndAcceleration(1, .75), cargoOnePose, cargoTwoPose).deadlineWith(loadCargoWithIndexer())
+        .andThen(new PrintCommand("Done driving to human player station"))
         .andThen(waitForCargoCount(2).withTimeout(2)))
-        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoTwoPose, shootPose))
+        .andThen(new PrintCommand("Done waiting for two cargo at human player station"))
+        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoTwoPose, shootPose)
+            .deadlineWith(spinUpShooter(Units.inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer()))
+        .andThen(new PrintCommand("Done driving to shoo"))
         .andThen(shoot(Integer.MAX_VALUE));
   }
 
@@ -235,21 +184,29 @@ public class AutonomousBuilder {
    * - Waits up to two seconds for two cargo to load while running intake
    * - Drives from cargoThreePose to shootPose
    * - Shoots two
-   * @param startPose
-   * @param cargoOnePose
-   * @param cargoTwoPose
-   * @param shootPose
    * @return
    */
-  private Command fiveCargo(Pose2d startPose, Pose2d cargoOnePose, Pose2d cargoTwoPose, Pose2d cargoThreePose, Pose2d shootPose) {
-    return drivePickupShootTwo(startPose, cargoOnePose).withTimeout(5)
-        .andThen(drive(withSpeedAndAcceleration(1, 1), cargoOnePose, cargoTwoPose).deadlineWith(loadCargo()))
-        .andThen(waitForCargoCount(1).withTimeout(2))
-        .andThen(shoot(1).withTimeout(3))
-        .andThen(drive(withSpeedAndAcceleration(1, 1), cargoTwoPose, cargoThreePose).deadlineWith(loadCargo())
+  private void fiveCargo() {
+    var startPose = new Pose2d(inchesToMeters(310), Units.inchesToMeters(71.75), new Rotation2d(degreesToRadians(-90))); // Starting
+    var cargoOnePose = new Pose2d(inchesToMeters(310), Units.inchesToMeters(31.5), new Rotation2d(degreesToRadians(-90))); // Ball 1
+    var angleAfterCargoOne = 145d;
+    var cargoTwoPose = new Pose2d(inchesToMeters(209), inchesToMeters(86), new Rotation2d(degreesToRadians(145))); // Ball 2
+    var cargoThreePose = new Pose2d(inchesToMeters(60), inchesToMeters(50), new Rotation2d(degreesToRadians(-151))); // Human Player
+    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))); // Shoot
+
+    var command = drivePickupShootTwo(startPose, cargoOnePose).withTimeout(5)
+        .andThen(turnToAngle(angleAfterCargoOne))
+        .andThen(drive(withSpeedAndAcceleration(.7, .7), new Pose2d(cargoOnePose.getX(), cargoOnePose.getY(), new Rotation2d(degreesToRadians(angleAfterCargoOne))), cargoTwoPose)
+            .deadlineWith(loadCargoWithIndexer()))
+        .andThen(new PrintCommand("Done driving to ball two"))
+        .andThen(shoot(1).withTimeout(4).deadlineWith(loadCargoWithoutIndexer()))
+        .andThen(drive(withSpeedAndAcceleration(1, .75), cargoTwoPose, cargoThreePose).deadlineWith(loadCargoWithIndexer())
+        .andThen(new PrintCommand("Done driving to human player"))
         .andThen(waitForCargoCount(2).withTimeout(2)))
         .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoThreePose, shootPose))
-        .andThen(shoot(2).withTimeout(4));
+        .andThen(shoot(Integer.MAX_VALUE));
+      
+    autoChooser.addOption("5-cargo", command);
   }
 
   private Command deployIntake() {
@@ -259,6 +216,14 @@ public class AutonomousBuilder {
   private Command drive(TrajectoryConfig config, Pose2d... waypoints) {
     return driveTrainSubsystem.createCommandForTrajectory(
       generateTrajectory(Arrays.asList(waypoints), config));
+  }
+
+  private Command spinUpShooter(double distance) {
+    return new SpinupShooterCommand(shooterSubsystem, distance);
+  }
+
+  private Command prepareIndexerToShoot() {
+    return new RunCommand(indexerSubsystem::prepareToShoot, indexerSubsystem);
   }
 
   /**
@@ -283,8 +248,12 @@ public class AutonomousBuilder {
         driveTrainSubsystem, trackTargetCommand::getAngleToTarget, cargoCount);
   }
 
-  private Command loadCargo() {
+  private Command loadCargoWithIndexer() {
     return new LoadCargoAutoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem);
+  }
+
+  private Command loadCargoWithoutIndexer() {
+    return new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, null);
   }
 
   private Command setPose(Pose2d pose) {
@@ -294,7 +263,11 @@ public class AutonomousBuilder {
   private Command waitForCargoCount(int count) {
     return (
         new WaitUntilCommand(() -> indexerSubsystem.getCargoCount() >= count || indexerSubsystem.isFullSensorTripped())
-          .deadlineWith(loadCargo()));
+          .deadlineWith(loadCargoWithIndexer()));
+  }
+
+  private Command turnToAngle(double angle) {
+    return new TurnToAngleCommand(angle, driveTrainSubsystem);
   }
 
 }

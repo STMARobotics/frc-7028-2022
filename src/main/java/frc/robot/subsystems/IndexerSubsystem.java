@@ -83,9 +83,6 @@ public class IndexerSubsystem extends SubsystemBase {
     detailDashboard.addNumber("Spacer Prox", () -> spacerProximity).withPosition(1, 0);
     detailDashboard.addNumber("Full Prox", () -> fullProximity).withPosition(0, 1);
     detailDashboard.addNumber("Cargo Count", this::getCargoCount).withPosition(1, 1);
-    detailDashboard.addNumber("Velocity", () -> indexer.getEncoder().getVelocity()).withPosition(0, 2);
-    detailDashboard.addNumber("Error", () -> IndexerConstants.BELT_RUN_SPEED - indexer.getEncoder().getVelocity())
-        .withPosition(1, 2);
     
     dashboard.add(this).withPosition(0, 1);
   }

@@ -63,7 +63,7 @@ public final class Constants {
     public static final double kV_ANGULAR = 1.5;
     public static final double kA_ANGULAR = 0.3;
 
-    public static final double kP = 0.15;
+    public static final double kP = 0.05;
 
     public static final double CLOSED_LOOP_RAMP = .2;
     public static final double OPEN_LOOP_RAMP = .25;
@@ -77,7 +77,7 @@ public final class Constants {
     public static final double kV = 0.104625;
     public static final double kA = 0.0068293;
 
-    public static final double kP = 0.03;
+    public static final double kP = 0.035;
 
     public static final int EDGES_PER_REVOLUTION = 2048;
 
@@ -206,7 +206,7 @@ public final class Constants {
     public static final double MAX_SPEED_AUTO = 3.5;
 
     // Max acceleration in meters per second per second
-    public static final double MAX_ACCELERATION_AUTO = 2;
+    public static final double MAX_ACCELERATION_AUTO = 2.5;
 
     // Max voltage
     public static final double MAX_VOLTAGE_AUTO = 11;
@@ -230,10 +230,10 @@ public final class Constants {
     public static final DeadbandFilter DEADBAND_FILTER = new DeadbandFilter(DEADBAND_LOW, DEADBAND_HIGH);
 
     // Max rate of change for speed per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double SPEED_RATE_LIMIT_ARCADE = 1.5;
+    public static final double SPEED_RATE_LIMIT_ARCADE = 2d;
 
     // Max rate of change for rotation per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double ROTATE_RATE_LIMIT_ARCADE = 4.0;
+    public static final double ROTATE_RATE_LIMIT_ARCADE = 5d;
   }
 
   public static final class AimConstants {

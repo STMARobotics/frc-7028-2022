@@ -10,6 +10,7 @@ import java.util.Map;
 import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.util.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -66,8 +67,12 @@ public class RobotContainer {
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
+
   private final TeleopClimbCommand teleopClimbCommand = new TeleopClimbCommand(
-    climbSubsystem, () -> -operatorController.getLeftY(), operatorController::setRumble, turretSubsystem::isClearOfClimb);
+      climbSubsystem, () -> -operatorController.getLeftY(),
+      (r) -> operatorController.setRumble(RumbleType.kLeftRumble, r),
+      turretSubsystem::isClearOfClimb);
+
   private final TrackTargetCommand trackTargetCommand = new TrackTargetCommand(driveTrainSubsystem::getCurrentPose);
 
   private final AutonomousBuilder autoBuilder = new AutonomousBuilder(
@@ -113,7 +118,8 @@ public class RobotContainer {
     // Shooting and Limelight
     new Trigger(() -> driverController.getRightTriggerAxis() > .5)
       .whileActiveContinuous(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
-            driveTrainSubsystem, trackTargetCommand::getAngleToTarget, driverController::setRumble, true));
+            driveTrainSubsystem, trackTargetCommand::getAngleToTarget,
+            (r) -> driverController.setRumble(RumbleType.kLeftRumble, r), true));
 
     // Limelight
     new JoystickButton(driverController, XboxController.Button.kStart.value)
@@ -127,7 +133,8 @@ public class RobotContainer {
         .whileHeld(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
 
     new JoystickButton(driverController, XboxController.Button.kRightBumper.value).whileHeld(new LoadCargoCommand(
-        intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, driverController::setRumble));
+        intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, 
+        (r) -> driverController.setRumble(RumbleType.kRightRumble, r)));
 
     // Operator
     new JoystickButton(operatorController, XboxController.Button.kStart.value)

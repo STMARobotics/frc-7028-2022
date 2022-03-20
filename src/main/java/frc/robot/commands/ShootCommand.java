@@ -1,6 +1,6 @@
 package frc.robot.commands;
 
-import java.util.function.BiConsumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AimConstants;
@@ -40,7 +39,7 @@ public class ShootCommand extends CommandBase {
   private final DoubleSupplier targetAngleProvider;
   private final boolean resetPose;
   private final int cargoToShoot;
-  private final BiConsumer<RumbleType, Double> rumble; 
+  private final DoubleConsumer rumble; 
 
   private int cargoShot = 0;
   private boolean wasFull = false;
@@ -48,6 +47,7 @@ public class ShootCommand extends CommandBase {
   private double lastTargetDistance = 0;
   private double lastTurretPosition = 0;
   private boolean wrongColor = false;
+  private double missTurretPosition = 0d;
 
   /**
    * Constructs a shoot command that will shoot at least the specified number of cargo
@@ -89,7 +89,7 @@ public class ShootCommand extends CommandBase {
       IndexerSubsystem indexerSubsystem,
       DriveTrainSubsystem driveTrainSubsystem,
       DoubleSupplier targetAngleProvider,
-      BiConsumer<RumbleType, Double> rumble,
+      DoubleConsumer rumble,
       boolean resetPose) {
     this(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem,
         targetAngleProvider, rumble, resetPose, Integer.MAX_VALUE);
@@ -115,7 +115,7 @@ public class ShootCommand extends CommandBase {
       IndexerSubsystem indexerSubsystem,
       DriveTrainSubsystem driveTrainSubsystem,
       DoubleSupplier targetAngleProvider,
-      BiConsumer<RumbleType, Double> rumble,
+      DoubleConsumer rumble,
       boolean resetPose,
       int cargoToShoot) {
     this.shooterSubsystem = shooterSubsystem;
@@ -126,7 +126,7 @@ public class ShootCommand extends CommandBase {
     this.targetAngleProvider = targetAngleProvider;
     this.resetPose = resetPose;
     this.cargoToShoot = cargoToShoot;
-    this.rumble = rumble;
+    this.rumble = rumble == null ? (r) -> {} : rumble;
 
     addRequirements(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem);
   }
@@ -140,6 +140,7 @@ public class ShootCommand extends CommandBase {
     wasFull = indexerSubsystem.isFullSensorTripped();
     endTimer.reset();
     wrongColor = false;
+    missTurretPosition = 0;
   }
 
   @Override
@@ -152,9 +153,7 @@ public class ShootCommand extends CommandBase {
 
     // If we have a target distance, spin up and shoot
     if (lastTargetDistance > 0) {
-      if (rumble != null) {
-        rumble.accept(RumbleType.kLeftRumble, 0d);
-      }
+      rumble.accept(0d);
       shooterSubsystem.prepareToShoot(lastTargetDistance);
       // We're not going to worry about losing the target for rotation because Limelight returns target X of 0 when no
       // target is visible, so we just won't rotate when no target is visible (although we may shoot since we're at
@@ -178,10 +177,16 @@ public class ShootCommand extends CommandBase {
         lastTurretPosition = turretSubsystem.getAngleToRobot() - targetX;
       }
       if (wrongColor) {
-        // Aim off from the target to miss the shot for wrong color cargo
-        var adjust = lastTurretPosition > 180 ? -15 : 15;
-        turretSubsystem.positionToRobotAngle(lastTurretPosition + adjust);
+        if (missTurretPosition == 0) {
+          // Aim off from the target to miss the shot for wrong color cargo
+          // Only do this once to prevent bouncing back and forth near 180-degrees
+          missTurretPosition = lastTurretPosition > 180 ? -15 : 15;
+        }
+        turretSubsystem.positionToRobotAngle(lastTurretPosition + missTurretPosition);
       } else {
+        if (!TurretSubsystem.isInRange(lastTurretPosition)) {
+          rumble.accept(1d);
+        }
         turretSubsystem.positionToRobotAngle(lastTurretPosition);
       }
 
@@ -198,9 +203,7 @@ public class ShootCommand extends CommandBase {
       }
     } else {
       // No target has ever been visible, so point the turret where the target should be
-      if (rumble != null) {
-        rumble.accept(RumbleType.kLeftRumble, 1d);
-      }
+      rumble.accept(1d);
       shooterSubsystem.stop();
       turretSubsystem.positionToRobotAngle(targetAngleProvider.getAsDouble());
     }
@@ -249,9 +252,7 @@ public class ShootCommand extends CommandBase {
     shooterSubsystem.stop();
     turretSubsystem.stop();
     indexerSubsystem.stop();
-    if (rumble != null) {
-      rumble.accept(RumbleType.kLeftRumble, 0d);
-    }
+    rumble.accept(0d);
   }
 
 }

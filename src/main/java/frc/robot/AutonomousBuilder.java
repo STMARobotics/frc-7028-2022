@@ -2,7 +2,6 @@ package frc.robot;
 
 import static edu.wpi.first.math.MathUtil.clamp;
 import static edu.wpi.first.math.trajectory.TrajectoryGenerator.generateTrajectory;
-import static edu.wpi.first.math.util.Units.degreesToRadians;
 import static edu.wpi.first.math.util.Units.inchesToMeters;
 import static frc.robot.Constants.TrajectoryConstants.MAX_ACCELERATION_AUTO;
 import static frc.robot.Constants.TrajectoryConstants.MAX_SPEED_AUTO;
@@ -12,7 +11,6 @@ import java.util.Arrays;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -96,22 +94,22 @@ public class AutonomousBuilder {
 
   private void buildTarmacOne() {
     var command = drivePickupShootTwo(
-      new Pose2d(inchesToMeters(72), inchesToMeters(15), new Rotation2d(degreesToRadians(0))),
-      new Pose2d(inchesToMeters(148), inchesToMeters(15), new Rotation2d(degreesToRadians(0))));
+      new Pose2d(inchesToMeters(72), inchesToMeters(15), Rotation2d.fromDegrees(0)),
+      new Pose2d(inchesToMeters(148), inchesToMeters(15), Rotation2d.fromDegrees(0)));
     autoChooser.setDefaultOption("Tarmac 1", command);
   }
 
   private void buildTarmacTwo() {
     var command = drivePickupShootTwo(
-      new Pose2d(inchesToMeters(242), inchesToMeters(96), new Rotation2d(degreesToRadians(-153))), // starting
-      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153)))); // ball 1
+      new Pose2d(inchesToMeters(242), inchesToMeters(96), Rotation2d.fromDegrees(-153)),
+      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153)));
     autoChooser.addOption("Tarmac 2", command);
   }
 
   private void buildTarmacThree() {
     var command = drivePickupShootTwo(
-      new Pose2d(7.586, Units.inchesToMeters(71.75), new Rotation2d(degreesToRadians(-90))),
-      new Pose2d(7.586, Units.inchesToMeters(31.5), new Rotation2d(degreesToRadians(-90))));
+      new Pose2d(7.586, inchesToMeters(71.75), Rotation2d.fromDegrees(-90)),
+      new Pose2d(7.586, inchesToMeters(31.5), Rotation2d.fromDegrees(-90)));
     autoChooser.addOption("Tarmac 3", command);
   }
 
@@ -127,10 +125,10 @@ public class AutonomousBuilder {
    * - Shoots two
    */
   private void buildFourCargo() {
-    var startPose = new Pose2d(inchesToMeters(242), inchesToMeters(96), new Rotation2d(degreesToRadians(-153)));
-    var cargoOnePose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153)));
-    var cargoTwoPose = new Pose2d(inchesToMeters(41.36), inchesToMeters(42), new Rotation2d(degreesToRadians(-151)));
-    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153)));
+    var startPose = new Pose2d(inchesToMeters(242), inchesToMeters(96), Rotation2d.fromDegrees(-153));
+    var cargoOnePose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153));
+    var cargoTwoPose = new Pose2d(inchesToMeters(41.36), inchesToMeters(42), Rotation2d.fromDegrees(-151));
+    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153));
 
     var command = drivePickupShootTwo(startPose, cargoOnePose)
         .andThen(drive(withSpeedAndAcceleration(1, .75), cargoOnePose, cargoTwoPose).deadlineWith(loadCargoWithIndexer())
@@ -138,8 +136,8 @@ public class AutonomousBuilder {
         .andThen(waitForCargoCount(2).withTimeout(2)))
         .andThen(new PrintCommand("Done waiting for two cargo at human player station"))
         .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoTwoPose, shootPose)
-            .deadlineWith(spinUpShooter(Units.inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer()))
-        .andThen(new PrintCommand("Done driving to shoo"))
+            .deadlineWith(spinUpShooter(inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer()))
+        .andThen(new PrintCommand("Done driving to shoot"))
         .andThen(shoot(Integer.MAX_VALUE));
     
     autoChooser.addOption("4-cargo", command);
@@ -160,19 +158,19 @@ public class AutonomousBuilder {
    * - Shoots two
    */
   private void buildFiveCargo() {
-    var startPose = new Pose2d(inchesToMeters(310), Units.inchesToMeters(71.75), new Rotation2d(degreesToRadians(-90))); // Starting
-    var cargoOnePose = new Pose2d(inchesToMeters(310), Units.inchesToMeters(31.5), new Rotation2d(degreesToRadians(-90))); // Ball 1
-    var angleAfterCargoOne = 145d;
-    var cargoTwoPose = new Pose2d(inchesToMeters(209), inchesToMeters(86), new Rotation2d(degreesToRadians(145))); // Ball 2
-    var cargoThreePose = new Pose2d(inchesToMeters(60), inchesToMeters(50), new Rotation2d(degreesToRadians(-151))); // Human Player
-    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))); // Shoot
+    var startPose = new Pose2d(inchesToMeters(310), inchesToMeters(71.75), Rotation2d.fromDegrees(-90)); 
+    var cargoOnePose = new Pose2d(inchesToMeters(310), inchesToMeters(31.5), Rotation2d.fromDegrees(-90));
+    var angleAfterCargoOne = 125d;
+    var cargoTwoPose = new Pose2d(inchesToMeters(209), inchesToMeters(86), Rotation2d.fromDegrees(-175));
+    var cargoThreePose = new Pose2d(inchesToMeters(60), inchesToMeters(50), Rotation2d.fromDegrees(-151));
+    var shootPose = new Pose2d(inchesToMeters(190), inchesToMeters(86), Rotation2d.fromDegrees(-175));
 
     var command = drivePickupShootTwo(startPose, cargoOnePose)
         .andThen(turnToAngle(angleAfterCargoOne))
-        .andThen(drive(withSpeedAndAcceleration(.7, .7), new Pose2d(cargoOnePose.getX(), cargoOnePose.getY(), new Rotation2d(degreesToRadians(angleAfterCargoOne))), cargoTwoPose)
+        .andThen(drive(withSpeedAndAcceleration(.7, .7), new Pose2d(cargoOnePose.getX(), cargoOnePose.getY(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
             .deadlineWith(loadCargoWithIndexer()))
         .andThen(new PrintCommand("Done driving to ball two"))
-        .andThen(shoot(1).withTimeout(4).deadlineWith(loadCargoWithoutIndexer()))
+        .andThen(shoot(1).withTimeout(4))
         .andThen(drive(withSpeedAndAcceleration(1, .75), cargoTwoPose, cargoThreePose).deadlineWith(loadCargoWithIndexer())
         .andThen(new PrintCommand("Done driving to human player"))
         .andThen(waitForCargoCount(2).withTimeout(2)))
@@ -195,9 +193,10 @@ public class AutonomousBuilder {
   private Command drivePickupShootTwo(Pose2d startPose, Pose2d endPose) {
     return new PrintCommand("Starting auto")
         .andThen(setPose(startPose).alongWith(setCargoCount(1)).alongWith(deployIntake()))
-        .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, endPose).deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92))))
+        .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, endPose)
+            .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92))))
         .andThen(new PrintCommand("Done driving"))
-        .andThen(shoot(2).withTimeout(3).deadlineWith(loadCargoWithoutIndexer()))
+        .andThen(shoot(2).withTimeout(3))
         .andThen(new PrintCommand("Done shooting 2"));
   }
 
@@ -237,7 +236,7 @@ public class AutonomousBuilder {
 
   private Command shoot(int cargoCount) {
     return new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
-        driveTrainSubsystem, trackTargetCommand::getAngleToTarget, cargoCount);
+        driveTrainSubsystem, trackTargetCommand::getAngleToTarget, cargoCount).deadlineWith(loadCargoWithoutIndexer());
   }
 
   private Command loadCargoWithIndexer() {

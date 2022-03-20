@@ -75,7 +75,7 @@ public class AutonomousBuilder {
     buildTarmacTwo();
     buildTarmacThree();
     buildFourCargo();
-    fiveCargo();
+    buildFiveCargo();
   }
 
   /**
@@ -111,17 +111,75 @@ public class AutonomousBuilder {
   private void buildTarmacThree() {
     var command = drivePickupShootTwo(
       new Pose2d(7.586, Units.inchesToMeters(71.75), new Rotation2d(degreesToRadians(-90))),
-      new Pose2d(7.586, Units.inchesToMeters(24 + 7.5), new Rotation2d(degreesToRadians(-90))));
+      new Pose2d(7.586, Units.inchesToMeters(31.5), new Rotation2d(degreesToRadians(-90))));
     autoChooser.addOption("Tarmac 3", command);
   }
 
+  /**
+   * Builds a 4-cargo auto routine.
+   * - Starts with one cargo at startPose
+   * - Drives from startPose to cargoOnePose while running the intake
+   * - Waits up to two seconds for two cargo to load while running the intake
+   * - Shoots two cargo
+   * - Drives from cargoOnePose to cargoTwoPose with intake running
+   * - Waits up to two seconds for two cargo to load while running intake
+   * - Drives from cargoTwoPose to shootPose
+   * - Shoots two
+   */
   private void buildFourCargo() {
-    var command = fourCargo(
-      new Pose2d(inchesToMeters(242), inchesToMeters(96), new Rotation2d(degreesToRadians(-153))), // starting
-      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))), // ball 1
-      new Pose2d(inchesToMeters(41.36), inchesToMeters(42), new Rotation2d(degreesToRadians(-151))), // human player
-      new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153)))); // shoot
+    var startPose = new Pose2d(inchesToMeters(242), inchesToMeters(96), new Rotation2d(degreesToRadians(-153)));
+    var cargoOnePose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153)));
+    var cargoTwoPose = new Pose2d(inchesToMeters(41.36), inchesToMeters(42), new Rotation2d(degreesToRadians(-151)));
+    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153)));
+
+    var command = drivePickupShootTwo(startPose, cargoOnePose)
+        .andThen(drive(withSpeedAndAcceleration(1, .75), cargoOnePose, cargoTwoPose).deadlineWith(loadCargoWithIndexer())
+        .andThen(new PrintCommand("Done driving to human player station"))
+        .andThen(waitForCargoCount(2).withTimeout(2)))
+        .andThen(new PrintCommand("Done waiting for two cargo at human player station"))
+        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoTwoPose, shootPose)
+            .deadlineWith(spinUpShooter(Units.inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer()))
+        .andThen(new PrintCommand("Done driving to shoo"))
+        .andThen(shoot(Integer.MAX_VALUE));
+    
     autoChooser.addOption("4-cargo", command);
+  }
+
+ /**
+   * Builds a 5-cargo auto routine.
+   * - Starts with one cargo at startPose
+   * - Drives from startPose to cargoOnePose while running the intake
+   * - Waits up to two seconds for two cargo to load while running the intake
+   * - Shoots two cargo
+   * - Drives from cargoOnePose to cargoTwoPose with intake running
+   * - Waits up to two seconds for one cargo to load while running intake
+   * - Shoots one cargo
+   * - Drives from cargoTwoPose to cargoThreePose
+   * - Waits up to two seconds for two cargo to load while running intake
+   * - Drives from cargoThreePose to shootPose
+   * - Shoots two
+   */
+  private void buildFiveCargo() {
+    var startPose = new Pose2d(inchesToMeters(310), Units.inchesToMeters(71.75), new Rotation2d(degreesToRadians(-90))); // Starting
+    var cargoOnePose = new Pose2d(inchesToMeters(310), Units.inchesToMeters(31.5), new Rotation2d(degreesToRadians(-90))); // Ball 1
+    var angleAfterCargoOne = 145d;
+    var cargoTwoPose = new Pose2d(inchesToMeters(209), inchesToMeters(86), new Rotation2d(degreesToRadians(145))); // Ball 2
+    var cargoThreePose = new Pose2d(inchesToMeters(60), inchesToMeters(50), new Rotation2d(degreesToRadians(-151))); // Human Player
+    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))); // Shoot
+
+    var command = drivePickupShootTwo(startPose, cargoOnePose)
+        .andThen(turnToAngle(angleAfterCargoOne))
+        .andThen(drive(withSpeedAndAcceleration(.7, .7), new Pose2d(cargoOnePose.getX(), cargoOnePose.getY(), new Rotation2d(degreesToRadians(angleAfterCargoOne))), cargoTwoPose)
+            .deadlineWith(loadCargoWithIndexer()))
+        .andThen(new PrintCommand("Done driving to ball two"))
+        .andThen(shoot(1).withTimeout(4).deadlineWith(loadCargoWithoutIndexer()))
+        .andThen(drive(withSpeedAndAcceleration(1, .75), cargoTwoPose, cargoThreePose).deadlineWith(loadCargoWithIndexer())
+        .andThen(new PrintCommand("Done driving to human player"))
+        .andThen(waitForCargoCount(2).withTimeout(2)))
+        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoThreePose, shootPose))
+        .andThen(shoot(Integer.MAX_VALUE));
+      
+    autoChooser.addOption("5-cargo", command);
   }
 
   /**
@@ -141,72 +199,6 @@ public class AutonomousBuilder {
         .andThen(new PrintCommand("Done driving"))
         .andThen(shoot(2).withTimeout(3).deadlineWith(loadCargoWithoutIndexer()))
         .andThen(new PrintCommand("Done shooting 2"));
-  }
-
-  /**
-   * Builds a 4-cargo auto routine.
-   * - Starts with one cargo at startPose
-   * - Drives from startPose to cargoOnePose while running the intake
-   * - Waits up to two seconds for two cargo to load while running the intake
-   * - Shoots two cargo
-   * - Drives from cargoOnePose to cargoTwoPose with intake running
-   * - Waits up to two seconds for two cargo to load while running intake
-   * - Drives from cargoTwoPose to shootPose
-   * - Shoots two
-   * @param startPose
-   * @param cargoOnePose
-   * @param cargoTwoPose
-   * @param shootPose
-   * @return
-   */
-  private Command fourCargo(Pose2d startPose, Pose2d cargoOnePose, Pose2d cargoTwoPose, Pose2d shootPose) {
-    return drivePickupShootTwo(startPose, cargoOnePose).withTimeout(5)
-        .andThen(drive(withSpeedAndAcceleration(1, .75), cargoOnePose, cargoTwoPose).deadlineWith(loadCargoWithIndexer())
-        .andThen(new PrintCommand("Done driving to human player station"))
-        .andThen(waitForCargoCount(2).withTimeout(2)))
-        .andThen(new PrintCommand("Done waiting for two cargo at human player station"))
-        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoTwoPose, shootPose)
-            .deadlineWith(spinUpShooter(Units.inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer()))
-        .andThen(new PrintCommand("Done driving to shoo"))
-        .andThen(shoot(Integer.MAX_VALUE));
-  }
-
- /**
-   * Builds a 5-cargo auto routine.
-   * - Starts with one cargo at startPose
-   * - Drives from startPose to cargoOnePose while running the intake
-   * - Waits up to two seconds for two cargo to load while running the intake
-   * - Shoots two cargo
-   * - Drives from cargoOnePose to cargoTwoPose with intake running
-   * - Waits up to two seconds for one cargo to load while running intake
-   * - Shoots one cargo
-   * - Drives from cargoTwoPose to cargoThreePose
-   * - Waits up to two seconds for two cargo to load while running intake
-   * - Drives from cargoThreePose to shootPose
-   * - Shoots two
-   * @return
-   */
-  private void fiveCargo() {
-    var startPose = new Pose2d(inchesToMeters(310), Units.inchesToMeters(71.75), new Rotation2d(degreesToRadians(-90))); // Starting
-    var cargoOnePose = new Pose2d(inchesToMeters(310), Units.inchesToMeters(31.5), new Rotation2d(degreesToRadians(-90))); // Ball 1
-    var angleAfterCargoOne = 145d;
-    var cargoTwoPose = new Pose2d(inchesToMeters(209), inchesToMeters(86), new Rotation2d(degreesToRadians(145))); // Ball 2
-    var cargoThreePose = new Pose2d(inchesToMeters(60), inchesToMeters(50), new Rotation2d(degreesToRadians(-151))); // Human Player
-    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), new Rotation2d(degreesToRadians(-153))); // Shoot
-
-    var command = drivePickupShootTwo(startPose, cargoOnePose).withTimeout(5)
-        .andThen(turnToAngle(angleAfterCargoOne))
-        .andThen(drive(withSpeedAndAcceleration(.7, .7), new Pose2d(cargoOnePose.getX(), cargoOnePose.getY(), new Rotation2d(degreesToRadians(angleAfterCargoOne))), cargoTwoPose)
-            .deadlineWith(loadCargoWithIndexer()))
-        .andThen(new PrintCommand("Done driving to ball two"))
-        .andThen(shoot(1).withTimeout(4).deadlineWith(loadCargoWithoutIndexer()))
-        .andThen(drive(withSpeedAndAcceleration(1, .75), cargoTwoPose, cargoThreePose).deadlineWith(loadCargoWithIndexer())
-        .andThen(new PrintCommand("Done driving to human player"))
-        .andThen(waitForCargoCount(2).withTimeout(2)))
-        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoThreePose, shootPose))
-        .andThen(shoot(Integer.MAX_VALUE));
-      
-    autoChooser.addOption("5-cargo", command);
   }
 
   private Command deployIntake() {

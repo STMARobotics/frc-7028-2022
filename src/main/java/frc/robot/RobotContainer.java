@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
@@ -131,10 +130,6 @@ public class RobotContainer {
         intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, driverController::setRumble));
 
     // Operator
-    new JoystickButton(operatorController, XboxController.Button.kA.value).toggleWhenPressed(
-        new RunCommand(() -> turretSubsystem.positionToRobotAngle(180), turretSubsystem)
-            .andThen(turretSubsystem::stop, turretSubsystem));
-    
     new JoystickButton(operatorController, XboxController.Button.kStart.value)
         .whenPressed(intakeSubsystem::toggleCompressorEnabled);
 

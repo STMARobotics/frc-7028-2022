@@ -1,9 +1,6 @@
 package frc.robot.subsystems;
 
 import static frc.robot.Constants.IndexerConstants.DEVICE_ID_INDEXER;
-import static frc.robot.Constants.IndexerConstants.PORT_ID_FULL_SENSOR;
-import static frc.robot.Constants.IndexerConstants.PORT_ID_INTAKE_SENSOR;
-import static frc.robot.Constants.IndexerConstants.PORT_ID_SPACER_SENSOR;
 
 import java.util.Map;
 
@@ -15,7 +12,7 @@ import com.revrobotics.ColorMatch;
 import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -24,17 +21,14 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IndexerConstants;
-import frc.robot.util.MultiplexedColorSensor;
+import frc.robot.commands.ColorSensorReader;
 
 public class IndexerSubsystem extends SubsystemBase {
 
   private final CANSparkMax indexer = new CANSparkMax(DEVICE_ID_INDEXER, MotorType.kBrushless);
   private final SparkMaxPIDController pidController;
   
-  private final MultiplexedColorSensor intakeColorSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_INTAKE_SENSOR);
-  private final MultiplexedColorSensor spacerColorSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_SPACER_SENSOR);
-  private final MultiplexedColorSensor fullColorSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_FULL_SENSOR);
-  
+  private final ColorSensorReader colorSensorReader = new ColorSensorReader();
   // Proximity thresholds for when to trip each sensor
   private static final int THRESHOLD_INTAKE = 240;
   private static final int THRESHOLD_SPACE = 400;
@@ -56,6 +50,7 @@ public class IndexerSubsystem extends SubsystemBase {
 
   private ColorMatch colorMatch = new ColorMatch();
 
+  @SuppressWarnings("resource")
   public IndexerSubsystem() {
     indexer.restoreFactoryDefaults();
     indexer.enableVoltageCompensation(12);
@@ -65,7 +60,12 @@ public class IndexerSubsystem extends SubsystemBase {
     pidController.setP(0);//IndexerConstants.BELT_kP);
     pidController.setFF(0.00009);
     indexer.burnFlash();
-    updateColorSensors();
+    
+    // Update the color sensors in the background to prevent loop overrun
+    var notifier = new Notifier(colorSensorReader);
+    notifier.setName("Color Sensors");
+    notifier.startPeriodic(0.02);
+
     colorMatch.addColorMatch(IndexerConstants.COLOR_RED);
     colorMatch.addColorMatch(IndexerConstants.COLOR_BLUE);
     colorMatch.addColorMatch(IndexerConstants.COLOR_NONE);
@@ -127,13 +127,13 @@ public class IndexerSubsystem extends SubsystemBase {
    * Updates the color sensor values. We do this only once per period to avoid flooding I2C.
    */
   private void updateColorSensors(){
-    var intakeValues = intakeColorSensor.getValues();
+    var intakeValues = colorSensorReader.getIntakeValues();
     intakeColor = intakeValues.color;
     intakeProximity = intakeValues.proximity;
-    var spacerValues = spacerColorSensor.getValues();
+    var spacerValues = colorSensorReader.getSpacerValues();
     spacerColor = spacerValues.color;
     spacerProximity = spacerValues.proximity;
-    var fullValues = fullColorSensor.getValues();
+    var fullValues = colorSensorReader.getFullValues();
     fullColor = fullValues.color;
     fullProximity = fullValues.proximity;
   }

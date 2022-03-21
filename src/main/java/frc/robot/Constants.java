@@ -149,7 +149,12 @@ public final class Constants {
     public static final int PORT_ID_SPACER_SENSOR = 4;
     public static final int PORT_ID_FULL_SENSOR = 2;
 
-    public static final double BELT_kP = 0.00005;
+    // Proximity thresholds for when to trip each sensor
+    public static final int THRESHOLD_INTAKE = 240;
+    public static final int THRESHOLD_SPACE = 400;
+    public static final int THRESHOLD_FULL = 225;
+
+    public static final double BELT_kP = 0d;
     public static final double BELT_RUN_SPEED = 6000;
     public static final double BELT_SHOOT_SPEED = 8000;
 

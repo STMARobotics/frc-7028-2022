@@ -5,6 +5,8 @@ import static frc.robot.Constants.IndexerConstants.PORT_ID_FULL_SENSOR;
 import static frc.robot.Constants.IndexerConstants.PORT_ID_INTAKE_SENSOR;
 import static frc.robot.Constants.IndexerConstants.PORT_ID_SPACER_SENSOR;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import edu.wpi.first.wpilibj.I2C.Port;
 import frc.robot.util.ColorSensorValues;
 import frc.robot.util.MultiplexedColorSensor;
@@ -20,29 +22,29 @@ public class ColorSensorReader implements Runnable {
   private final MultiplexedColorSensor spacerColorSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_SPACER_SENSOR);
   private final MultiplexedColorSensor fullColorSensor = new MultiplexedColorSensor(Port.kMXP, PORT_ID_FULL_SENSOR);
   
-  private ColorSensorValues intakeValues;
-  private ColorSensorValues spacerValues;
-  private ColorSensorValues fullValues;
+  private AtomicReference<ColorSensorValues> intakeValues;
+  private AtomicReference<ColorSensorValues> spacerValues;
+  private AtomicReference<ColorSensorValues> fullValues;
 
    /**
    * Updates the color sensor values
    */
   public void run(){
-    intakeValues = intakeColorSensor.getValues();
-    spacerValues = spacerColorSensor.getValues();
-    fullValues = fullColorSensor.getValues();
+    intakeValues.set(intakeColorSensor.getValues());
+    spacerValues.set(spacerColorSensor.getValues());
+    fullValues.set(fullColorSensor.getValues());
   }
 
   public ColorSensorValues getIntakeValues() {
-    return intakeValues;
+    return intakeValues.get();
   }
 
   public ColorSensorValues getSpacerValues() {
-    return spacerValues;
+    return spacerValues.get();
   }
 
   public ColorSensorValues getFullValues() {
-    return fullValues;
+    return fullValues.get();
   }
 
 }

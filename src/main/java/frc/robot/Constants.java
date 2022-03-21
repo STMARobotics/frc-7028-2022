@@ -41,7 +41,7 @@ public final class Constants {
 
     public static final int EDGES_PER_ROTATION = 2048;
     public static final double WHEEL_DIAMETER_INCHES = 6d;
-    public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(19.5d);
+    public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(19.65d);
     public static final double DRIVE_GEAR_RATIO = 2700d / 240d;
 
     public static final double TRACK_WIDTH_METERS = 0.6608;
@@ -63,7 +63,7 @@ public final class Constants {
     public static final double kV_ANGULAR = 1.5;
     public static final double kA_ANGULAR = 0.3;
 
-    public static final double kP = 0.049615;
+    public static final double kP = 0.05;
 
     public static final double CLOSED_LOOP_RAMP = .2;
     public static final double OPEN_LOOP_RAMP = .25;
@@ -77,7 +77,7 @@ public final class Constants {
     public static final double kV = 0.104625;
     public static final double kA = 0.0068293;
 
-    public static final double kP = 0.03;
+    public static final double kP = 0.035;
 
     public static final int EDGES_PER_REVOLUTION = 2048;
 
@@ -90,6 +90,7 @@ public final class Constants {
       Map.entry(Units.inchesToMeters(40d), 11000d),
       Map.entry(Units.inchesToMeters(60d), 11375d),
       Map.entry(Units.inchesToMeters(80d), 12200d),
+      Map.entry(Units.inchesToMeters(90d), 12800d),
       Map.entry(Units.inchesToMeters(100d), 13000d),
       Map.entry(Units.inchesToMeters(120d), 14000d),
       Map.entry(Units.inchesToMeters(140d), 14900d),
@@ -148,8 +149,9 @@ public final class Constants {
     public static final int PORT_ID_SPACER_SENSOR = 4;
     public static final int PORT_ID_FULL_SENSOR = 2;
 
-    public static final double BELT_kP = 0;
-    public static final double BELT_RUN_SPEED = 11000;
+    public static final double BELT_kP = 0.00005;
+    public static final double BELT_RUN_SPEED = 6000;
+    public static final double BELT_SHOOT_SPEED = 8000;
 
     /** Color of red cargo */
     public static final Color COLOR_RED = new Color(0.510009765625, 0.365234375, 0.125);
@@ -201,10 +203,10 @@ public final class Constants {
   public static final class TrajectoryConstants {
 
     // Max speed in meters per second
-    public static final double MAX_SPEED_AUTO = 3;
+    public static final double MAX_SPEED_AUTO = 3.5;
 
     // Max acceleration in meters per second per second
-    public static final double MAX_ACCELERATION_AUTO = 2;
+    public static final double MAX_ACCELERATION_AUTO = 2.5;
 
     // Max voltage
     public static final double MAX_VOLTAGE_AUTO = 11;
@@ -225,11 +227,13 @@ public final class Constants {
     public static final double DEADBAND_HIGH = 0.12;
     public static final double DEADBAND_LOW = -DEADBAND_HIGH;
 
+    public static final DeadbandFilter DEADBAND_FILTER = new DeadbandFilter(DEADBAND_LOW, DEADBAND_HIGH);
+
     // Max rate of change for speed per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double SPEED_RATE_LIMIT_ARCADE = 2;
+    public static final double SPEED_RATE_LIMIT_ARCADE = 2d;
 
     // Max rate of change for rotation per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double ROTATE_RATE_LIMIT_ARCADE = 5.0;
+    public static final double ROTATE_RATE_LIMIT_ARCADE = 5d;
   }
 
   public static final class AimConstants {
@@ -266,7 +270,8 @@ public final class Constants {
   public static final class ClimbConstants {
 
     public static final int DEVICE_ID_FIRST_STAGE_CLIMB = 12;
-    public static final int DEVICE_ID_SECOND_STAGE_CLIMB = 13;
 
+    public static final double SOFT_LIMIT_FIRST_STAGE_FWD = 430000;
+    public static final double SOFT_LIMIT_FIRST_STAGE_REV = 0;
   }
 }

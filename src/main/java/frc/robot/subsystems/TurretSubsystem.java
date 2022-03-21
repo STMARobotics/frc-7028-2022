@@ -119,6 +119,10 @@ public class TurretSubsystem extends SubsystemBase {
     return nativePosition < SOFT_LIMIT_FORWARD && nativePosition > SOFT_LIMIT_REVERSE;
   }
 
+  public boolean isClearOfClimb() {
+    return getAngleToRobot() > 160 && getAngleToRobot() < 200;
+  }
+
   /**
    * Gets the angle of the turret from its position on the robot. CCW is positive.
    * For reference:

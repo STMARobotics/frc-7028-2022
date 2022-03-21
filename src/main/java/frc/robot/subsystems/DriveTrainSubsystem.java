@@ -137,8 +137,6 @@ public class DriveTrainSubsystem extends SubsystemBase {
     detailLayout.addNumber("Rotation", () -> getCurrentChassisSpeeds().omegaRadiansPerSecond).withPosition(1, 0);
     detailLayout.addString("Pose (X, Y)", this::getFomattedPose).withPosition(0, 1);
     detailLayout.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 1);
-    detailLayout.addNumber("X Velocity", this::getVelocityXComponent);
-    detailLayout.addNumber("Y Velocity", this::getVelocityYComponent);
     dashboard.add(this).withPosition(0, 1);
   }
 
@@ -174,7 +172,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
   private String getFomattedPose() {
     var pose = getCurrentPose();
-    return "(" + pose.getX() + ", " + pose.getY() + ") ";
+    return String.format("(%.2f, %.2f)", pose.getX(), pose.getY());
   }
 
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {

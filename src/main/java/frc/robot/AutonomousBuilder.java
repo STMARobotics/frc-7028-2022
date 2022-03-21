@@ -127,11 +127,14 @@ public class AutonomousBuilder {
   private void buildFourCargo() {
     var startPose = new Pose2d(inchesToMeters(242), inchesToMeters(96), Rotation2d.fromDegrees(-153));
     var cargoOnePose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153));
-    var cargoTwoPose = new Pose2d(inchesToMeters(41.36), inchesToMeters(42), Rotation2d.fromDegrees(-151));
-    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153));
+    var angleAfterCargoOne = 180d;
+    var cargoTwoPose = new Pose2d(inchesToMeters(48.36), inchesToMeters(49), Rotation2d.fromDegrees(-145));
+    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(170));
 
     var command = drivePickupShootTwo(startPose, cargoOnePose)
-        .andThen(drive(withSpeedAndAcceleration(1, .75), cargoOnePose, cargoTwoPose).deadlineWith(loadCargoWithIndexer())
+        .andThen(turnToAngle(angleAfterCargoOne))
+        .andThen(drive(withSpeedAndAcceleration(1, .75), new Pose2d(cargoOnePose.getX(), cargoOnePose.getY(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
+            .deadlineWith(loadCargoWithIndexer())
         .andThen(new PrintCommand("Done driving to human player station"))
         .andThen(waitForCargoCount(2).withTimeout(2)))
         .andThen(new PrintCommand("Done waiting for two cargo at human player station"))
@@ -192,7 +195,7 @@ public class AutonomousBuilder {
    */
   private Command drivePickupShootTwo(Pose2d startPose, Pose2d endPose) {
     return new PrintCommand("Starting auto")
-        .andThen(setPose(startPose).alongWith(setCargoCount(1)).alongWith(deployIntake()))
+        .alongWith(setCargoCount(1)).alongWith(deployIntake())
         .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, endPose)
             .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92))))
         .andThen(new PrintCommand("Done driving"))
@@ -205,8 +208,8 @@ public class AutonomousBuilder {
   }
 
   private Command drive(TrajectoryConfig config, Pose2d... waypoints) {
-    return driveTrainSubsystem.createCommandForTrajectory(
-      generateTrajectory(Arrays.asList(waypoints), config));
+    return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(waypoints[0]), driveTrainSubsystem)
+        .andThen(driveTrainSubsystem.createCommandForTrajectory(generateTrajectory(Arrays.asList(waypoints), config)));
   }
 
   private Command spinUpShooter(double distance) {
@@ -245,10 +248,6 @@ public class AutonomousBuilder {
 
   private Command loadCargoWithoutIndexer() {
     return new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, null);
-  }
-
-  private Command setPose(Pose2d pose) {
-    return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(pose), driveTrainSubsystem);
   }
 
   private Command waitForCargoCount(int count) {

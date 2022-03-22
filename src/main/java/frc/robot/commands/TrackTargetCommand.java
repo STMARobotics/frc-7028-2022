@@ -66,7 +66,7 @@ public class TrackTargetCommand extends CommandBase {
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
     var targetLayout = driverTab.getLayout("Target", BuiltInLayouts.kGrid)
         .withProperties(Map.of("Number of columns", 2, "Number of rows", 1))
-        .withPosition(6, 0).withSize(2, 1);
+        .withPosition(9, 0).withSize(2, 1);
     targetLayout.addBoolean("Distance", () -> distanceToTarget > Units.inchesToMeters(48)).withPosition(0, 0);
     targetLayout.addBoolean("Turret", () -> TurretSubsystem.isInRange(angleToTarget)).withPosition(1, 0);
   }

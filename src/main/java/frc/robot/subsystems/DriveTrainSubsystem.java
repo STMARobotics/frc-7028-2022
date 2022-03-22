@@ -44,7 +44,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
@@ -178,7 +177,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
     // Using `withWidget` is a workaround for https://github.com/wpilibsuite/shuffleboard/issues/724
-    driverTab.add("Field", field2d).withWidget(BuiltInWidgets.kField).withPosition(9, 0).withSize(4, 3);
+    // driverTab.add("Field", field2d).withWidget(BuiltInWidgets.kField).withPosition(9, 0).withSize(4, 3);
   }
 
   /**

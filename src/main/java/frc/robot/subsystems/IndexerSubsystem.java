@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import static frc.robot.Constants.IndexerConstants.DEVICE_ID_INDEXER;
-import static frc.robot.Constants.IndexerConstants.THRESHOLD_FULL;
 import static frc.robot.Constants.IndexerConstants.THRESHOLD_INTAKE;
 import static frc.robot.Constants.IndexerConstants.THRESHOLD_SPACE;
 
@@ -61,7 +60,7 @@ public class IndexerSubsystem extends SubsystemBase {
     colorSensorReader.run();
     // Update the color sensors in the background to prevent loop overrun
     colorSensorNotifier.setName("Color Sensors");
-    colorSensorNotifier.startPeriodic(0.02);
+    colorSensorNotifier.startPeriodic(0.01);
 
     colorMatch.addColorMatch(IndexerConstants.COLOR_RED);
     colorMatch.addColorMatch(IndexerConstants.COLOR_BLUE);
@@ -86,10 +85,10 @@ public class IndexerSubsystem extends SubsystemBase {
 
   public void addDriverDashboardWidgets(ShuffleboardTab dashboard) {
     dashboard.addNumber("Cargo Count", this::getCargoCount).withWidget(BuiltInWidgets.kDial)
-        .withProperties(Map.of("Min", 0, "Max", 0)).withSize(1, 1).withPosition(8, 1);
+        .withProperties(Map.of("Min", 0, "Max", 2)).withSize(1, 1).withPosition(11, 1);
     var colorSensorLayout = dashboard.getLayout("Indexer", BuiltInLayouts.kGrid)
         .withProperties(Map.of("Number of columns", 1, "Number of rows", 3))
-        .withSize(1, 3).withPosition(5, 0);
+        .withSize(1, 3).withPosition(8, 0);
     fullColorWidget = colorSensorLayout.addBoolean("Full", () -> true).withPosition(0, 0);
     spacerColorWidget = colorSensorLayout.addBoolean("Spacer", () -> true).withPosition(0, 1);
     intakeColorWidget = colorSensorLayout.addBoolean("Intake", () -> true).withPosition(0, 2);
@@ -194,7 +193,8 @@ public class IndexerSubsystem extends SubsystemBase {
   }
 
   public boolean isFullSensorTripped() {
-    return colorSensorReader.getFullValues().proximity > THRESHOLD_FULL;
+    return colorMatch.matchClosestColor(colorSensorReader.getFullValues().color).color != IndexerConstants.COLOR_NONE;
+    // return colorSensorReader.getFullValues().proximity > THRESHOLD_FULL;
   }
 
   private boolean isIntakeSensorTripped() {

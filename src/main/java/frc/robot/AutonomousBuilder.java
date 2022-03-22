@@ -81,7 +81,7 @@ public class AutonomousBuilder {
    * @param dashboard dashboard
    */
   public void addDashboardWidgets(ShuffleboardTab dashboard) {
-    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(6, 2);
+    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(9, 2);
   }
 
   /**
@@ -128,7 +128,7 @@ public class AutonomousBuilder {
     var startPose = new Pose2d(inchesToMeters(242), inchesToMeters(96), Rotation2d.fromDegrees(-153));
     var cargoOnePose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153));
     var angleAfterCargoOne = 180d;
-    var cargoTwoPose = new Pose2d(inchesToMeters(48.36), inchesToMeters(49), Rotation2d.fromDegrees(-145));
+    var cargoTwoPose = new Pose2d(inchesToMeters(42.36), inchesToMeters(43), Rotation2d.fromDegrees(-140));
     var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(170));
 
     var command = drivePickupShootTwo(startPose, cargoOnePose)

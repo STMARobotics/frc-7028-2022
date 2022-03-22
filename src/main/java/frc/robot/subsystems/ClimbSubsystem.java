@@ -50,7 +50,7 @@ public class ClimbSubsystem extends SubsystemBase {
 
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
     driverTab.addBoolean("Climb Down", () -> !this.isFirstStageRaised()).withWidget(BuiltInWidgets.kBooleanBox)
-         .withPosition(8, 0).withSize(0, 0);
+         .withPosition(11, 0).withSize(0, 0);
   }
 
   public void setFirstStage(double power) {

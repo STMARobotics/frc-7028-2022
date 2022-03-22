@@ -212,7 +212,7 @@ public class RobotContainer {
     autoBuilder.addDashboardWidgets(Dashboard.driverTab);
     var camera = new HttpCamera("Driver", "http://10.70.28.13:1182");
     if (camera != null) {
-      Dashboard.driverTab.add("Driver Camera", camera).withSize(5, 3).withPosition(0, 0);
+      Dashboard.driverTab.add("Driver Camera", camera).withSize(8, 5).withPosition(0, 0);
     }
   }
 

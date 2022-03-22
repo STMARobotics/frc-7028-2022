@@ -51,6 +51,7 @@ public class IndexerSubsystem extends SubsystemBase {
     indexer.enableVoltageCompensation(12);
     indexer.setIdleMode(IdleMode.kCoast);
     indexer.setOpenLoopRampRate(0.1);
+    indexer.setClosedLoopRampRate(0.1);
     pidController = indexer.getPIDController();
     pidController.setP(IndexerConstants.BELT_kP);
     pidController.setFF(0.00009);

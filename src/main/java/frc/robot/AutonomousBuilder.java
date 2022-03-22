@@ -94,8 +94,8 @@ public class AutonomousBuilder {
 
   private void buildTarmacOne() {
     var command = drivePickupShootTwo(
-      new Pose2d(inchesToMeters(72), inchesToMeters(15), Rotation2d.fromDegrees(0)),
-      new Pose2d(inchesToMeters(148), inchesToMeters(15), Rotation2d.fromDegrees(0)));
+      new Pose2d(inchesToMeters(252), inchesToMeters(217), Rotation2d.fromDegrees(155)),
+      new Pose2d(inchesToMeters(194), inchesToMeters(243), Rotation2d.fromDegrees(155)));
     autoChooser.setDefaultOption("Tarmac 1", command);
   }
 

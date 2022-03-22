@@ -17,6 +17,7 @@ public class TransferSubsystem extends SubsystemBase {
     transferMotor.enableVoltageCompensation(12);
     transferMotor.setIdleMode(IdleMode.kCoast);
     transferMotor.setInverted(true);
+    transferMotor.setOpenLoopRampRate(.1);
     transferMotor.burnFlash();
   }
 
@@ -25,11 +26,11 @@ public class TransferSubsystem extends SubsystemBase {
   }
 
   public void intake() {
-    set(.25);
+    set(.8);
   }
 
   public void output() {
-    set(-.25);
+    set(-.8);
   }
 
   public void stop() {

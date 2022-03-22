@@ -27,6 +27,7 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeMotor.restoreFactoryDefaults();
     intakeMotor.enableVoltageCompensation(12);
     intakeMotor.setIdleMode(IdleMode.kCoast);
+    intakeMotor.setOpenLoopRampRate(.1);
     intakeMotor.burnFlash();
 
     new Trigger(RobotState::isEnabled).whenActive(compressor::enableDigital);
@@ -46,11 +47,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
   
   public void intake() {
-    intakeMotor.set(.8);
+    intakeMotor.set(1d);
   }
   
   public void reverse() {
-    intakeMotor.set(-.5);
+    intakeMotor.set(-1d);
   }
   
   public void stop() {

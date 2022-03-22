@@ -10,7 +10,9 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimbConstants;
 
@@ -44,6 +46,11 @@ public class ClimbSubsystem extends SubsystemBase {
     detailLayout.addNumber("Native Position", firstStageClimb::getSelectedSensorPosition).withPosition(0, 1);
     detailLayout.addBoolean("Rev Limit", () -> firstStageClimb.getSelectedSensorPosition() >= 0).withPosition(1, 1);
     dashboard.add(this).withPosition(0, 1);
+  }
+
+  public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
+    driverTab.addBoolean("Climb Down", () -> !this.isFirstStageRaised()).withWidget(BuiltInWidgets.kBooleanBox)
+         .withPosition(8, 0).withSize(0, 0);
   }
 
   public void setFirstStage(double power) {

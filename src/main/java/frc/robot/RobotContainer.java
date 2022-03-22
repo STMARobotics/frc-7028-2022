@@ -211,6 +211,7 @@ public class RobotContainer {
     shooterSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     indexerSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     trackTargetCommand.addDriverDashboardWidgets(Dashboard.driverTab);
+    climbSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     autoBuilder.addDashboardWidgets(Dashboard.driverTab);
   }
 

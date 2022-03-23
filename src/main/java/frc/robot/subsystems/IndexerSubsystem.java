@@ -60,7 +60,7 @@ public class IndexerSubsystem extends SubsystemBase {
     colorSensorReader.run();
     // Update the color sensors in the background to prevent loop overrun
     colorSensorNotifier.setName("Color Sensors");
-    colorSensorNotifier.startPeriodic(0.01);
+    colorSensorNotifier.startPeriodic(0.02);
 
     colorMatch.addColorMatch(IndexerConstants.COLOR_RED);
     colorMatch.addColorMatch(IndexerConstants.COLOR_BLUE);

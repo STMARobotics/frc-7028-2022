@@ -84,7 +84,7 @@ public final class Constants {
     public static final double RAMP_RATE = 0.2;
     public static final int CLOSED_LOOP_ERROR_TOLERANCE = 200;
 
-    public static final double SHOOT_TIME = 0.25;
+    public static final double SHOOT_TIME = 0.1;
 
     public static final ShootingInterpolator SHOOTING_INTERPOLATOR = new ShootingInterpolator(Map.ofEntries(
       Map.entry(Units.inchesToMeters(40d), 11000d),

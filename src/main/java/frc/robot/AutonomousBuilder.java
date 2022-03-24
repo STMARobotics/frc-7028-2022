@@ -165,7 +165,7 @@ public class AutonomousBuilder {
     var cargoOnePose = new Pose2d(inchesToMeters(310), inchesToMeters(31.5), Rotation2d.fromDegrees(-90));
     var angleAfterCargoOne = 180d;
     var cargoTwoPose = new Pose2d(inchesToMeters(209), inchesToMeters(68), Rotation2d.fromDegrees(165));
-    var cargoThreePose = new Pose2d(inchesToMeters(84), inchesToMeters(52), Rotation2d.fromDegrees(-145));
+    var cargoThreePose = new Pose2d(inchesToMeters(76), inchesToMeters(24), Rotation2d.fromDegrees(-145));
     var shootPose = new Pose2d(inchesToMeters(190), inchesToMeters(86), Rotation2d.fromDegrees(-175));
 
     var command =
@@ -177,12 +177,11 @@ public class AutonomousBuilder {
         .andThen(new PrintCommand("Done driving"))
         .andThen(turnToAngle(angleAfterCargoOne).deadlineWith(loadCargoWithIndexer()))
         .andThen(drive(withSpeedAndAcceleration(1, 1), new Pose2d(cargoOnePose.getX(), cargoOnePose.getY(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
-            .deadlineWith(loadCargoWithIndexer().alongWith(spinUpShooter(inchesToMeters(108)))))
+            .deadlineWith(loadCargoWithIndexer().alongWith(spinUpShooter(inchesToMeters(118)))))
         .andThen(new PrintCommand("Done driving to ball two"))
-        .andThen(shoot(2).withTimeout(4))
-        .andThen(drive(withSpeedAndAcceleration(1, 1), cargoTwoPose, cargoThreePose).deadlineWith(loadCargoWithIndexer())
+        .andThen(shoot(2).withTimeout(10))
+        .andThen(drive(withSpeedAndAcceleration(1, 1), cargoTwoPose, cargoThreePose).deadlineWith(loadCargoWithIndexer()))
         .andThen(new PrintCommand("Done driving to human player"))
-        .andThen(waitForCargoCount(1).withTimeout(2)))
         .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoThreePose, shootPose).deadlineWith(loadCargoWithIndexer()))
         .andThen(shoot(Integer.MAX_VALUE));
       

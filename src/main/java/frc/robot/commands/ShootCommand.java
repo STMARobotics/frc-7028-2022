@@ -164,7 +164,7 @@ public class ShootCommand extends CommandBase {
       // Update the wrongColor variable
       checkAllianceColor();
 
-      if (shooterSubsystem.isReadyToShoot() && (wrongColor || atTarget)) {
+      if ((shooterSubsystem.isReadyToShoot() && (wrongColor || atTarget)) || (cargoToShoot <= 2 && cargoShot > 0)) {
         // Turn the indexer on to put cargo in shooter. It does not have safety so it will stay on until stopped.
         indexerSubsystem.shoot();
       } else {
@@ -180,7 +180,7 @@ public class ShootCommand extends CommandBase {
         if (missTurretPosition == 0) {
           // Aim off from the target to miss the shot for wrong color cargo
           // Only do this once to prevent bouncing back and forth near 180-degrees
-          missTurretPosition = lastTurretPosition > 180 ? -15 : 15;
+          missTurretPosition = lastTurretPosition > 180 ? -20 : 20;
         }
         turretSubsystem.positionToRobotAngle(lastTurretPosition + missTurretPosition);
       } else {

@@ -85,7 +85,7 @@ public class IndexerSubsystem extends SubsystemBase {
 
   public void addDriverDashboardWidgets(ShuffleboardTab dashboard) {
     dashboard.addNumber("Cargo Count", this::getCargoCount).withWidget(BuiltInWidgets.kDial)
-        .withProperties(Map.of("Min", 0, "Max", 2)).withSize(1, 1).withPosition(11, 1);
+        .withProperties(Map.of("Min", 0, "Max", 2)).withSize(1, 1).withPosition(8, 3);
     var colorSensorLayout = dashboard.getLayout("Indexer", BuiltInLayouts.kGrid)
         .withProperties(Map.of("Number of columns", 1, "Number of rows", 3))
         .withSize(1, 3).withPosition(8, 0);

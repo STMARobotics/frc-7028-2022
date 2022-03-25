@@ -24,12 +24,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.EntryListenerFlags;
-import edu.wpi.first.networktables.EntryNotification;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -80,15 +76,15 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
-    var gainEntry = driverTab.addPersistent("Gain", 0).withWidget(BuiltInWidgets.kNumberSlider)
-        .withProperties(Map.of("Max", 60, "Min", -60)).withSize(2, 1).withPosition(9, 1).getEntry();
-    gainEntry.addListener(this::updateGain, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-    gain = gainEntry.getDouble(0);
+    // var gainEntry = driverTab.addPersistent("Gain", 0).withWidget(BuiltInWidgets.kNumberSlider)
+    //     .withProperties(Map.of("Max", 60, "Min", -60)).withSize(2, 1).withPosition(9, 1).getEntry();
+    // gainEntry.addListener(this::updateGain, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+    // gain = gainEntry.getDouble(0);
   }
 
-  private void updateGain(EntryNotification notification) {
-    gain = Units.inchesToMeters(notification.value.getDouble());
-  }
+  // private void updateGain(EntryNotification notification) {
+  //   gain = Units.inchesToMeters(notification.value.getDouble());
+  // }
 
   /**
    * Runs the shooter at the specified velocity

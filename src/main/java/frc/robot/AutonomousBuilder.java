@@ -129,7 +129,7 @@ public class AutonomousBuilder {
     var cargoOnePose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153));
     var angleAfterCargoOne = 180d;
     var cargoTwoPose = new Pose2d(inchesToMeters(42.36), inchesToMeters(43), Rotation2d.fromDegrees(-140));
-    var shootPose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(170));
+    var shootPose = new Pose2d(inchesToMeters(210), inchesToMeters(73.95), Rotation2d.fromDegrees(-174));
 
     var command = drivePickupShootTwo(startPose, cargoOnePose)
         .andThen(turnToAngle(angleAfterCargoOne))

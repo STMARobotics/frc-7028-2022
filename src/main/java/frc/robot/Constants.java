@@ -88,13 +88,13 @@ public final class Constants {
 
     public static final ShootingInterpolator SHOOTING_INTERPOLATOR = new ShootingInterpolator(Map.ofEntries(
       Map.entry(Units.inchesToMeters(40d), 11000d),
-      Map.entry(Units.inchesToMeters(60d), 11550d),
+      Map.entry(Units.inchesToMeters(60d), 12100d),
       Map.entry(Units.inchesToMeters(80d), 12600d),
       Map.entry(Units.inchesToMeters(90d), 12865d),
-      Map.entry(Units.inchesToMeters(100d), 13500d),
-      Map.entry(Units.inchesToMeters(120d), 14200d),
-      Map.entry(Units.inchesToMeters(140d), 15125d),
-      Map.entry(Units.inchesToMeters(160d), 16000d),
+      Map.entry(Units.inchesToMeters(100d), 13375d),
+      Map.entry(Units.inchesToMeters(120d), 14300d),
+      Map.entry(Units.inchesToMeters(140d), 15250d),
+      Map.entry(Units.inchesToMeters(160d), 16350d),
       Map.entry(Units.inchesToMeters(180d), 17200d),
       Map.entry(Units.inchesToMeters(200d), 18100d),
       Map.entry(Units.inchesToMeters(220d), 19000d),

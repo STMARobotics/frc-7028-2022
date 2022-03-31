@@ -226,8 +226,8 @@ public final class Constants {
 
   public static final class DriverConstants {
 
-    public static final double SLOW_MODE_SPEED_MULTIPLIER = .6;
-    public static final double SLOW_MODE_ROTATION_MULTIPLIER = .9;
+    public static final double SLOW_MODE_SPEED_MULTIPLIER = .5;
+    public static final double SLOW_MODE_ROTATION_MULTIPLIER = .6;
 
     public static final double DEADBAND_HIGH = 0.12;
     public static final double DEADBAND_LOW = -DEADBAND_HIGH;

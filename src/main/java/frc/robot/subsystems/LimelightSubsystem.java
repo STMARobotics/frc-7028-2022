@@ -9,13 +9,9 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.InstantWhenDisabledCommand;
 
 /**
  * LimelightSubsystem
@@ -46,10 +42,6 @@ public class LimelightSubsystem extends SubsystemBase {
 
     //this adds listeners on an explicit list
     addLimelightUpdateListeners(limelightNetworkTable, ntTargetValid, ntTargetX, ntTargetY);
-
-    new Trigger(RobotState::isEnabled)
-        .whenActive(new InstantCommand(this::enable))
-        .whenInactive(new InstantWhenDisabledCommand(this::disable));
   }
 
   private void addLimelightUpdateListeners(NetworkTable limelightTable, String... keys) {

@@ -70,7 +70,6 @@ public class TurretSubsystem extends SubsystemBase {
     turretMotor.setNeutralMode(NeutralMode.Brake);
     turretMotor.setSensorPhase(false);
     turretMotor.setInverted(true);
-    // TODO should we also use current limiting in case we DO hit the hard stop?
     turretMotor.setSafetyEnabled(true);
   }
 

@@ -18,11 +18,11 @@ import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.commands.TeleopTurretCommand;
-import frc.robot.commands.TrackTargetCommand;
 import frc.robot.commands.UnloadCargoCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
@@ -46,30 +46,28 @@ public class RobotContainer {
   private final TransferSubsystem transferSubsystem = new TransferSubsystem();
   private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
   private final TurretSubsystem turretSubsystem = new TurretSubsystem();
+  private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem("limelight");
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> driverController.getLeftY(), () -> driverController.getRightX());
 
-  private final TrackTargetCommand trackTargetCommand = new TrackTargetCommand(driveTrainSubsystem::getCurrentPose);
 
-  private final Boolean indoorMode = true;
+  private final Boolean indoorMode = false;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
     // Forward ports for USB access
-    PortForwarder.add(8811, "10.70.28.11", 5801); // Limelight
     PortForwarder.add(8813, "10.70.28.13", 1182); // Jetson
 
     teleDriveCommand.toggleSlowMode();
+    limelightSubsystem.disable();
 
     configureButtonBindings();
     configureSubsystemCommands();
     configureSubsystemDashboard();
     configureDriverDashboard();
-
-    trackTargetCommand.schedule();
   }
 
   /**
@@ -147,7 +145,6 @@ public class RobotContainer {
     shooterSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     driveTrainSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     indexerSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
-    trackTargetCommand.addDriverDashboardWidgets(Dashboard.driverTab);
     var camera = new HttpCamera("Driver", "http://10.70.28.13:1182");
     if (camera != null) {
       Dashboard.driverTab.add("Driver Camera", camera).withSize(8, 5).withPosition(0, 0);

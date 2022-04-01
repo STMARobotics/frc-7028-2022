@@ -128,7 +128,7 @@ public class ShootCommand extends CommandBase {
     this.cargoToShoot = cargoToShoot;
     this.rumble = rumble == null ? (r) -> {} : rumble;
 
-    addRequirements(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem);
+    addRequirements(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem);
   }
 
   @Override

@@ -132,7 +132,13 @@ public class AutonomousBuilder {
     var cargoTwoPose = new Pose2d(inchesToMeters(42.36), inchesToMeters(43), Rotation2d.fromDegrees(-140));
     var shootPose = new Pose2d(inchesToMeters(210), inchesToMeters(73.95), Rotation2d.fromDegrees(-174));
 
-    var command = drivePickupShootTwo(startPose, cargoOnePose)
+    var command = print("Starting auto")
+        .alongWith(setCargoCount(1)).alongWith(deployIntake())
+        .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, cargoOnePose)
+            .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92)), aimTurret()))
+        .andThen(print("Done driving to cargo"))
+        .andThen(shoot(2).withTimeout(3))
+        .andThen(print("Done shooting 2"))
         .andThen(turnToAngle(angleAfterCargoOne))
         .andThen(drive(withSpeedAndAcceleration(1, .75), new Pose2d(cargoOnePose.getTranslation(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
             .deadlineWith(loadCargoWithIndexer())
@@ -167,7 +173,7 @@ public class AutonomousBuilder {
     var angleAfterCargoOne = 180d;
     var cargoTwoPose = new Pose2d(inchesToMeters(198.616), inchesToMeters(73.7), Rotation2d.fromDegrees(165));
     var cargoThreePose = new Pose2d(inchesToMeters(60), inchesToMeters(59), Rotation2d.fromDegrees(-140));
-    var shootPose = new Pose2d(inchesToMeters(210), inchesToMeters(73.95), Rotation2d.fromDegrees(160));
+    var shootPose = new Pose2d(inchesToMeters(198.616), inchesToMeters(73.95), Rotation2d.fromDegrees(160));
 
     var command =
        print("Starting auto")
@@ -210,8 +216,7 @@ public class AutonomousBuilder {
         .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, endPose)
             .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92)), aimTurret()))
         .andThen(print("Done driving to cargo"))
-        .andThen(shoot(2).withTimeout(3))
-        .andThen(print("Done shooting 2"));
+        .andThen(shoot(Integer.MAX_VALUE));
   }
 
   private Command deployIntake() {

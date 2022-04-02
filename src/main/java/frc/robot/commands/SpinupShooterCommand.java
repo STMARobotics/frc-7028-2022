@@ -20,4 +20,9 @@ public class SpinupShooterCommand extends CommandBase {
     shooterSubsystem.prepareToShoot(distance);
   }
 
+  @Override
+  public void end(boolean interrupted) {
+    shooterSubsystem.stop();
+  }
+
 }

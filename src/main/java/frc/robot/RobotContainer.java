@@ -212,7 +212,7 @@ public class RobotContainer {
 
     Dashboard.driverTab.add(new HttpCamera("Driver", "http://10.70.28.13:1182"))
         .withWidget(BuiltInWidgets.kCameraStream)
-        .withProperties(Map.of("showCrosshair", false, "showControls", false))
+        .withProperties(Map.of("showCrosshair", true, "showControls", false))
         .withSize(8, 5).withPosition(0, 0);
     
     Dashboard.driverTab.add(new HttpCamera("limelight", "http://10.70.28.11:5800"))

@@ -247,7 +247,7 @@ public final class Constants {
     public static final double kD = 0.0;
     public static final double AIM_TOLERANCE = 1.5;
 
-    public static final double AIM_ROTATION_SPEED = 0.3;
+    public static final double AIM_ROTATION_SPEED = 1d;
 
     public static final double SLOW_MODE_SPEED_MULTIPLIER = .6;
     public static final double SLOW_MODE_ROTATION_MULTIPLIER = .9;

@@ -202,7 +202,7 @@ public class ShootCommand extends CommandBase {
    * Aims at the target by positioning the turret, and turning the drivetrain if the target it out of reach.
    */
   private void aimAtTarget(double angle) {
-    if (TurretSubsystem.isInRange(angle)) {
+    if (TurretSubsystem.isInShootingRange(angle)) {
       driveTrainSubsystem.stop();
     } else {
       // Turn the drivetrain toward the target

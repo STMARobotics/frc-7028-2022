@@ -4,6 +4,7 @@ import static frc.robot.Constants.AimConstants.AIM_ROTATION_SPEED;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -12,6 +13,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.AimConstants;
+import frc.robot.Constants.DriverConstants;
 import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.DriveTrainSubsystem;
@@ -31,6 +33,7 @@ public class ShootCommand extends CommandBase {
 
   private static final Pose2d fieldOriginOnHubPlane = 
       new Pose2d(-hubPose.getX(), -hubPose.getY(), new Rotation2d());
+  private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(DriverConstants.ROTATE_RATE_LIMIT_ARCADE);
 
   private final ShooterSubsystem shooterSubsystem;
   private final ShooterLimelightSubsystem limelightSubsystem;
@@ -204,10 +207,11 @@ public class ShootCommand extends CommandBase {
   private void aimAtTarget(double angle) {
     if (TurretSubsystem.isInShootingRange(angle)) {
       driveTrainSubsystem.stop();
+      rotationRateLimiter.reset(0);
     } else {
       // Turn the drivetrain toward the target
       var rotation = angle < 180 ? AIM_ROTATION_SPEED : -AIM_ROTATION_SPEED;
-      driveTrainSubsystem.arcadeDrive(0, rotation, false);
+      driveTrainSubsystem.arcadeDrive(0, rotationRateLimiter.calculate(rotation), false);
     }
     turretSubsystem.positionToRobotAngle(angle);
   }
@@ -256,6 +260,7 @@ public class ShootCommand extends CommandBase {
     turretSubsystem.stop();
     indexerSubsystem.stop();
     driveTrainSubsystem.stop();
+    rotationRateLimiter.reset(0);
   }
 
 }

@@ -172,7 +172,7 @@ public class AutonomousBuilder {
     var cargoOnePose = new Pose2d(inchesToMeters(298), inchesToMeters(37), Rotation2d.fromDegrees(-90));
     var angleAfterCargoOne = 180d;
     var cargoTwoPose = new Pose2d(inchesToMeters(198.616), inchesToMeters(73.7), Rotation2d.fromDegrees(165));
-    var cargoThreePose = new Pose2d(inchesToMeters(60), inchesToMeters(59), Rotation2d.fromDegrees(-140));
+    var cargoThreePose = new Pose2d(inchesToMeters(64), inchesToMeters(55), Rotation2d.fromDegrees(-140));
     var shootPose = new Pose2d(inchesToMeters(198.616), inchesToMeters(73.95), Rotation2d.fromDegrees(160));
 
     var command =
@@ -183,11 +183,11 @@ public class AutonomousBuilder {
             .deadlineWith(loadCargoWithIndexer()))
         .andThen(print("Done driving to cargo one"))
         .andThen(turnToAngle(angleAfterCargoOne).deadlineWith(loadCargoWithIndexer()))
-        .andThen(drive(withSpeedAndAcceleration(1, 1.2), new Pose2d(cargoOnePose.getTranslation(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
+        .andThen(driveFromAngle(withSpeedAndAcceleration(1, 1.2), new Pose2d(cargoOnePose.getTranslation(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
             .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(118)), aimTurret()))
         .andThen(print("Done driving to cargo two"))
         .andThen(shoot(1).withTimeout(10))
-        .andThen(shoot(1).withTimeout(4))
+        .andThen(shoot(1).withTimeout(10))
         .andThen(print("Done shooting two cargos"))
         .andThen(drive(withSpeedAndAcceleration(1, 1.2), cargoTwoPose, cargoThreePose).deadlineWith(loadCargoWithIndexer()))
         .andThen(print("Done driving to human player"))
@@ -225,6 +225,12 @@ public class AutonomousBuilder {
 
   private Command drive(TrajectoryConfig config, Pose2d... waypoints) {
     return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(waypoints[0]), driveTrainSubsystem)
+        .andThen(driveTrainSubsystem.createCommandForTrajectory(generateTrajectory(Arrays.asList(waypoints), config))
+        .andThen(() -> driveTrainSubsystem.stop()));
+  }
+
+  private Command driveFromAngle(TrajectoryConfig config, Pose2d... waypoints) {
+    return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d(waypoints[0].getTranslation(), driveTrainSubsystem.getCurrentPose().getRotation())), driveTrainSubsystem)
         .andThen(driveTrainSubsystem.createCommandForTrajectory(generateTrajectory(Arrays.asList(waypoints), config))
         .andThen(() -> driveTrainSubsystem.stop()));
   }

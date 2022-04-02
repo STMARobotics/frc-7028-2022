@@ -81,7 +81,7 @@ public class AutonomousBuilder {
    * @param dashboard dashboard
    */
   public void addDashboardWidgets(ShuffleboardTab dashboard) {
-    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(9, 2);
+    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(9, 1);
   }
 
   /**

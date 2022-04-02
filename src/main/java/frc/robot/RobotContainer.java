@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.LimeLightConstants;
-import frc.robot.commands.ClimbTurretSafetyCommand;
+import frc.robot.commands.ClimbRaisedCommand;
 import frc.robot.commands.IndexCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
@@ -118,8 +118,7 @@ public class RobotContainer {
     // Shooting and Limelight
     new Trigger(() -> driverController.getRightTriggerAxis() > .5)
       .whileActiveContinuous(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
-            driveTrainSubsystem, trackTargetCommand::getAngleToTarget,
-            (r) -> driverController.setRumble(RumbleType.kLeftRumble, r), true));
+            driveTrainSubsystem, trackTargetCommand::getAngleToTarget, true));
 
     // Limelight
     new JoystickButton(driverController, XboxController.Button.kStart.value)
@@ -146,7 +145,7 @@ public class RobotContainer {
     // Position the turret to 180 degrees when the climb is up or the operator is trying to move the climb
     new Trigger(
         () -> climbSubsystem.isFirstStageRaised() || DEADBAND_FILTER.calculate(operatorController.getLeftY()) != 0)
-      .whileActiveContinuous(new ClimbTurretSafetyCommand(turretSubsystem));
+      .whileActiveContinuous(new ClimbRaisedCommand(turretSubsystem, limelightSubsystem));
 
     // TODO remove this when we have a proper sensor on the climb
     new JoystickButton(operatorController, XboxController.Button.kBack.value)
@@ -210,10 +209,16 @@ public class RobotContainer {
     trackTargetCommand.addDriverDashboardWidgets(Dashboard.driverTab);
     climbSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     autoBuilder.addDashboardWidgets(Dashboard.driverTab);
-    var camera = new HttpCamera("Driver", "http://10.70.28.13:1182");
-    if (camera != null) {
-      Dashboard.driverTab.add("Driver Camera", camera).withSize(8, 5).withPosition(0, 0);
-    }
+
+    Dashboard.driverTab.add(new HttpCamera("Driver", "http://10.70.28.13:1182"))
+        .withWidget(BuiltInWidgets.kCameraStream)
+        .withProperties(Map.of("showCrosshair", false, "showControls", false))
+        .withSize(8, 5).withPosition(0, 0);
+    
+    Dashboard.driverTab.add(new HttpCamera("limelight", "http://10.70.28.11:5800"))
+        .withWidget(BuiltInWidgets.kCameraStream)
+        .withProperties(Map.of("showCrosshair", false, "showControls", false))
+        .withSize(4, 3).withPosition(9, 2);
   }
 
   /**

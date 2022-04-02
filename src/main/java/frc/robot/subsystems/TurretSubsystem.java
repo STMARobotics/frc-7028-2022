@@ -106,7 +106,7 @@ public class TurretSubsystem extends SubsystemBase {
     var position = degreesPositionToNativePot(angle);
     turretMotor.set(
         TalonSRXControlMode.Position, 
-        MathUtil.clamp(position, TurretConstants.SOFT_LIMIT_REVERSE + 1, SOFT_LIMIT_FORWARD - 1));
+        MathUtil.clamp(position, SOFT_LIMIT_REVERSE + 1, SOFT_LIMIT_FORWARD - 1));
   }
 
   /**
@@ -115,8 +115,23 @@ public class TurretSubsystem extends SubsystemBase {
    * @return true if in range, false if out of range
    */
   public static boolean isInRange(double angle) {
-    var nativePosition = degreesPositionToNativePot(angle);
-    return nativePosition < SOFT_LIMIT_FORWARD && nativePosition > SOFT_LIMIT_REVERSE;
+    var boundFwdDegrees = nativePotPositionToDegrees(SOFT_LIMIT_FORWARD - 1);
+    var boundRevDegrees = nativePotPositionToDegrees(SOFT_LIMIT_REVERSE + 1);
+
+    return angle > boundFwdDegrees && angle < boundRevDegrees;
+  }
+
+    /**
+   * Returns true if the specified angle is within the range of the turret for {@link #positionToRobotAngle(double)}
+   * plus one degree of wiggle room on each end.
+   * @param angle angle to check
+   * @return true if in range, false if out of range
+   */
+  public static boolean isInShootingRange(double angle) {
+    var boundFwdDegrees = nativePotPositionToDegrees(SOFT_LIMIT_FORWARD - 1) + 5;
+    var boundRevDegrees = nativePotPositionToDegrees(SOFT_LIMIT_REVERSE + 1) - 5;
+
+    return angle > boundFwdDegrees && angle < boundRevDegrees;
   }
 
   public boolean isClearOfClimb() {

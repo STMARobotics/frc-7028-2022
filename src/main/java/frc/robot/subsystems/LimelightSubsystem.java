@@ -37,6 +37,7 @@ public class LimelightSubsystem extends SubsystemBase {
   private final HashMap<String, MedianFilter> updateFilterMap = new HashMap<>();
   
   private boolean enabled;
+  private boolean driverMode;
   private Profile activeProfile = Profile.NEAR;
 
   public LimelightSubsystem(String networkTableName) {
@@ -96,7 +97,7 @@ public class LimelightSubsystem extends SubsystemBase {
         limelightNetworkTable.getEntry("pipeline").getDouble(0.0) != activeProfile.pipelineId);
   
     limelightNetworkTable.getEntry("ledMode").setDouble(enabled ? 0.0 : 1.0);
-    limelightNetworkTable.getEntry("camMode").setDouble(enabled ? 0.0 : 0.0);
+    limelightNetworkTable.getEntry("camMode").setDouble(driverMode ? 1.0 : 0.0);
     limelightNetworkTable.getEntry("pipeline").setDouble(activeProfile.pipelineId);
   
     if (shouldFlush)  {
@@ -121,10 +122,11 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   /**
-   * Turns the LEDS off and switches camera mode to driver.
+   * Turns the LEDS off and switches the camera mode to vision processor.
    */
   public void disable() {
     enabled = false;
+    driverMode = false;
   }
 
   /**
@@ -133,6 +135,15 @@ public class LimelightSubsystem extends SubsystemBase {
    */
   public void enable() {
     enabled = true;
+    driverMode = false;
+  }
+
+  /**
+   * Sets the LEDs to off and switches the camera to driver mode.
+   */
+  public void driverMode() {
+    enabled = false;
+    driverMode = true;
   }
 
   public void setProfile(final Profile profile) {

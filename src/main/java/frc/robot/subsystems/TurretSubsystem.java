@@ -128,8 +128,8 @@ public class TurretSubsystem extends SubsystemBase {
    * @return true if in range, false if out of range
    */
   public static boolean isInShootingRange(double angle) {
-    var boundFwdDegrees = nativePotPositionToDegrees(SOFT_LIMIT_FORWARD - 1) - 5;
-    var boundRevDegrees = nativePotPositionToDegrees(SOFT_LIMIT_REVERSE + 1) + 5;
+    var boundFwdDegrees = nativePotPositionToDegrees(SOFT_LIMIT_FORWARD - 1) + 5;
+    var boundRevDegrees = nativePotPositionToDegrees(SOFT_LIMIT_REVERSE + 1) - 5;
 
     return angle > boundFwdDegrees && angle < boundRevDegrees;
   }

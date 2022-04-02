@@ -26,6 +26,7 @@ import frc.robot.commands.ClimbRaisedCommand;
 import frc.robot.commands.IndexCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoCommand;
+import frc.robot.commands.PositionTurretCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.commands.TeleopClimbCommand;
@@ -125,7 +126,8 @@ public class RobotContainer {
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
     
     new Trigger(() -> driverController.getLeftTriggerAxis() > .5).whileActiveContinuous(
-        new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 5000));
+        new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 11000)
+          .alongWith(new PositionTurretCommand(turretSubsystem, 180)));
 
     // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)

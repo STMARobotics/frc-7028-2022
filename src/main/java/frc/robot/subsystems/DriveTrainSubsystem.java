@@ -96,11 +96,9 @@ public class DriveTrainSubsystem extends SubsystemBase {
     talonConfig.openloopRamp = DriveTrainConstants.OPEN_LOOP_RAMP;
 
     rightLeader.configAllSettings(talonConfig);
-    rightLeader.enableVoltageCompensation(true);
-    rightLeader.enableVoltageCompensation(true);
     rightFollower.configFactoryDefault();
     leftLeader.configAllSettings(talonConfig);
-    leftLeader.enableVoltageCompensation(true);
+
     leftFollower.configFactoryDefault();
 
     rightLeader.setSafetyEnabled(true);
@@ -300,12 +298,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
         ControlMode.Velocity, 
         metersPerSecToEdgesPerDecisec(leftVelocity), 
         DemandType.ArbitraryFeedForward,
-        leftFeedForwardVolts / 12);
+        leftFeedForwardVolts / RobotController.getBatteryVoltage());
     rightLeader.set(
         ControlMode.Velocity,
         metersPerSecToEdgesPerDecisec(rightVelocity),
         DemandType.ArbitraryFeedForward,
-        rightFeedForwardVolts / 12);
+        rightFeedForwardVolts / RobotController.getBatteryVoltage());
   }
 
   /**

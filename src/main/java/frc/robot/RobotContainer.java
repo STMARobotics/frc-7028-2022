@@ -17,15 +17,16 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.LimeLightConstants;
 import frc.robot.commands.ClimbRaisedCommand;
 import frc.robot.commands.IndexCommand;
 import frc.robot.commands.JustShootCommand;
-import frc.robot.commands.LoadCargoCommand;
+import frc.robot.commands.LoadCargoTelopCommand;
 import frc.robot.commands.PositionTurretCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
@@ -68,6 +69,8 @@ public class RobotContainer {
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
+
+  private final LoadCargoTelopCommand loadCargo = new LoadCargoTelopCommand(intakeSubsystem, transferSubsystem);
 
   private final TeleopClimbCommand teleopClimbCommand = new TeleopClimbCommand(
       climbSubsystem, () -> -operatorController.getLeftY(),
@@ -130,19 +133,28 @@ public class RobotContainer {
           .alongWith(new PositionTurretCommand(turretSubsystem, 180)));
 
     // Intake/transfer/indexer
-    new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
-        .whileHeld(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
+    // new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
+    //     .whileHeld(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
 
-    new JoystickButton(driverController, XboxController.Button.kRightBumper.value).whileHeld(new LoadCargoCommand(
-        intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, 
-        (r) -> driverController.setRumble(RumbleType.kRightRumble, r)));
+    // new JoystickButton(driverController, XboxController.Button.kRightBumper.value).whileHeld(new LoadCargoCommand(
+    //     intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, 
+    //     (r) -> driverController.setRumble(RumbleType.kRightRumble, r)));
 
     // Operator
     new JoystickButton(operatorController, XboxController.Button.kStart.value)
         .whenPressed(intakeSubsystem::toggleCompressorEnabled);
 
-    new POVButton(operatorController, 0).whenPressed(intakeSubsystem::deploy);
-    new POVButton(operatorController, 180).whenPressed(intakeSubsystem::retract);
+    new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
+        .whenPressed(new ScheduleCommand(loadCargo));
+    new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
+        .whenPressed(() -> CommandScheduler.getInstance().cancel(loadCargo));
+
+    new JoystickButton(operatorController, XboxController.Button.kA.value)
+        .whileHeld(new StartEndCommand(intakeSubsystem::deploy, intakeSubsystem::retract)
+        .alongWith(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem)));
+
+    // new POVButton(operatorController, 0).whenPressed(intakeSubsystem::deploy);
+    // new POVButton(operatorController, 180).whenPressed(intakeSubsystem::retract);
 
     // Position the turret to 180 degrees when the climb is up or the operator is trying to move the climb
     new Trigger(

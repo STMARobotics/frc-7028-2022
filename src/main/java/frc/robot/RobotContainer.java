@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -33,7 +32,7 @@ import frc.robot.commands.TeleDriveCommand;
 import frc.robot.commands.TeleopClimbCommand;
 import frc.robot.commands.TeleopTurretCommand;
 import frc.robot.commands.TrackTargetCommand;
-import frc.robot.commands.UnloadCargoCommand;
+import frc.robot.commands.UnloadCargoTeleopCommand;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -71,6 +70,7 @@ public class RobotContainer {
       driveTrainSubsystem, () -> -driverController.getLeftY(), () -> driverController.getRightX());
 
   private final LoadCargoTelopCommand loadCargo = new LoadCargoTelopCommand(intakeSubsystem, transferSubsystem);
+  private final UnloadCargoTeleopCommand unloadCargo = new UnloadCargoTeleopCommand(intakeSubsystem, transferSubsystem, indexerSubsystem);
 
   private final TeleopClimbCommand teleopClimbCommand = new TeleopClimbCommand(
       climbSubsystem, () -> -operatorController.getLeftY(),
@@ -145,13 +145,14 @@ public class RobotContainer {
         .whenPressed(intakeSubsystem::toggleCompressorEnabled);
 
     new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
-        .whenPressed(new ScheduleCommand(loadCargo));
-    new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
-        .whenPressed(() -> CommandScheduler.getInstance().cancel(loadCargo));
+        .whenPressed(loadCargo);
+
+        new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
+        .whenPressed(() -> CommandScheduler.getInstance().cancel(loadCargo))
+        .whenPressed(() -> CommandScheduler.getInstance().cancel(unloadCargo));
 
     new JoystickButton(operatorController, XboxController.Button.kA.value)
-        .whileHeld(new StartEndCommand(intakeSubsystem::deploy, intakeSubsystem::retract)
-        .alongWith(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem)));
+        .whenPressed(unloadCargo);
 
     // new POVButton(operatorController, 0).whenPressed(intakeSubsystem::deploy);
     // new POVButton(operatorController, 180).whenPressed(intakeSubsystem::retract);

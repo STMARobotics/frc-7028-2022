@@ -129,7 +129,7 @@ public class AutonomousBuilder {
     var startPose = new Pose2d(inchesToMeters(242), inchesToMeters(96), Rotation2d.fromDegrees(-153));
     var cargoOnePose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153));
     var angleAfterCargoOne = 180d;
-    var cargoTwoPose = new Pose2d(inchesToMeters(42.36), inchesToMeters(43), Rotation2d.fromDegrees(-140));
+    var cargoTwoPose = new Pose2d(inchesToMeters(46), inchesToMeters(49), Rotation2d.fromDegrees(-140));
     var shootPose = new Pose2d(inchesToMeters(210), inchesToMeters(73.95), Rotation2d.fromDegrees(-174));
 
     var command = print("Starting auto")
@@ -171,8 +171,8 @@ public class AutonomousBuilder {
     var startPose = new Pose2d(inchesToMeters(298), inchesToMeters(72.5), Rotation2d.fromDegrees(-90));
     var cargoOnePose = new Pose2d(inchesToMeters(298), inchesToMeters(37), Rotation2d.fromDegrees(-90));
     var angleAfterCargoOne = 180d;
-    var cargoTwoPose = new Pose2d(inchesToMeters(198.616), inchesToMeters(73.7), Rotation2d.fromDegrees(165));
-    var cargoThreePose = new Pose2d(inchesToMeters(64), inchesToMeters(55), Rotation2d.fromDegrees(-140));
+    var cargoTwoPose = new Pose2d(inchesToMeters(193), inchesToMeters(73.7), Rotation2d.fromDegrees(165));
+    var cargoThreePose = new Pose2d(inchesToMeters(68), inchesToMeters(45), Rotation2d.fromDegrees(-140));
     var shootPose = new Pose2d(inchesToMeters(198.616), inchesToMeters(73.95), Rotation2d.fromDegrees(160));
 
     var command =

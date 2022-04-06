@@ -121,6 +121,7 @@ public class RobotContainer {
   
     // Shooting and Limelight
     new Trigger(() -> driverController.getRightTriggerAxis() > .5)
+      .whenActive(() -> CommandScheduler.getInstance().cancel(loadCargo))
       .whileActiveContinuous(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
             driveTrainSubsystem, trackTargetCommand::getAngleToTarget, true));
 
@@ -132,30 +133,16 @@ public class RobotContainer {
         new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 11000)
           .alongWith(new PositionTurretCommand(turretSubsystem, 180)));
 
-    // Intake/transfer/indexer
-    // new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
-    //     .whileHeld(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
-
-    // new JoystickButton(driverController, XboxController.Button.kRightBumper.value).whileHeld(new LoadCargoCommand(
-    //     intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, 
-    //     (r) -> driverController.setRumble(RumbleType.kRightRumble, r)));
-
     // Operator
-    new JoystickButton(operatorController, XboxController.Button.kStart.value)
-        .whenPressed(intakeSubsystem::toggleCompressorEnabled);
-
     new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
         .whenPressed(loadCargo);
 
-        new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
+    new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
         .whenPressed(() -> CommandScheduler.getInstance().cancel(loadCargo))
         .whenPressed(() -> CommandScheduler.getInstance().cancel(unloadCargo));
 
     new JoystickButton(operatorController, XboxController.Button.kA.value)
         .whenPressed(unloadCargo);
-
-    // new POVButton(operatorController, 0).whenPressed(intakeSubsystem::deploy);
-    // new POVButton(operatorController, 180).whenPressed(intakeSubsystem::retract);
 
     // Position the turret to 180 degrees when the climb is up or the operator is trying to move the climb
     new Trigger(
@@ -174,6 +161,10 @@ public class RobotContainer {
         turretSubsystem, operatorController::getRightTriggerAxis, operatorController::getLeftTriggerAxis));
     indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
     climbSubsystem.setDefaultCommand(teleopClimbCommand);
+  }
+
+  public void teleopInit() {
+    intakeSubsystem.retract();
   }
 
   /**

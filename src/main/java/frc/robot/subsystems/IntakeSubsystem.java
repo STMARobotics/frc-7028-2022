@@ -33,19 +33,6 @@ public class IntakeSubsystem extends SubsystemBase {
     new Trigger(RobotState::isEnabled).whenActive(compressor::enableDigital);
   }
 
-  /**
-   * Toggles the compressor on or off
-   * @return returns the new status of the compressor
-   */
-  public boolean toggleCompressorEnabled() {
-    if (compressor.enabled()) {
-      compressor.disable();
-      return false;
-    }
-    compressor.enableDigital();
-    return true;
-  }
-  
   public void intake() {
     intakeMotor.set(1d);
   }

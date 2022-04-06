@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.IndexerConstants.COLOR_BLUE;
+import static frc.robot.Constants.IndexerConstants.COLOR_NONE;
+import static frc.robot.Constants.IndexerConstants.COLOR_RED;
 import static frc.robot.Constants.IndexerConstants.DEVICE_ID_INDEXER;
 import static frc.robot.Constants.IndexerConstants.THRESHOLD_INTAKE;
 import static frc.robot.Constants.IndexerConstants.THRESHOLD_SPACE;
@@ -15,6 +18,8 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -35,8 +40,8 @@ public class IndexerSubsystem extends SubsystemBase {
   
   private final ColorSensorReader colorSensorReader = new ColorSensorReader();
   private final Notifier colorSensorNotifier = new Notifier(colorSensorReader);
+  private final Debouncer fullSensorDebouncer = new Debouncer(0.1, DebounceType.kFalling);
 
-  private boolean shooting;
   private int cargoCount = 0;
 
   private SuppliedValueWidget<Boolean> intakeColorWidget;
@@ -63,9 +68,9 @@ public class IndexerSubsystem extends SubsystemBase {
     colorSensorNotifier.setName("Color Sensors");
     colorSensorNotifier.startPeriodic(0.02);
 
-    colorMatch.addColorMatch(IndexerConstants.COLOR_RED);
-    colorMatch.addColorMatch(IndexerConstants.COLOR_BLUE);
-    colorMatch.addColorMatch(IndexerConstants.COLOR_NONE);
+    colorMatch.addColorMatch(COLOR_RED);
+    colorMatch.addColorMatch(COLOR_BLUE);
+    colorMatch.addColorMatch(COLOR_NONE);
 
     // Add triggers for cargo count management
     new Trigger(this::isFullSensorTripped).whenInactive(this::fullSensorCleared);
@@ -140,11 +145,6 @@ public class IndexerSubsystem extends SubsystemBase {
     }
   }
 
-  public boolean isReadyForCargo() {
-    return (!isIntakeSensorTripped() && !isSpacerSensorTripped() && !isFullSensorTripped())
-        || (shooting && !isIntakeSensorTripped() && !isSpacerSensorTripped());
-  }
-
   @Override
   public void periodic() {
     // Update the dashboard with color indicators
@@ -159,43 +159,47 @@ public class IndexerSubsystem extends SubsystemBase {
   private String getColorMatchString(Color color) {
     var colorMatchResult = colorMatch.matchClosestColor(color);
     String intakeColorString = "Black";
-    if (colorMatchResult.color == IndexerConstants.COLOR_NONE){
+    if (colorMatchResult.color == COLOR_NONE){
       intakeColorString = "Black";
-    } else if(colorMatchResult.color == IndexerConstants.COLOR_RED){
+    } else if(colorMatchResult.color == COLOR_RED){
       intakeColorString = "Red";
-    } else if(colorMatchResult.color == IndexerConstants.COLOR_BLUE){
+    } else if(colorMatchResult.color == COLOR_BLUE){
       intakeColorString = "Blue";
     }
     return intakeColorString;
   }
 
   /**
-   * Returns the color detected by the intake sensor if there is something in front of it, otherwise null.
-   * @return the color detected or null if nothing in front of the sensor
+   * Returns the color detected by the intake sensor
+   * @return the color detected
    */
   public Color getIntakeColor() {
     return colorMatch.matchClosestColor(colorSensorReader.getIntakeValues().color).color;
   }
 
   /**
-   * Returns the color detected by the spacer sensor if there is something in front of it, otherwise null.
-   * @return the color detected or null if nothing in front of the sensor
+   * Returns the color detected by the spacer sensor
+   * @return the color detected
    */
   public Color getSpacerColor() {
      return colorMatch.matchClosestColor(colorSensorReader.getSpacerValues().color).color;
   }
 
   /**
-   * Returns the color detected by the full sensor if there is something in front of it, otherwise null.
-   * @return the color detected or null if nothing in front of the sensor
+   * Returns the color detected by the full sensor
+   * @return the color detected
    */
   public Color getFullColor() {
     return colorMatch.matchClosestColor(colorSensorReader.getFullValues().color).color;
   }
 
+  /**
+   * Returns true when the full sensor is tripped. The falling edge is debounced.
+   * @return true if the full sensor is tripped, otherwise false
+   */
   public boolean isFullSensorTripped() {
-    return colorMatch.matchClosestColor(colorSensorReader.getFullValues().color).color != IndexerConstants.COLOR_NONE;
-    // return colorSensorReader.getFullValues().proximity > THRESHOLD_FULL;
+    var sensorTripped = colorMatch.matchClosestColor(colorSensorReader.getFullValues().color).color != COLOR_NONE;
+    return fullSensorDebouncer.calculate(sensorTripped);
   }
 
   private boolean isIntakeSensorTripped() {
@@ -204,10 +208,6 @@ public class IndexerSubsystem extends SubsystemBase {
 
   public boolean isSpacerSensorTripped() {
     return colorSensorReader.getSpacerValues().proximity > THRESHOLD_SPACE;
-  }
-
-  public boolean isRunning() {
-    return indexer.getOutputCurrent() != 0;
   }
 
   public int getCargoCount() {
@@ -220,22 +220,18 @@ public class IndexerSubsystem extends SubsystemBase {
 
   public void load() {
     pidController.setReference(IndexerConstants.BELT_RUN_SPEED, ControlType.kVelocity);
-    shooting = false;
   }
 
   public void unload() {
     indexer.set(-.5);
-    shooting = false;
   }
 
   public void shoot() {
     pidController.setReference(IndexerConstants.BELT_SHOOT_SPEED, ControlType.kVelocity);
-    shooting = true;
   }
 
   public void stop() {
     pidController.setReference(0, ControlType.kVelocity);
-    shooting = false;
   }
 
 }

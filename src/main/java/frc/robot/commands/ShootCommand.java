@@ -4,8 +4,6 @@ import static frc.robot.Constants.AimConstants.AIM_ROTATION_SPEED;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -34,7 +32,6 @@ public class ShootCommand extends CommandBase {
       new Pose2d(-hubPose.getX(), -hubPose.getY(), new Rotation2d());
 
   private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(DriverConstants.ROTATE_RATE_LIMIT_ARCADE);
-  private final Debouncer fullDebouncer = new Debouncer(0.1, DebounceType.kFalling);
 
   private final ShooterSubsystem shooterSubsystem;
   private final ShooterLimelightSubsystem limelightSubsystem;
@@ -186,7 +183,7 @@ public class ShootCommand extends CommandBase {
       }
 
       // Check for full sensor falling edge while shooting (a ball left the top of the indexer)
-      var isFull = fullDebouncer.calculate(indexerSubsystem.isFullSensorTripped());
+      var isFull = indexerSubsystem.isFullSensorTripped();
       if (wasFull && !isFull && isShooting) {
         cargoShot++;
         System.out.println("Shot " + cargoShot + " cargo");

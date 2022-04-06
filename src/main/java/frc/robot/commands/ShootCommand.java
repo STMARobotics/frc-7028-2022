@@ -46,11 +46,13 @@ public class ShootCommand extends CommandBase {
 
   private int cargoShot = 0;
   private boolean wasFull = false;
-  private Timer endTimer = new Timer();
+  private Timer shootTimer = new Timer();
   private double lastTargetDistance = 0;
   private double lastTurretPosition = 0;
   private boolean wrongColor = false;
   private double missTurretOffset = 0d;
+  private boolean isWaitingForShot;
+  private boolean isIndexerShooting;
 
   /**
    * Constructs a shoot command that will shoot at least the specified number of cargo
@@ -133,12 +135,14 @@ public class ShootCommand extends CommandBase {
   public void initialize() {
     limelightSubsystem.enable();
     lastTargetDistance = 0;
-    lastTurretPosition = 0;
+    lastTurretPosition = turretSubsystem.getAngleToRobot();
     cargoShot = 0;
     wasFull = indexerSubsystem.isFullSensorTripped();
-    endTimer.reset();
+    shootTimer.reset();
     wrongColor = false;
     missTurretOffset = 0;
+    isWaitingForShot = false;
+    isIndexerShooting = false;
   }
 
   @Override
@@ -160,9 +164,10 @@ public class ShootCommand extends CommandBase {
       // Update the wrongColor variable
       checkAllianceColor();
 
-      if (shooterSubsystem.isReadyToShoot() && (wrongColor || atTarget)) {
+      if ((shooterSubsystem.isReadyToShoot() && (wrongColor || atTarget)) || isWaitingForShot) {
         // Turn the indexer on to put cargo in shooter
         indexerSubsystem.shoot();
+        isIndexerShooting = true;
       } else {
         // Indexer can raise cargo up to the shooter while it's spinning up and aiming
         indexerSubsystem.prepareToShoot();
@@ -184,11 +189,19 @@ public class ShootCommand extends CommandBase {
       }
 
       var isFull = indexerSubsystem.isFullSensorTripped();
-      if ((wasFull && !isFull) && (++cargoShot >= cargoToShoot)) {
+      if (wasFull && !isFull && !isWaitingForShot) {
+        cargoShot++;
         System.out.println("Shot " + cargoShot + " cargo, waiting for timeout");
-        endTimer.start();
+        shootTimer.start();
+        isWaitingForShot = true;
       }
       wasFull = isFull;
+
+      if (isIndexerShooting && isWaitingForShot && shootTimer.hasElapsed(ShooterConstants.SHOOT_TIME)) {
+        isWaitingForShot = false;
+        isIndexerShooting = false;
+        shootTimer.reset();
+      }
       
       if (atTarget && resetPose) {
         // Reset robot pose
@@ -251,7 +264,7 @@ public class ShootCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return (cargoShot >= cargoToShoot && endTimer.hasElapsed(ShooterConstants.SHOOT_TIME));
+    return (cargoShot >= cargoToShoot && !isWaitingForShot);
   }
 
   @Override

@@ -71,4 +71,12 @@ public class ShootingInterpolator {
     return (low_speed + (distance - low_distance) * (high_speed - low_speed) / (high_distance - low_distance));
   }
 
+  public double getMax() {
+    return knownValuesMap.lastKey();
+  }
+
+  public double getMin() {
+    return knownValuesMap.firstKey();
+  }
+
 }

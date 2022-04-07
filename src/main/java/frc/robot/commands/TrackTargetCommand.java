@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static frc.robot.Constants.ShooterConstants.SHOOTING_INTERPOLATOR;
+
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -19,6 +21,9 @@ public class TrackTargetCommand extends CommandBase {
   // The hub is in the center of the field. The field is 54' x 27'
   private static final Pose2d hubPose = 
       new Pose2d(Units.inchesToMeters(54 * 12) / 2, Units.inchesToMeters(27 * 12) / 2, new Rotation2d());
+
+  private static final double MIN_DISTANCE = SHOOTING_INTERPOLATOR.getMin() + Units.inchesToMeters(24d);
+  private static final double MAX_DISTANCE = SHOOTING_INTERPOLATOR.getMax() + Units.inchesToMeters(24d);
 
   private final Supplier<Pose2d> poseSupplier;
   private double angleToTarget;
@@ -67,7 +72,7 @@ public class TrackTargetCommand extends CommandBase {
     var targetLayout = driverTab.getLayout("Target", BuiltInLayouts.kGrid)
         .withProperties(Map.of("Number of columns", 2, "Number of rows", 1))
         .withPosition(9, 0).withSize(2, 1);
-    targetLayout.addBoolean("Distance", () -> distanceToTarget > Units.inchesToMeters(48)).withPosition(0, 0);
+    targetLayout.addBoolean("Distance", this::isDistanceInRange).withPosition(0, 0);
     targetLayout.addBoolean("Turret", () -> TurretSubsystem.isInRange(angleToTarget)).withPosition(1, 0);
   }
 
@@ -77,6 +82,10 @@ public class TrackTargetCommand extends CommandBase {
    */
   public double getAngleToTarget() {
     return angleToTarget;
+  }
+
+  public boolean isDistanceInRange() {
+    return distanceToTarget >= MIN_DISTANCE && distanceToTarget <= MAX_DISTANCE;
   }
 
   @Override

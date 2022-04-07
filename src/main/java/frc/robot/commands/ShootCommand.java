@@ -1,7 +1,9 @@
 package frc.robot.commands;
 
 import static frc.robot.Constants.AimConstants.AIM_ROTATION_SPEED;
+import static frc.robot.Constants.ShooterConstants.SHOOTING_INTERPOLATOR;
 
+import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -33,6 +35,10 @@ public class ShootCommand extends CommandBase {
 
   private static final Pose2d fieldOriginOnHubPlane = 
       new Pose2d(-hubPose.getX(), -hubPose.getY(), new Rotation2d());
+  
+  private static final double MAX_DISTANCE = SHOOTING_INTERPOLATOR.getMax();
+  private static final double MIN_DISTANCE = SHOOTING_INTERPOLATOR.getMin();
+
   private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(DriverConstants.ROTATE_RATE_LIMIT_ARCADE);
 
   private final ShooterSubsystem shooterSubsystem;
@@ -43,6 +49,7 @@ public class ShootCommand extends CommandBase {
   private final DoubleSupplier targetAngleProvider;
   private final boolean resetPose;
   private final int cargoToShoot;
+ private final DoubleConsumer rumble;
 
   private int cargoShot = 0;
   private boolean wasFull = false;
@@ -73,7 +80,7 @@ public class ShootCommand extends CommandBase {
       DoubleSupplier targetAngleProvider,
       int cargoToShoot) {
     this(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem,
-        targetAngleProvider, false, cargoToShoot);
+        targetAngleProvider, false, cargoToShoot, null);
   }
 
   /**
@@ -93,9 +100,10 @@ public class ShootCommand extends CommandBase {
       IndexerSubsystem indexerSubsystem,
       DriveTrainSubsystem driveTrainSubsystem,
       DoubleSupplier targetAngleProvider,
-      boolean resetPose) {
+      boolean resetPose,
+      DoubleConsumer rumble) {
     this(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem,
-        targetAngleProvider, resetPose, Integer.MAX_VALUE);
+        targetAngleProvider, resetPose, Integer.MAX_VALUE, rumble);
   }
 
   /**
@@ -118,7 +126,8 @@ public class ShootCommand extends CommandBase {
       DriveTrainSubsystem driveTrainSubsystem,
       DoubleSupplier targetAngleProvider,
       boolean resetPose,
-      int cargoToShoot) {
+      int cargoToShoot,
+      DoubleConsumer rumble) {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
     this.turretSubsystem = turretSubsystem;
@@ -127,6 +136,7 @@ public class ShootCommand extends CommandBase {
     this.targetAngleProvider = targetAngleProvider;
     this.resetPose = resetPose;
     this.cargoToShoot = cargoToShoot;
+    this.rumble = rumble == null ? (r) -> {} : rumble;
 
     addRequirements(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem, driveTrainSubsystem);
   }
@@ -154,6 +164,16 @@ public class ShootCommand extends CommandBase {
 
     // If we have a target distance, spin up and shoot
     if (lastTargetDistance > 0) {
+      if (lastTargetDistance > MAX_DISTANCE || lastTargetDistance < MIN_DISTANCE) {
+        // Target out of range, rumble and exit
+        rumble.accept(1);
+        shooterSubsystem.stop();
+        indexerSubsystem.stop();
+        aimAtTarget(targetAngleProvider.getAsDouble());
+        return;
+      }
+      rumble.accept(0);
+
       shooterSubsystem.prepareToShoot(lastTargetDistance);
       // We're not going to worry about losing the target for rotation because Limelight returns target X of 0 when no
       // target is visible, so we just won't rotate when no target is visible (although we may shoot since we're at
@@ -274,6 +294,7 @@ public class ShootCommand extends CommandBase {
     indexerSubsystem.stop();
     driveTrainSubsystem.stop();
     rotationRateLimiter.reset(0);
+    rumble.accept(0);
   }
 
 }

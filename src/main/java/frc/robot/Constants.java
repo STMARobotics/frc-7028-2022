@@ -96,9 +96,7 @@ public final class Constants {
       Map.entry(Units.inchesToMeters(140d), 15250d),
       Map.entry(Units.inchesToMeters(160d), 16350d),
       Map.entry(Units.inchesToMeters(180d), 17200d),
-      Map.entry(Units.inchesToMeters(200d), 18100d),
-      Map.entry(Units.inchesToMeters(220d), 19000d),
-      Map.entry(Units.inchesToMeters(240d), 20000d)));
+      Map.entry(Units.inchesToMeters(200d), 18100d)));
   }
 
   public static final class TurretConstants {

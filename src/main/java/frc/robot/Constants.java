@@ -111,9 +111,9 @@ public final class Constants {
 
     // Native sensor units are in range of [0,1023], or [-1023,0] when sensor phase is true (inverted)
     /** Forward soft limit in native sensor units */
-    public static final int SOFT_LIMIT_FORWARD = -152;
+    public static final int SOFT_LIMIT_FORWARD = -442;
     /** Reverse soft limit in native sensor units */
-    public static final int SOFT_LIMIT_REVERSE = -400;
+    public static final int SOFT_LIMIT_REVERSE = -695;
     
     /** Range of motion between soft limits in degrees */
     public static final double RANGE_OF_MOTION = 183;
@@ -233,7 +233,7 @@ public final class Constants {
     public static final DeadbandFilter DEADBAND_FILTER = new DeadbandFilter(DEADBAND_LOW, DEADBAND_HIGH);
 
     // Max rate of change for speed per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double SPEED_RATE_LIMIT_ARCADE = 2d;
+    public static final double SPEED_RATE_LIMIT_ARCADE = 1.75d;
 
     // Max rate of change for rotation per second (1 / <value> is the number of seconds allowed to go from 0 to max)
     public static final double ROTATE_RATE_LIMIT_ARCADE = 5d;

@@ -27,6 +27,7 @@ import frc.robot.commands.IndexCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LoadCargoTelopCommand;
 import frc.robot.commands.PositionTurretCommand;
+import frc.robot.commands.RumbleCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.commands.TeleopClimbCommand;
@@ -74,7 +75,7 @@ public class RobotContainer {
 
   private final TeleopClimbCommand teleopClimbCommand = new TeleopClimbCommand(
       climbSubsystem, () -> -operatorController.getLeftY(),
-      (r) -> operatorController.setRumble(RumbleType.kLeftRumble, r),
+      (r) -> operatorController.setRumble(RumbleType.kRightRumble, r),
       turretSubsystem::isClearOfClimb);
 
   private final TrackTargetCommand trackTargetCommand = new TrackTargetCommand(driveTrainSubsystem::getCurrentPose);
@@ -119,19 +120,22 @@ public class RobotContainer {
     new JoystickButton(driverController, XboxController.Button.kX.value).toggleWhenPressed(toggleReverse);
     new JoystickButton(driverController, XboxController.Button.kA.value).toggleWhenPressed(toggleReverse);
   
-    // Shooting and Limelight
+    // Shooting
+    var shootCommand = new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
+        driveTrainSubsystem, trackTargetCommand::getAngleToTarget, true,
+        (r) -> driverController.setRumble(RumbleType.kRightRumble, r));
     new Trigger(() -> driverController.getRightTriggerAxis() > .5)
-      .whenActive(() -> CommandScheduler.getInstance().cancel(loadCargo))
-      .whileActiveContinuous(new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
-            driveTrainSubsystem, trackTargetCommand::getAngleToTarget, true));
+        .whileActiveContinuous(shootCommand.alongWith(new RumbleCommand(operatorController, RumbleType.kLeftRumble)));
 
     // Limelight
     new JoystickButton(driverController, XboxController.Button.kStart.value)
         .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
     
-    new Trigger(() -> driverController.getLeftTriggerAxis() > .5).whileActiveContinuous(
-        new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 11000)
-          .alongWith(new PositionTurretCommand(turretSubsystem, 180)));
+    // Bloop
+    new Trigger(() -> driverController.getLeftTriggerAxis() > .5)
+        .whileActiveContinuous(new RumbleCommand(operatorController, RumbleType.kLeftRumble)
+            .alongWith(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 11000))
+            .alongWith(new PositionTurretCommand(turretSubsystem, 180)));
 
     // Operator
     new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
@@ -149,7 +153,6 @@ public class RobotContainer {
         () -> climbSubsystem.isFirstStageRaised() || DEADBAND_FILTER.calculate(operatorController.getLeftY()) != 0)
       .whileActiveContinuous(new ClimbRaisedCommand(turretSubsystem, limelightSubsystem));
 
-    // TODO remove this when we have a proper sensor on the climb
     new JoystickButton(operatorController, XboxController.Button.kBack.value)
         .whileHeld(new StartEndCommand(climbSubsystem::disableLimits, climbSubsystem::resetAndEnableLimits));
     // addShootCalibrationMode();

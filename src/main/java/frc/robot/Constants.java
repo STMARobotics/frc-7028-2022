@@ -88,6 +88,7 @@ public final class Constants {
 
     public static final ShootingInterpolator SHOOTING_INTERPOLATOR = new ShootingInterpolator(Map.ofEntries(
       Map.entry(Units.inchesToMeters(40d), 11000d),
+      Map.entry(Units.inchesToMeters(56d), 11700d),
       Map.entry(Units.inchesToMeters(60d), 12100d),
       Map.entry(Units.inchesToMeters(80d), 12600d),
       Map.entry(Units.inchesToMeters(90d), 12865d),

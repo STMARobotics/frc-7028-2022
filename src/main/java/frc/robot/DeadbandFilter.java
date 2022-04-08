@@ -9,7 +9,7 @@ public class DeadbandFilter {
   private final double high;
 
   /**
-   * Constructor. Values above the low low and below high limit are filtered to zero.
+   * Constructor. Values above the low and below high limit are filtered to zero.
    * @param low  low limit
    * @param high high limit
    */

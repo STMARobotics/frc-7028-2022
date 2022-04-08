@@ -3,7 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
-import static frc.robot.Constants.DriverConstants.DEADBAND_FILTER;
+import static frc.robot.Constants.ClimbConstants.CLIMB_DEADBAND_FILTER;
 
 import java.util.Map;
 
@@ -150,7 +150,7 @@ public class RobotContainer {
 
     // Position the turret to 180 degrees when the climb is up or the operator is trying to move the climb
     new Trigger(
-        () -> climbSubsystem.isFirstStageRaised() || DEADBAND_FILTER.calculate(operatorController.getLeftY()) != 0)
+        () -> climbSubsystem.isFirstStageRaised() || CLIMB_DEADBAND_FILTER.calculate(operatorController.getLeftY()) != 0)
       .whileActiveContinuous(new ClimbRaisedCommand(turretSubsystem, limelightSubsystem));
 
     new JoystickButton(operatorController, XboxController.Button.kBack.value)

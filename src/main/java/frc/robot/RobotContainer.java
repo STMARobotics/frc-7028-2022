@@ -156,6 +156,9 @@ public class RobotContainer {
     new JoystickButton(operatorController, XboxController.Button.kBack.value)
         .whileHeld(new StartEndCommand(climbSubsystem::disableLimits, climbSubsystem::resetAndEnableLimits));
     // addShootCalibrationMode();
+
+    new JoystickButton(operatorController, XboxController.Button.kB.value)
+        .whenPressed(limelightSubsystem::takeSnapshot);
   }
 
   private void configureSubsystemCommands() {

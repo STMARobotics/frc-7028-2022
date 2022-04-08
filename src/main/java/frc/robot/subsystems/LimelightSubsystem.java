@@ -158,4 +158,9 @@ public class LimelightSubsystem extends SubsystemBase {
     return networkTableName;
   }
 
+  public void takeSnapshot() {
+    limelightNetworkTable.getEntry("snapshot").setDouble(1.0);
+    NetworkTableInstance.getDefault().flush();
+  }
+
 }

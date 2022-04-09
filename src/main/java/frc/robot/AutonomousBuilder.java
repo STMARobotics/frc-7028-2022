@@ -172,7 +172,7 @@ public class AutonomousBuilder {
     var cargoOnePose = new Pose2d(inchesToMeters(298), inchesToMeters(37), Rotation2d.fromDegrees(-90));
     var angleAfterCargoOne = 180d;
     var cargoTwoPose = new Pose2d(inchesToMeters(193), inchesToMeters(73.7), Rotation2d.fromDegrees(165));
-    var cargoThreePose = new Pose2d(inchesToMeters(66), inchesToMeters(47), Rotation2d.fromDegrees(-140));
+    var cargoThreePose = new Pose2d(inchesToMeters(65), inchesToMeters(46), Rotation2d.fromDegrees(-140));
     var shootPose = new Pose2d(inchesToMeters(198.616), inchesToMeters(73.95), Rotation2d.fromDegrees(160));
 
     var command =

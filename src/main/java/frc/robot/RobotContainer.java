@@ -29,6 +29,7 @@ import frc.robot.commands.LoadCargoTelopCommand;
 import frc.robot.commands.PositionTurretCommand;
 import frc.robot.commands.RumbleCommand;
 import frc.robot.commands.ShootCommand;
+import frc.robot.commands.ShootWhileMovingCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.commands.TeleopClimbCommand;
 import frc.robot.commands.TeleopTurretCommand;
@@ -126,6 +127,12 @@ public class RobotContainer {
         (r) -> driverController.setRumble(RumbleType.kRightRumble, r));
     new Trigger(() -> driverController.getRightTriggerAxis() > .5)
         .whileActiveContinuous(shootCommand.alongWith(new RumbleCommand(operatorController, RumbleType.kLeftRumble)));
+    
+    var shootWhileMovingCommand = new ShootWhileMovingCommand(
+      shooterSubsystem, indexerSubsystem, turretSubsystem, limelightSubsystem,
+      driveTrainSubsystem::getCurrentPose, driveTrainSubsystem::getCurrentChassisSpeeds,
+      trackTargetCommand::getAngleToTarget);
+    new JoystickButton(driverController, XboxController.Button.kY.value).whileHeld(shootWhileMovingCommand);
 
     // Limelight
     new JoystickButton(driverController, XboxController.Button.kStart.value)

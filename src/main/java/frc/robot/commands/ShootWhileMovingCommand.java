@@ -76,6 +76,8 @@ public class ShootWhileMovingCommand extends CommandBase {
     } else {
       // try to find the target
       turretSubsystem.positionToRobotAngle(targetAngleProvider.getAsDouble());
+      shooterSubsystem.stop();
+      indexerSubsystem.prepareToShoot();
     }
 
   }

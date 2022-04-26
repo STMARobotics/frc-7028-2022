@@ -1,7 +1,8 @@
 package frc.robot.commands;
 
 import static frc.robot.Constants.AimConstants.AIM_ROTATION_SPEED;
-import static frc.robot.Constants.ShooterConstants.SHOOTING_INTERPOLATOR;
+import static frc.robot.Constants.ShooterConstants.MAX_DISTANCE;
+import static frc.robot.Constants.ShooterConstants.MIN_DISTANCE;
 
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -32,9 +33,6 @@ public class ShootCommand extends CommandBase {
 
   private static final Pose2d fieldOriginOnHubPlane = 
       new Pose2d(-hubPose.getX(), -hubPose.getY(), new Rotation2d());
-  
-  private static final double MAX_DISTANCE = SHOOTING_INTERPOLATOR.getMax();
-  private static final double MIN_DISTANCE = SHOOTING_INTERPOLATOR.getMin();
 
   private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(DriverConstants.ROTATE_RATE_LIMIT_ARCADE);
 
@@ -160,7 +158,7 @@ public class ShootCommand extends CommandBase {
       if (lastTargetDistance > MAX_DISTANCE || lastTargetDistance < MIN_DISTANCE) {
         // Target out of range, rumble and exit
         rumble.accept(1);
-        shooterSubsystem.stop();
+        shooterSubsystem.prepareToShoot(MIN_DISTANCE);
         indexerSubsystem.stop();
         aimAtTarget(targetAngleProvider.getAsDouble());
         return;
@@ -216,7 +214,7 @@ public class ShootCommand extends CommandBase {
       }
     } else {
       // No target has ever been visible, so aim where the target should be
-      shooterSubsystem.stop();
+      shooterSubsystem.prepareToShoot(MIN_DISTANCE);
       aimAtTarget(targetAngleProvider.getAsDouble());
     }
   }
@@ -276,7 +274,6 @@ public class ShootCommand extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    shooterSubsystem.stop();
     turretSubsystem.stop();
     indexerSubsystem.stop();
     driveTrainSubsystem.stop();

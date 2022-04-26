@@ -98,6 +98,9 @@ public final class Constants {
       Map.entry(Units.inchesToMeters(160d), 16350d),
       Map.entry(Units.inchesToMeters(180d), 17200d),
       Map.entry(Units.inchesToMeters(200d), 18100d)));
+
+    public static final double MAX_DISTANCE = SHOOTING_INTERPOLATOR.getMax();
+    public static final double MIN_DISTANCE = SHOOTING_INTERPOLATOR.getMin();
   }
 
   public static final class TurretConstants {

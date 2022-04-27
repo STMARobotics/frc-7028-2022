@@ -23,7 +23,7 @@ public class TurretSubsystemTest {
 
   @Test
   public void testConvert() {
-    assertEquals(-100d, TurretSubsystem.degreesPositionToNativePot(TurretSubsystem.nativePotPositionToDegrees(-100d)), 0.1);
+    assertEquals(-100d, TurretSubsystem.degreesPositionToNativePot(TurretSubsystem.nativePositionToDegrees(-100d)), 0.1);
   }
 
 }

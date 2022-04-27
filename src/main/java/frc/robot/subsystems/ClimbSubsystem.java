@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.ClimbConstants.DEVICE_ID_FIRST_STAGE_CLIMB;
 import static frc.robot.Constants.ClimbConstants.SOFT_LIMIT_FIRST_STAGE_FWD;
+import static frc.robot.Constants.ClimbConstants.SOFT_LIMIT_FIRST_STAGE_REV;
 
 import java.util.Map;
 import java.util.function.BooleanSupplier;
@@ -14,7 +15,6 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ClimbConstants;
 
 public class ClimbSubsystem extends SubsystemBase {
   
@@ -34,7 +34,7 @@ public class ClimbSubsystem extends SubsystemBase {
     firstStageClimb.configForwardSoftLimitEnable(true);
     firstStageClimb.configReverseSoftLimitEnable(true);
     firstStageClimb.configForwardSoftLimitThreshold(SOFT_LIMIT_FIRST_STAGE_FWD);
-    firstStageClimb.configReverseSoftLimitThreshold(0);
+    firstStageClimb.configReverseSoftLimitThreshold(SOFT_LIMIT_FIRST_STAGE_REV);
   }
 
   public void addDashboardWidgets(ShuffleboardLayout dashboard) {
@@ -89,7 +89,7 @@ public class ClimbSubsystem extends SubsystemBase {
    */
   public void resetAndEnableLimits() {
     limitsDisabled = false;
-    firstStageClimb.setSelectedSensorPosition(ClimbConstants.SOFT_LIMIT_FIRST_STAGE_REV);
+    firstStageClimb.setSelectedSensorPosition(SOFT_LIMIT_FIRST_STAGE_REV);
     firstStageClimb.configReverseSoftLimitEnable(true);
     firstStageClimb.configForwardSoftLimitEnable(true);
   }

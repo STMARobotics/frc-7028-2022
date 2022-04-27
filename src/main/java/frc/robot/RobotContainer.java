@@ -220,7 +220,6 @@ public class RobotContainer {
 
   private void configureDriverDashboard() {
     shooterSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
-    driveTrainSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     indexerSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     trackTargetCommand.addDriverDashboardWidgets(Dashboard.driverTab);
     climbSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);

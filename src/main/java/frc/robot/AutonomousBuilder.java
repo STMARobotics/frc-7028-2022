@@ -20,13 +20,13 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.TrajectoryConstants;
-import frc.robot.commands.AimTurretCommand;
-import frc.robot.commands.LoadCargoAutoCommand;
-import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
-import frc.robot.commands.SpinupShooterCommand;
 import frc.robot.commands.TrackTargetCommand;
-import frc.robot.commands.TurnToAngleCommand;
+import frc.robot.commands.autonomous.AimTurretCommand;
+import frc.robot.commands.autonomous.LoadCargoCommand;
+import frc.robot.commands.autonomous.LoadCargoWithIndexerCommand;
+import frc.robot.commands.autonomous.SpinupShooterCommand;
+import frc.robot.commands.autonomous.TurnToAngleCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -266,11 +266,11 @@ public class AutonomousBuilder {
   }
 
   private Command loadCargoWithIndexer() {
-    return new LoadCargoAutoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem);
+    return new LoadCargoWithIndexerCommand(intakeSubsystem, transferSubsystem, indexerSubsystem);
   }
 
   private Command loadCargoWithoutIndexer() {
-    return new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, null);
+    return new LoadCargoCommand(intakeSubsystem, transferSubsystem);
   }
 
   private Command waitForCargoCount(int count) {

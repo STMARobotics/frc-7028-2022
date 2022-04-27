@@ -73,7 +73,7 @@ public class TrackTargetCommand extends CommandBase {
         .withProperties(Map.of("Number of columns", 2, "Number of rows", 1))
         .withPosition(9, 0).withSize(2, 1);
     targetLayout.addBoolean("Distance", this::isDistanceInRange).withPosition(0, 0);
-    targetLayout.addBoolean("Turret", () -> TurretSubsystem.isInRange(angleToTarget)).withPosition(1, 0);
+    targetLayout.addBoolean("Turret", () -> TurretSubsystem.isInShootingRange(angleToTarget)).withPosition(1, 0);
   }
 
   /**

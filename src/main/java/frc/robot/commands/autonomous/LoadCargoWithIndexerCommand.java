@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.autonomous;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -11,13 +11,13 @@ import frc.robot.subsystems.TransferSubsystem;
  * That means an autonomous routine that uses the indexer for shooting will
  * not run the indexer's default command.
  */
-public class LoadCargoAutoCommand extends CommandBase {
+public class LoadCargoWithIndexerCommand extends CommandBase {
   
   private final IntakeSubsystem intakeSubsystem;
   private final TransferSubsystem transferSubsystem;
   private final IndexerSubsystem indexerSubsystem;
 
-  public LoadCargoAutoCommand(
+  public LoadCargoWithIndexerCommand(
         IntakeSubsystem intakeSubsystem, TransferSubsystem transferSubsystem, IndexerSubsystem indexerSubsystem) {
 
     this.intakeSubsystem = intakeSubsystem;

@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 
 /**
@@ -11,21 +12,26 @@ public class ClimbRaisedCommand extends CommandBase {
   
   private final TurretSubsystem turretSubsystem;
   private final LimelightSubsystem limelightSubsystem;
+  private final ShooterSubsystem shooterSubsystem;
 
-  public ClimbRaisedCommand(TurretSubsystem turretSubsystem, LimelightSubsystem limelightSubsystem) {
+  public ClimbRaisedCommand(
+        TurretSubsystem turretSubsystem, LimelightSubsystem limelightSubsystem, ShooterSubsystem shooterSubsystem) {
     this.turretSubsystem = turretSubsystem;
     this.limelightSubsystem = limelightSubsystem;
+    this.shooterSubsystem = shooterSubsystem;
 
-    addRequirements(turretSubsystem, limelightSubsystem);
+    addRequirements(turretSubsystem, limelightSubsystem, shooterSubsystem);
   }
 
   @Override
   public void initialize() {
+    shooterSubsystem.stop();
     limelightSubsystem.driverMode();
   }
 
   @Override
   public void execute() {
+    shooterSubsystem.stop();
     turretSubsystem.positionToRobotAngle(180);
   }
 

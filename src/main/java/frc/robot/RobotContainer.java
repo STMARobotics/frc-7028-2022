@@ -153,7 +153,7 @@ public class RobotContainer {
     // Position the turret to 180 degrees when the climb is up or the operator is trying to move the climb
     new Trigger(
         () -> climbSubsystem.isFirstStageRaised() || CLIMB_DEADBAND_FILTER.calculate(operatorController.getLeftY()) != 0)
-      .whileActiveContinuous(new ClimbRaisedCommand(turretSubsystem, limelightSubsystem));
+      .whileActiveContinuous(new ClimbRaisedCommand(turretSubsystem, limelightSubsystem, shooterSubsystem));
 
     new JoystickButton(operatorController, XboxController.Button.kBack.value)
         .whileHeld(new StartEndCommand(climbSubsystem::disableLimits, climbSubsystem::resetAndEnableLimits));

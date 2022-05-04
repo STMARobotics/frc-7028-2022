@@ -129,7 +129,8 @@ public class AutonomousBuilder {
     var startPose = new Pose2d(inchesToMeters(242), inchesToMeters(96), Rotation2d.fromDegrees(-153));
     var cargoOnePose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153));
     var angleAfterCargoOne = 180d;
-    var cargoTwoPose = new Pose2d(inchesToMeters(46), inchesToMeters(49), Rotation2d.fromDegrees(-140));
+    var humanPlayerPose = new Pose2d(inchesToMeters(46), inchesToMeters(49), Rotation2d.fromDegrees(-140));
+    var waitForCargoPose = new Pose2d(inchesToMeters(46 + 5), inchesToMeters(49 + 5), Rotation2d.fromDegrees(-140));
     var shootPose = new Pose2d(inchesToMeters(210), inchesToMeters(73.95), Rotation2d.fromDegrees(-174));
 
     var command = print("Starting auto")
@@ -140,12 +141,14 @@ public class AutonomousBuilder {
         .andThen(shoot(2).withTimeout(3))
         .andThen(print("Done shooting 2"))
         .andThen(turnToAngle(angleAfterCargoOne))
-        .andThen(drive(withSpeedAndAcceleration(1, .75), new Pose2d(cargoOnePose.getTranslation(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
-            .deadlineWith(loadCargoWithIndexer())
+        .andThen(drive(withSpeedAndAcceleration(1, .75), new Pose2d(cargoOnePose.getTranslation(), Rotation2d.fromDegrees(angleAfterCargoOne)), humanPlayerPose)
+            .deadlineWith(loadCargoWithIndexer()))
         .andThen(print("Done driving to human player station"))
-        .andThen(waitForCargoCount(2).withTimeout(2)))
+        .andThen(drive(withSpeedAndAcceleration(.5, .5).setReversed(true), humanPlayerPose, waitForCargoPose)
+            .deadlineWith(loadCargoWithIndexer()))
+        .andThen(waitForCargoCount(2).withTimeout(2))
         .andThen(print("Done waiting for two cargo at human player station"))
-        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoTwoPose, shootPose)
+        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), waitForCargoPose, shootPose)
             .deadlineWith(spinUpShooter(inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer(), aimTurret()))
         .andThen(print("Done driving to shoot"))
         .andThen(shoot(Integer.MAX_VALUE));
@@ -172,7 +175,8 @@ public class AutonomousBuilder {
     var cargoOnePose = new Pose2d(inchesToMeters(298), inchesToMeters(37), Rotation2d.fromDegrees(-90));
     var angleAfterCargoOne = 180d;
     var cargoTwoPose = new Pose2d(inchesToMeters(193), inchesToMeters(73.7), Rotation2d.fromDegrees(165));
-    var cargoThreePose = new Pose2d(inchesToMeters(65), inchesToMeters(46), Rotation2d.fromDegrees(-140));
+    var humanPlayerPose = new Pose2d(inchesToMeters(65), inchesToMeters(46), Rotation2d.fromDegrees(-140));
+    var waitForCargoPose = new Pose2d(inchesToMeters(65 + 5), inchesToMeters(46 + 5), Rotation2d.fromDegrees(-140));
     var shootPose = new Pose2d(inchesToMeters(198.616), inchesToMeters(73.95), Rotation2d.fromDegrees(160));
 
     var command =
@@ -189,11 +193,13 @@ public class AutonomousBuilder {
         .andThen(shoot(1).withTimeout(10))
         .andThen(shoot(1).withTimeout(10))
         .andThen(print("Done shooting two cargos"))
-        .andThen(drive(withSpeedAndAcceleration(1, 1.2), cargoTwoPose, cargoThreePose).deadlineWith(loadCargoWithIndexer()))
+        .andThen(drive(withSpeedAndAcceleration(1, 1.2), cargoTwoPose, humanPlayerPose).deadlineWith(loadCargoWithIndexer()))
         .andThen(print("Done driving to human player"))
+        .andThen(drive(withSpeedAndAcceleration(.5, .5).setReversed(true), humanPlayerPose, waitForCargoPose)
+            .deadlineWith(loadCargoWithIndexer()))
         .andThen(waitForCargoCount(2).withTimeout(1))
         .andThen(print("Done waiting at human player station"))
-        .andThen(drive(withSpeedAndAcceleration(1, 1.2).setReversed(true), cargoThreePose, shootPose)
+        .andThen(drive(withSpeedAndAcceleration(1, 1.2).setReversed(true), waitForCargoPose, shootPose)
             .deadlineWith(spinUpShooter(inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer(), aimTurret()))
         .andThen(shoot(Integer.MAX_VALUE));
       

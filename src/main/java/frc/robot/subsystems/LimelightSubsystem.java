@@ -29,6 +29,8 @@ public class LimelightSubsystem extends SubsystemBase {
   private final NetworkTable limelightNetworkTable;
   private final String networkTableName;
 
+  private boolean takeSnapshot = false;
+
   private boolean targetValid = false;
   private long targetLastSeen = 0;
   private double targetX = 0;
@@ -47,6 +49,8 @@ public class LimelightSubsystem extends SubsystemBase {
 
     //this adds listeners on an explicit list
     addLimelightUpdateListeners(limelightNetworkTable, ntTargetValid, ntTargetX, ntTargetY);
+
+    limelightNetworkTable.getEntry("snapshot").setDouble(0.0);
 
     new Trigger(RobotState::isEnabled)
         .whenActive(new InstantCommand(this::enable))
@@ -102,6 +106,13 @@ public class LimelightSubsystem extends SubsystemBase {
   
     if (shouldFlush)  {
       NetworkTableInstance.getDefault().flush();
+    }
+
+    if(takeSnapshot) {
+      limelightNetworkTable.getEntry("snapshot").setDouble(1.0);
+      takeSnapshot = false;
+    } else {
+      limelightNetworkTable.getEntry("snapshot").setDouble(0.0);
     }
   }
 
@@ -159,8 +170,7 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   public void takeSnapshot() {
-    limelightNetworkTable.getEntry("snapshot").setDouble(1.0);
-    NetworkTableInstance.getDefault().flush();
+    takeSnapshot = true;
   }
 
 }

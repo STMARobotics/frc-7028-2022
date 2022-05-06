@@ -157,7 +157,7 @@ public final class Constants {
     public static final int THRESHOLD_FULL = 225;
 
     public static final double BELT_kP = 0d;
-    public static final double BELT_RUN_SPEED = 6000;
+    public static final double BELT_RUN_SPEED = 8000;
     public static final double BELT_SHOOT_SPEED = 8000;
 
     /** Color of red cargo */

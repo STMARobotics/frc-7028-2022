@@ -115,9 +115,9 @@ public final class Constants {
 
     // Native sensor units are in range of [0,1023], or [-1023,0] when sensor phase is true (inverted)
     /** Forward soft limit in native sensor units */
-    public static final int SOFT_LIMIT_FORWARD = -421;
+    public static final int SOFT_LIMIT_FORWARD = -400;
     /** Reverse soft limit in native sensor units */
-    public static final int SOFT_LIMIT_REVERSE = -680;
+    public static final int SOFT_LIMIT_REVERSE = -657;
     
     /** Range of motion between soft limits in degrees */
     public static final double RANGE_OF_MOTION = 183;

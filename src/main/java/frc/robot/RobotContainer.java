@@ -4,7 +4,6 @@
 package frc.robot;
 
 import static frc.robot.Constants.ClimbConstants.CLIMB_DEADBAND_FILTER;
-import static frc.robot.Constants.ShooterConstants.MIN_DISTANCE;
 
 import java.util.Map;
 
@@ -19,7 +18,6 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -169,8 +167,8 @@ public class RobotContainer {
         turretSubsystem, operatorController::getRightTriggerAxis, operatorController::getLeftTriggerAxis));
     indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
     climbSubsystem.setDefaultCommand(teleopClimbCommand);
-    shooterSubsystem.setDefaultCommand(
-        new RunCommand(() -> shooterSubsystem.prepareToShoot(MIN_DISTANCE), shooterSubsystem));
+    // shooterSubsystem.setDefaultCommand(
+    //     new RunCommand(() -> shooterSubsystem.prepareToShoot(MIN_DISTANCE), shooterSubsystem));
   }
 
   public void teleopInit() {

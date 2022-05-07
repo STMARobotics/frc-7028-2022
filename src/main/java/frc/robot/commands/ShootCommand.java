@@ -274,6 +274,7 @@ public class ShootCommand extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
+    shooterSubsystem.stop();
     turretSubsystem.stop();
     indexerSubsystem.stop();
     driveTrainSubsystem.stop();

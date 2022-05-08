@@ -54,7 +54,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
     new Trigger(RobotState::isEnabled)
         .whenActive(new InstantCommand(this::enable))
-        .whenInactive(new InstantWhenDisabledCommand(this::disable));
+        .whenInactive(new InstantWhenDisabledCommand(this::disable, this));
   }
 
   private void addLimelightUpdateListeners(NetworkTable limelightTable, String... keys) {

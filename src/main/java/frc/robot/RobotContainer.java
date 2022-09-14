@@ -82,8 +82,8 @@ public class RobotContainer {
 
     // Driver
     // Drivetrain
-    new JoystickButton(driverController, XboxController.Button.kB.value)
-        .whenPressed(teleDriveCommand::toggleSlowMode);
+    //new JoystickButton(driverController, XboxController.Button.kB.value)
+    //    .whenPressed(teleDriveCommand::toggleSlowMode);
 
     new JoystickButton(driverController, XboxController.Button.kA.value).whileActiveContinuous(
         new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 11000));

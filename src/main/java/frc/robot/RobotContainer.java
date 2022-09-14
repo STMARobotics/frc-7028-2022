@@ -55,7 +55,7 @@ import frc.robot.subsystems.TurretSubsystem;
 public class RobotContainer {
 
   private final XboxController driverController = new XboxController(0);
-  private final XboxController operatorController = new XboxController(1);
+  private final XboxController operatorController = new XboxController(2);
 
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final DriveTrainSubsystem driveTrainSubsystem = new DriveTrainSubsystem();

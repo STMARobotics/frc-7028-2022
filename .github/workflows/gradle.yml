@@ -28,9 +28,7 @@ jobs:
         channel-id: 'C8Q6UHPA5'
         payload: |
           {
-            "text": "GitHub Action Result [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\nStatus: ${{ job.status }}\n[${{ github.sha }}](${{ github.event.head_commit.url }})",
-            "mrkdwn": "true",
-            "parse": "full"
+            "text": "GitHub Action: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }} #${{ github.run_number }}>\nStatus: ${{ job.status }}\nBranch/Tag: ${{ github.ref_name }}\nTriggered by: ${{ github.actor }}"
           }
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

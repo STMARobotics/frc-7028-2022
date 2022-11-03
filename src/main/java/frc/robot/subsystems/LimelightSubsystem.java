@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.math.filter.MedianFilter;
-import edu.wpi.first.networktables.EntryListenerFlags;
+// import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -59,7 +59,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
   private void addLimelightUpdateListeners(NetworkTable limelightTable, String... keys) {
     for (String key : keys) {
-      limelightNetworkTable.addEntryListener(key, this::update, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+      // limelightNetworkTable.addEntryListener(key, this::update, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
       updateFilterMap.putIfAbsent(key, new MedianFilter(20));
     }
   }

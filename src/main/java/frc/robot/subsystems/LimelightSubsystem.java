@@ -4,11 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.math.filter.MedianFilter;
-// import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -53,13 +51,14 @@ public class LimelightSubsystem extends SubsystemBase {
     limelightNetworkTable.getEntry("snapshot").setDouble(0.0);
 
     new Trigger(RobotState::isEnabled)
-        .whenActive(new InstantCommand(this::enable))
-        .whenInactive(new InstantWhenDisabledCommand(this::disable, this));
+        .onTrue(new InstantCommand(this::enable))
+        .onFalse(new InstantWhenDisabledCommand(this::disable, this));
   }
 
   private void addLimelightUpdateListeners(NetworkTable limelightTable, String... keys) {
     for (String key : keys) {
-      // limelightNetworkTable.addEntryListener(key, this::update, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+      var topic = limelightTable.getTopic(key);
+      NetworkTableInstance.getDefault().addListener(topic, NetworkTableEvent.kValueLocal, this::update);
       updateFilterMap.putIfAbsent(key, new MedianFilter(20));
     }
   }
@@ -75,10 +74,9 @@ public class LimelightSubsystem extends SubsystemBase {
     return detailDashboard;
   }
 
-  private void update(final NetworkTable table, final String key, final NetworkTableEntry entry,
-      final NetworkTableValue value, final int flags) {
-
-    switch(key) {
+  private void update(NetworkTableEvent event) {
+    var value = event.valueData.value;
+    switch(event.valueData.getTopic().getInfo().name) {
 
       case ntTargetX:
         targetX = value.getDouble();

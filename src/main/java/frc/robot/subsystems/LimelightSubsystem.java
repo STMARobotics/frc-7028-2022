@@ -1,11 +1,13 @@
 package frc.robot.subsystems;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEvent;
+import edu.wpi.first.networktables.NetworkTableEvent.Kind;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -58,7 +60,7 @@ public class LimelightSubsystem extends SubsystemBase {
   private void addLimelightUpdateListeners(NetworkTable limelightTable, String... keys) {
     for (String key : keys) {
       var topic = limelightTable.getTopic(key);
-      NetworkTableInstance.getDefault().addListener(topic, NetworkTableEvent.kValueLocal, this::update);
+      NetworkTableInstance.getDefault().addListener(topic, EnumSet.of(Kind.kValueRemote), this::update);
       updateFilterMap.putIfAbsent(key, new MedianFilter(20));
     }
   }

@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -30,7 +31,7 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeMotor.setOpenLoopRampRate(.1);
     intakeMotor.burnFlash();
 
-    new Trigger(RobotState::isEnabled).whenActive(compressor::enableDigital);
+    new Trigger(RobotState::isEnabled).onTrue(new InstantCommand(compressor::enableDigital));
   }
 
   public void intake() {

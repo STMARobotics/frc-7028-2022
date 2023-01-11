@@ -1,11 +1,10 @@
 package frc.robot.util;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
 import java.util.Map;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 
 public class ShootingInterpolatorTest {
 
@@ -14,10 +13,10 @@ public class ShootingInterpolatorTest {
    */
   @Test
   public void testDirectMatch() {
-    ShootingInterpolator shootingInterpolator =
-        new ShootingInterpolator(Map.ofEntries(Map.entry(2d, 5d), Map.entry(3d, 6d)));
+    ShootingInterpolator shootingInterpolator = new ShootingInterpolator(
+        Map.ofEntries(Map.entry(2d, 5d), Map.entry(3d, 6d)));
 
-    assertThat(shootingInterpolator.interpolate(2d), equalTo(5d));
+    assertEquals(shootingInterpolator.interpolate(2d), 5d);
   }
 
   /**
@@ -25,10 +24,10 @@ public class ShootingInterpolatorTest {
    */
   @Test
   public void testInteger() {
-    ShootingInterpolator shootingInterpolator =
-        new ShootingInterpolator(Map.ofEntries(Map.entry(4d, 14d), Map.entry(6d, 16d)));
+    ShootingInterpolator shootingInterpolator = new ShootingInterpolator(
+        Map.ofEntries(Map.entry(4d, 14d), Map.entry(6d, 16d)));
 
-    assertThat(shootingInterpolator.interpolate(5d), equalTo(15d));
+    assertEquals(shootingInterpolator.interpolate(5d), 15d);
   }
 
   /**
@@ -36,32 +35,34 @@ public class ShootingInterpolatorTest {
    */
   @Test
   public void testDecimal() {
-    ShootingInterpolator shootingInterpolator =
-        new ShootingInterpolator(Map.ofEntries(Map.entry(4.75d, 14.75d), Map.entry(6.75d, 16.75d)));
-    
-    assertThat(shootingInterpolator.interpolate(5.25), equalTo(15.25));
+    ShootingInterpolator shootingInterpolator = new ShootingInterpolator(
+        Map.ofEntries(Map.entry(4.75d, 14.75d), Map.entry(6.75d, 16.75d)));
+
+    assertEquals(shootingInterpolator.interpolate(5.25), 15.25);
   }
 
   /**
-   * Test getting the speed for a distance that is larger than the largest known value.
+   * Test getting the speed for a distance that is larger than the largest known
+   * value.
    */
   @Test
   public void testAbove() {
-    ShootingInterpolator shootingInterpolator =
-        new ShootingInterpolator(Map.ofEntries(Map.entry(2d, 5d), Map.entry(3d, 10d)));
+    ShootingInterpolator shootingInterpolator = new ShootingInterpolator(
+        Map.ofEntries(Map.entry(2d, 5d), Map.entry(3d, 10d)));
 
-    assertThat(shootingInterpolator.interpolate(5d), equalTo(10d));
+    assertEquals(shootingInterpolator.interpolate(5d), 10d);
   }
 
   /**
-   * Test getting the speed for a distance that is smaller than the smallest known value.
+   * Test getting the speed for a distance that is smaller than the smallest known
+   * value.
    */
   @Test
   public void testBelow() {
-    ShootingInterpolator shootingInterpolator =
-        new ShootingInterpolator(Map.ofEntries(Map.entry(2d, 5d), Map.entry(3d, 10d)));
+    ShootingInterpolator shootingInterpolator = new ShootingInterpolator(
+        Map.ofEntries(Map.entry(2d, 5d), Map.entry(3d, 10d)));
 
-    assertThat(shootingInterpolator.interpolate(1d), equalTo(5d));
+    assertEquals(shootingInterpolator.interpolate(1d), 5d);
   }
 
 }

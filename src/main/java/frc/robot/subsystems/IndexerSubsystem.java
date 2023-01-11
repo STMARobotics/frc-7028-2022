@@ -27,6 +27,8 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IndexerConstants;
@@ -73,8 +75,9 @@ public class IndexerSubsystem extends SubsystemBase {
     colorMatch.addColorMatch(COLOR_NONE);
 
     // Add triggers for cargo count management
-    new Trigger(this::isFullSensorTripped).whenInactive(this::fullSensorCleared);
-    new Trigger(this::isSpacerSensorTripped).whenActive(this::spaceSensorTripped).whenInactive(this::spaceSensorCleared);
+    new Trigger(this::isFullSensorTripped).onFalse(new InstantCommand(this::fullSensorCleared));
+    new Trigger(this::isSpacerSensorTripped)
+        .whileTrue(new StartEndCommand(this::spaceSensorTripped, this::spaceSensorCleared));
     
   }
 

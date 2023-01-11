@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -113,52 +114,52 @@ public class RobotContainer {
     // Driver
     // Drivetrain
     new JoystickButton(driverController, XboxController.Button.kB.value)
-        .whenPressed(teleDriveCommand::toggleSlowMode);
+        .onTrue(new InstantCommand(teleDriveCommand::toggleSlowMode));
 
     var toggleReverse = new StartEndCommand(
         () -> teleDriveCommand.setReverseMode(true), () -> teleDriveCommand.setReverseMode(false));
-    new JoystickButton(driverController, XboxController.Button.kX.value).toggleWhenPressed(toggleReverse);
-    new JoystickButton(driverController, XboxController.Button.kA.value).toggleWhenPressed(toggleReverse);
+    new JoystickButton(driverController, XboxController.Button.kX.value).toggleOnTrue(toggleReverse);
+    new JoystickButton(driverController, XboxController.Button.kA.value).toggleOnTrue(toggleReverse);
   
     // Shooting
     var shootCommand = new ShootCommand(shooterSubsystem, limelightSubsystem, turretSubsystem, indexerSubsystem,
         driveTrainSubsystem, trackTargetCommand::getAngleToTarget, true,
         (r) -> driverController.setRumble(RumbleType.kRightRumble, r));
     new Trigger(() -> driverController.getRightTriggerAxis() > .5)
-        .whileActiveContinuous(shootCommand.alongWith(new RumbleCommand(operatorController, RumbleType.kLeftRumble)));
+        .whileTrue(shootCommand.alongWith(new RumbleCommand(operatorController, RumbleType.kLeftRumble)));
 
     // Limelight
     new JoystickButton(driverController, XboxController.Button.kStart.value)
-        .toggleWhenPressed(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
+        .toggleOnTrue(new StartEndCommand(limelightSubsystem::enable, limelightSubsystem::disable));
     
     // Bloop
     new Trigger(() -> driverController.getLeftTriggerAxis() > .5)
-        .whileActiveContinuous(new RumbleCommand(operatorController, RumbleType.kLeftRumble)
+        .whileTrue(new RumbleCommand(operatorController, RumbleType.kLeftRumble)
             .alongWith(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 11000))
             .alongWith(new PositionTurretCommand(turretSubsystem, 180)));
 
     // Operator
     new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
-        .whenPressed(loadCargo);
+        .onTrue(loadCargo);
 
     new JoystickButton(operatorController, XboxController.Button.kLeftBumper.value)
-        .whenPressed(() -> CommandScheduler.getInstance().cancel(loadCargo))
-        .whenPressed(() -> CommandScheduler.getInstance().cancel(unloadCargo));
+        .onTrue(new InstantCommand(() -> CommandScheduler.getInstance().cancel(loadCargo)))
+        .onTrue(new InstantCommand(() -> CommandScheduler.getInstance().cancel(unloadCargo)));
 
     new JoystickButton(operatorController, XboxController.Button.kA.value)
-        .whenPressed(unloadCargo);
+        .onTrue(unloadCargo);
 
     // Position the turret to 180 degrees when the climb is up or the operator is trying to move the climb
     new Trigger(
         () -> climbSubsystem.isFirstStageRaised() || CLIMB_DEADBAND_FILTER.calculate(operatorController.getLeftY()) != 0)
-      .whileActiveContinuous(new ClimbRaisedCommand(turretSubsystem, limelightSubsystem, shooterSubsystem));
+      .whileTrue(new ClimbRaisedCommand(turretSubsystem, limelightSubsystem, shooterSubsystem));
 
     new JoystickButton(operatorController, XboxController.Button.kBack.value)
-        .whileHeld(new StartEndCommand(climbSubsystem::disableLimits, climbSubsystem::resetAndEnableLimits));
+        .whileTrue(new StartEndCommand(climbSubsystem::disableLimits, climbSubsystem::resetAndEnableLimits));
     // addShootCalibrationMode();
 
     new JoystickButton(operatorController, XboxController.Button.kB.value)
-        .whenPressed(limelightSubsystem::takeSnapshot);
+        .onTrue(new InstantCommand(limelightSubsystem::takeSnapshot));
   }
 
   private void configureSubsystemCommands() {
@@ -184,7 +185,7 @@ public class RobotContainer {
     var shooterSpeed = shooterTab.add("Y-Button Shoot Speed", 0).withWidget(BuiltInWidgets.kTextView)
         .withProperties(Map.of("Max", 21000, "Min", 0)).getEntry();
     new JoystickButton(driverController, XboxController.Button.kY.value)
-        .whileHeld(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> shooterSpeed.getDouble(150000)));
+        .whileTrue(new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> shooterSpeed.getDouble(150000)));
     limelightSubsystem.addDashboardWidgets(shooterTab.getLayout("Limelight", BuiltInLayouts.kList));
   }
 

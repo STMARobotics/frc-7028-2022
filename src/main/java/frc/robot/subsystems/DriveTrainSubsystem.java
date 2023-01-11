@@ -82,7 +82,10 @@ public class DriveTrainSubsystem extends SubsystemBase {
   public DriveTrainSubsystem() {
     zeroDriveTrainEncoders();
     gyro.zeroYaw();
-    differentialDriveOdometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
+    differentialDriveOdometry = new DifferentialDriveOdometry(
+        Rotation2d.fromDegrees(getHeading()),
+        edgesToMeters(getLeftEncoderPosition()),
+        edgesToMeters(getRightEncoderPosition()));
     resetOdometry();
 
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -112,7 +115,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
     leftFollower.follow(leftLeader);
     rightFollower.follow(rightLeader);
     
-    new Trigger(RobotState::isEnabled).whenActive(new StartEndCommand(() -> {
+    new Trigger(RobotState::isEnabled).whileTrue(new StartEndCommand(() -> {
       leftLeader.setNeutralMode(NeutralMode.Brake);
       leftFollower.setNeutralMode(NeutralMode.Brake);
       rightLeader.setNeutralMode(NeutralMode.Brake);
@@ -155,8 +158,11 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
-    zeroDriveTrainEncoders();
-    differentialDriveOdometry.resetPosition(newPose, Rotation2d.fromDegrees(getHeading()));
+    differentialDriveOdometry.resetPosition(
+        Rotation2d.fromDegrees(getHeading()),
+        edgesToMeters(getLeftEncoderPosition()),
+        edgesToMeters(getRightEncoderPosition()),
+        newPose);
   }
 
   @Override

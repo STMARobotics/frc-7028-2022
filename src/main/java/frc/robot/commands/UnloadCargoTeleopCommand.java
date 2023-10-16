@@ -8,19 +8,24 @@ import frc.robot.subsystems.TransferSubsystem;
 /**
  * Command that runs the intake, transfer, and indexer to unload/reverse cargo back out onto the field.
  */
-public class UnloadCargoCommand extends CommandBase {
+public class UnloadCargoTeleopCommand extends CommandBase {
 
   private final IntakeSubsystem intakeSubsystem;
   private final TransferSubsystem transferSubsystem;
   private final IndexerSubsystem indexerSubsystem;
 
-  public UnloadCargoCommand(
+  public UnloadCargoTeleopCommand(
       IntakeSubsystem intakeSubsystem, TransferSubsystem transferSubsystem, IndexerSubsystem indexerSubsystem) {
     this.intakeSubsystem = intakeSubsystem;
     this.transferSubsystem = transferSubsystem;
     this.indexerSubsystem = indexerSubsystem;
 
     addRequirements(intakeSubsystem, transferSubsystem, indexerSubsystem);
+  }
+
+  @Override
+  public void initialize() {
+    intakeSubsystem.deploy();
   }
 
   @Override
@@ -35,6 +40,7 @@ public class UnloadCargoCommand extends CommandBase {
     intakeSubsystem.stop();
     transferSubsystem.stop();
     indexerSubsystem.stop();
+    intakeSubsystem.retract();
   }
   
 }

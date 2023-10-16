@@ -1,14 +1,14 @@
 package frc.robot.subsystems;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.math.filter.MedianFilter;
-import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableEvent;
+import edu.wpi.first.networktables.NetworkTableEvent.Kind;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,6 +25,8 @@ public class LimelightSubsystem extends SubsystemBase {
   private final NetworkTable limelightNetworkTable;
   private final String networkTableName;
 
+  private boolean takeSnapshot = false;
+
   private boolean targetValid = false;
   private long targetLastSeen = 0;
   private double targetX = 0;
@@ -33,6 +35,7 @@ public class LimelightSubsystem extends SubsystemBase {
   private final HashMap<String, MedianFilter> updateFilterMap = new HashMap<>();
   
   private boolean enabled;
+  private boolean driverMode;
   private Profile activeProfile = Profile.NEAR;
 
   public LimelightSubsystem(String networkTableName) {
@@ -42,11 +45,14 @@ public class LimelightSubsystem extends SubsystemBase {
 
     //this adds listeners on an explicit list
     addLimelightUpdateListeners(limelightNetworkTable, ntTargetValid, ntTargetX, ntTargetY);
+    limelightNetworkTable.getEntry("snapshot").setDouble(0.0);
+
   }
 
   private void addLimelightUpdateListeners(NetworkTable limelightTable, String... keys) {
     for (String key : keys) {
-      limelightNetworkTable.addEntryListener(key, this::update, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+      var topic = limelightTable.getTopic(key);
+      NetworkTableInstance.getDefault().addListener(topic, EnumSet.of(Kind.kValueRemote), this::update);
       updateFilterMap.putIfAbsent(key, new MedianFilter(20));
     }
   }
@@ -62,10 +68,9 @@ public class LimelightSubsystem extends SubsystemBase {
     return detailDashboard;
   }
 
-  private void update(final NetworkTable table, final String key, final NetworkTableEntry entry,
-      final NetworkTableValue value, final int flags) {
-
-    switch(key) {
+  private void update(NetworkTableEvent event) {
+    var value = event.valueData.value;
+    switch(event.valueData.getTopic().getInfo().name) {
 
       case ntTargetX:
         targetX = value.getDouble();
@@ -88,11 +93,18 @@ public class LimelightSubsystem extends SubsystemBase {
         limelightNetworkTable.getEntry("pipeline").getDouble(0.0) != activeProfile.pipelineId);
   
     limelightNetworkTable.getEntry("ledMode").setDouble(enabled ? 0.0 : 1.0);
-    limelightNetworkTable.getEntry("camMode").setDouble(enabled ? 0.0 : 0.0);
+    limelightNetworkTable.getEntry("camMode").setDouble(driverMode ? 1.0 : 0.0);
     limelightNetworkTable.getEntry("pipeline").setDouble(activeProfile.pipelineId);
   
     if (shouldFlush)  {
       NetworkTableInstance.getDefault().flush();
+    }
+
+    if(takeSnapshot) {
+      limelightNetworkTable.getEntry("snapshot").setDouble(1.0);
+      takeSnapshot = false;
+    } else {
+      limelightNetworkTable.getEntry("snapshot").setDouble(0.0);
     }
   }
 
@@ -113,10 +125,11 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   /**
-   * Turns the LEDS off and switches camera mode to driver.
+   * Turns the LEDS off and switches the camera mode to vision processor.
    */
   public void disable() {
     enabled = false;
+    driverMode = false;
   }
 
   /**
@@ -125,6 +138,15 @@ public class LimelightSubsystem extends SubsystemBase {
    */
   public void enable() {
     enabled = true;
+    driverMode = false;
+  }
+
+  /**
+   * Sets the LEDs to off and switches the camera to driver mode.
+   */
+  public void driverMode() {
+    enabled = false;
+    driverMode = true;
   }
 
   public void setProfile(final Profile profile) {
@@ -137,6 +159,10 @@ public class LimelightSubsystem extends SubsystemBase {
 
   public String getNetworkTableName() {
     return networkTableName;
+  }
+
+  public void takeSnapshot() {
+    takeSnapshot = true;
   }
 
 }

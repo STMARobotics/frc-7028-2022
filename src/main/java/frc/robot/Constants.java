@@ -88,6 +88,7 @@ public final class Constants {
 
     public static final ShootingInterpolator SHOOTING_INTERPOLATOR = new ShootingInterpolator(Map.ofEntries(
       Map.entry(Units.inchesToMeters(40d), 11000d),
+      Map.entry(Units.inchesToMeters(56d), 11700d),
       Map.entry(Units.inchesToMeters(60d), 12100d),
       Map.entry(Units.inchesToMeters(80d), 12600d),
       Map.entry(Units.inchesToMeters(90d), 12865d),
@@ -96,9 +97,10 @@ public final class Constants {
       Map.entry(Units.inchesToMeters(140d), 15250d),
       Map.entry(Units.inchesToMeters(160d), 16350d),
       Map.entry(Units.inchesToMeters(180d), 17200d),
-      Map.entry(Units.inchesToMeters(200d), 18100d),
-      Map.entry(Units.inchesToMeters(220d), 19000d),
-      Map.entry(Units.inchesToMeters(240d), 20000d)));
+      Map.entry(Units.inchesToMeters(200d), 18100d)));
+
+    public static final double MAX_DISTANCE = SHOOTING_INTERPOLATOR.getMax();
+    public static final double MIN_DISTANCE = SHOOTING_INTERPOLATOR.getMin();
   }
 
   public static final class TurretConstants {
@@ -113,7 +115,7 @@ public final class Constants {
 
     // Native sensor units are in range of [0,1023], or [-1023,0] when sensor phase is true (inverted)
     /** Forward soft limit in native sensor units */
-    public static final int SOFT_LIMIT_FORWARD = -152;
+    public static final int SOFT_LIMIT_FORWARD = -156;
     /** Reverse soft limit in native sensor units */
     public static final int SOFT_LIMIT_REVERSE = -400;
     
@@ -155,7 +157,7 @@ public final class Constants {
     public static final int THRESHOLD_FULL = 225;
 
     public static final double BELT_kP = 0d;
-    public static final double BELT_RUN_SPEED = 6000;
+    public static final double BELT_RUN_SPEED = 8000;
     public static final double BELT_SHOOT_SPEED = 8000;
 
     /** Color of red cargo */
@@ -182,10 +184,6 @@ public final class Constants {
   public static final class ControllerConstants {
     public static final int PORT_ID_DRIVER_CONTROLLER = 0;
     public static final int PORT_ID_OPERATOR_CONSOLE = 1;
-  }
-
-  public static final class JetsonConstants {
-    public static final double AREA_THRESHOLD = 80d;
   }
   
   public static final class LimeLightConstants {
@@ -235,7 +233,7 @@ public final class Constants {
     public static final DeadbandFilter DEADBAND_FILTER = new DeadbandFilter(DEADBAND_LOW, DEADBAND_HIGH);
 
     // Max rate of change for speed per second (1 / <value> is the number of seconds allowed to go from 0 to max)
-    public static final double SPEED_RATE_LIMIT_ARCADE = 2d;
+    public static final double SPEED_RATE_LIMIT_ARCADE = 1.75d;
 
     // Max rate of change for rotation per second (1 / <value> is the number of seconds allowed to go from 0 to max)
     public static final double ROTATE_RATE_LIMIT_ARCADE = 5d;
@@ -245,7 +243,9 @@ public final class Constants {
 
     public static final double kP = 0.023;
     public static final double kD = 0.0;
-    public static final double AIM_TOLERANCE = 1;
+    public static final double AIM_TOLERANCE = 1.5;
+
+    public static final double AIM_ROTATION_SPEED = 1d;
 
     public static final double SLOW_MODE_SPEED_MULTIPLIER = .6;
     public static final double SLOW_MODE_ROTATION_MULTIPLIER = .9;
@@ -273,6 +273,8 @@ public final class Constants {
   }
 
   public static final class ClimbConstants {
+
+    public static DeadbandFilter CLIMB_DEADBAND_FILTER = new DeadbandFilter(-.25, .5);
 
     public static final int DEVICE_ID_FIRST_STAGE_CLIMB = 12;
 

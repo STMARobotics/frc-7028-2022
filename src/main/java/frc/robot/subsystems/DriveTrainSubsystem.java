@@ -39,13 +39,11 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -84,7 +82,10 @@ public class DriveTrainSubsystem extends SubsystemBase {
   public DriveTrainSubsystem() {
     zeroDriveTrainEncoders();
     gyro.zeroYaw();
-    differentialDriveOdometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
+    differentialDriveOdometry = new DifferentialDriveOdometry(
+        Rotation2d.fromDegrees(getHeading()),
+        edgesToMeters(getLeftEncoderPosition()),
+        edgesToMeters(getRightEncoderPosition()));
     resetOdometry();
 
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -96,11 +97,9 @@ public class DriveTrainSubsystem extends SubsystemBase {
     talonConfig.openloopRamp = DriveTrainConstants.OPEN_LOOP_RAMP;
 
     rightLeader.configAllSettings(talonConfig);
-    rightLeader.enableVoltageCompensation(true);
-    rightLeader.enableVoltageCompensation(true);
     rightFollower.configFactoryDefault();
     leftLeader.configAllSettings(talonConfig);
-    leftLeader.enableVoltageCompensation(true);
+
     leftFollower.configFactoryDefault();
 
     rightLeader.setSafetyEnabled(true);
@@ -116,7 +115,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
     leftFollower.follow(leftLeader);
     rightFollower.follow(rightLeader);
     
-    new Trigger(RobotState::isEnabled).whenActive(new StartEndCommand(() -> {
+    new Trigger(RobotState::isEnabled).whileTrue(new StartEndCommand(() -> {
       leftLeader.setNeutralMode(NeutralMode.Brake);
       leftFollower.setNeutralMode(NeutralMode.Brake);
       rightLeader.setNeutralMode(NeutralMode.Brake);
@@ -140,44 +139,9 @@ public class DriveTrainSubsystem extends SubsystemBase {
     dashboard.add(this).withPosition(0, 1);
   }
 
-  public double getRelativeAngle(Pose2d target) {
-
-    // Get the robot's pose relative to the target. This will be the pose of the robot on a grid with the hub in the
-    // center at (0,0)
-    var relativePose = getCurrentPose().relativeTo(target);
-
-    // Get the angle to the hub from the robot's position
-    var angleToHub = Math.atan(relativePose.getY() / relativePose.getX());
-
-    // Calculate the direction to turn the turret, considering the direction the robot's drivetrain is in
-    var headingSetpoint = Units.radiansToDegrees(angleToHub) - getCurrentPose().getRotation().getDegrees();
-
-    // Deal with quadrants where X is > 0 (the robot is to the right of the hub)
-    if (relativePose.getX() > 0) {
-      headingSetpoint += 180;
-    }
-    
-    // Deal with quadrants that result in a negative or out of range value
-    headingSetpoint = (headingSetpoint + 360) % 360;
-    return headingSetpoint;
-  }
-
-  public double getVelocityXComponent() {
-    return getCurrentChassisSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getCos();
-  }
-
-  public double getVelocityYComponent() {
-    return getCurrentChassisSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getSin();
-  }
-
   private String getFomattedPose() {
     var pose = getCurrentPose();
     return String.format("(%.2f, %.2f)", pose.getX(), pose.getY());
-  }
-
-  public void addDriverDashboardWidgets(ShuffleboardTab driverTab) {
-    // Using `withWidget` is a workaround for https://github.com/wpilibsuite/shuffleboard/issues/724
-    // driverTab.add("Field", field2d).withWidget(BuiltInWidgets.kField).withPosition(9, 0).withSize(4, 3);
   }
 
   /**
@@ -194,8 +158,11 @@ public class DriveTrainSubsystem extends SubsystemBase {
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
-    zeroDriveTrainEncoders();
-    differentialDriveOdometry.resetPosition(newPose, Rotation2d.fromDegrees(getHeading()));
+    differentialDriveOdometry.resetPosition(
+        Rotation2d.fromDegrees(getHeading()),
+        edgesToMeters(getLeftEncoderPosition()),
+        edgesToMeters(getRightEncoderPosition()),
+        newPose);
   }
 
   @Override
@@ -300,12 +267,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
         ControlMode.Velocity, 
         metersPerSecToEdgesPerDecisec(leftVelocity), 
         DemandType.ArbitraryFeedForward,
-        leftFeedForwardVolts / 12);
+        leftFeedForwardVolts / RobotController.getBatteryVoltage());
     rightLeader.set(
         ControlMode.Velocity,
         metersPerSecToEdgesPerDecisec(rightVelocity),
         DemandType.ArbitraryFeedForward,
-        rightFeedForwardVolts / 12);
+        rightFeedForwardVolts / RobotController.getBatteryVoltage());
   }
 
   /**

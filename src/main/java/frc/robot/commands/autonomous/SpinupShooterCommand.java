@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.autonomous;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -18,6 +18,11 @@ public class SpinupShooterCommand extends CommandBase {
   @Override
   public void execute() {
     shooterSubsystem.prepareToShoot(distance);
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    shooterSubsystem.stop();
   }
 
 }

@@ -4,21 +4,23 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.TurretSubsystem;
 
 /**
- * Command to hold the turret at 180 degrees so it does not conflict with climb
+ * Positions the turret to an angle
  */
-public class ClimbTurretSafetyCommand extends CommandBase {
+public class PositionTurretCommand extends CommandBase {
   
   private final TurretSubsystem turretSubsystem;
+  private final double angle;
 
-  public ClimbTurretSafetyCommand(TurretSubsystem turretSubsystem) {
+  public PositionTurretCommand(TurretSubsystem turretSubsystem, double angle) {
     this.turretSubsystem = turretSubsystem;
+    this.angle = angle;
 
     addRequirements(turretSubsystem);
   }
 
   @Override
   public void execute() {
-    turretSubsystem.positionToRobotAngle(180);
+    turretSubsystem.positionToRobotAngle(angle);
   }
 
   @Override

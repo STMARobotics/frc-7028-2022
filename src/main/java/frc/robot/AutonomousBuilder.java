@@ -20,12 +20,13 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.TrajectoryConstants;
-import frc.robot.commands.LoadCargoAutoCommand;
-import frc.robot.commands.LoadCargoCommand;
 import frc.robot.commands.ShootCommand;
-import frc.robot.commands.SpinupShooterCommand;
 import frc.robot.commands.TrackTargetCommand;
-import frc.robot.commands.TurnToAngleCommand;
+import frc.robot.commands.autonomous.AimTurretCommand;
+import frc.robot.commands.autonomous.LoadCargoCommand;
+import frc.robot.commands.autonomous.LoadCargoWithIndexerCommand;
+import frc.robot.commands.autonomous.SpinupShooterCommand;
+import frc.robot.commands.autonomous.TurnToAngleCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -81,7 +82,7 @@ public class AutonomousBuilder {
    * @param dashboard dashboard
    */
   public void addDashboardWidgets(ShuffleboardTab dashboard) {
-    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(9, 2);
+    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(9, 1);
   }
 
   /**
@@ -128,19 +129,28 @@ public class AutonomousBuilder {
     var startPose = new Pose2d(inchesToMeters(242), inchesToMeters(96), Rotation2d.fromDegrees(-153));
     var cargoOnePose = new Pose2d(inchesToMeters(193.83), inchesToMeters(73.95), Rotation2d.fromDegrees(-153));
     var angleAfterCargoOne = 180d;
-    var cargoTwoPose = new Pose2d(inchesToMeters(42.36), inchesToMeters(43), Rotation2d.fromDegrees(-140));
+    var humanPlayerPose = new Pose2d(inchesToMeters(46), inchesToMeters(49), Rotation2d.fromDegrees(-140));
+    var waitForCargoPose = new Pose2d(inchesToMeters(46 + 5), inchesToMeters(49 + 5), Rotation2d.fromDegrees(-140));
     var shootPose = new Pose2d(inchesToMeters(210), inchesToMeters(73.95), Rotation2d.fromDegrees(-174));
 
-    var command = drivePickupShootTwo(startPose, cargoOnePose)
+    var command = print("Starting auto")
+        .alongWith(setCargoCount(1)).alongWith(deployIntake())
+        .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, cargoOnePose)
+            .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92)), aimTurret()))
+        .andThen(print("Done driving to cargo"))
+        .andThen(shoot(2).withTimeout(3))
+        .andThen(print("Done shooting 2"))
         .andThen(turnToAngle(angleAfterCargoOne))
-        .andThen(drive(withSpeedAndAcceleration(1, .75), new Pose2d(cargoOnePose.getX(), cargoOnePose.getY(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
-            .deadlineWith(loadCargoWithIndexer())
-        .andThen(new PrintCommand("Done driving to human player station"))
-        .andThen(waitForCargoCount(2).withTimeout(2)))
-        .andThen(new PrintCommand("Done waiting for two cargo at human player station"))
-        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoTwoPose, shootPose)
-            .deadlineWith(spinUpShooter(inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer()))
-        .andThen(new PrintCommand("Done driving to shoot"))
+        .andThen(drive(withSpeedAndAcceleration(1, .75), new Pose2d(cargoOnePose.getTranslation(), Rotation2d.fromDegrees(angleAfterCargoOne)), humanPlayerPose)
+            .deadlineWith(loadCargoWithIndexer()))
+        .andThen(print("Done driving to human player station"))
+        .andThen(drive(withSpeedAndAcceleration(.5, .5).setReversed(true), humanPlayerPose, waitForCargoPose)
+            .deadlineWith(loadCargoWithIndexer()))
+        .andThen(waitForCargoCount(2).withTimeout(2))
+        .andThen(print("Done waiting for two cargo at human player station"))
+        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), waitForCargoPose, shootPose)
+            .deadlineWith(spinUpShooter(inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer(), aimTurret()))
+        .andThen(print("Done driving to shoot"))
         .andThen(shoot(Integer.MAX_VALUE));
     
     autoChooser.addOption("4-cargo", command);
@@ -161,28 +171,36 @@ public class AutonomousBuilder {
    * - Shoots two
    */
   private void buildFiveCargo() {
-    var startPose = new Pose2d(inchesToMeters(310), inchesToMeters(71.75), Rotation2d.fromDegrees(-90)); 
-    var cargoOnePose = new Pose2d(inchesToMeters(310), inchesToMeters(31.5), Rotation2d.fromDegrees(-90));
+    var startPose = new Pose2d(inchesToMeters(298), inchesToMeters(72.5), Rotation2d.fromDegrees(-90));
+    var cargoOnePose = new Pose2d(inchesToMeters(298), inchesToMeters(37), Rotation2d.fromDegrees(-90));
     var angleAfterCargoOne = 180d;
-    var cargoTwoPose = new Pose2d(inchesToMeters(209), inchesToMeters(68), Rotation2d.fromDegrees(165));
-    var cargoThreePose = new Pose2d(inchesToMeters(76), inchesToMeters(24), Rotation2d.fromDegrees(-145));
-    var shootPose = new Pose2d(inchesToMeters(190), inchesToMeters(86), Rotation2d.fromDegrees(-175));
+    var cargoTwoPose = new Pose2d(inchesToMeters(193), inchesToMeters(73.7), Rotation2d.fromDegrees(165));
+    var humanPlayerPose = new Pose2d(inchesToMeters(65), inchesToMeters(46), Rotation2d.fromDegrees(-140));
+    var waitForCargoPose = new Pose2d(inchesToMeters(65 + 5), inchesToMeters(46 + 5), Rotation2d.fromDegrees(-140));
+    var shootPose = new Pose2d(inchesToMeters(198.616), inchesToMeters(73.95), Rotation2d.fromDegrees(160));
 
     var command =
-       new PrintCommand("Starting auto")
+       print("Starting auto")
         .alongWith(setCargoCount(1)).alongWith(deployIntake())
-        .andThen(shoot(1))
-        .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, cargoOnePose)
-            .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92))))
-        .andThen(new PrintCommand("Done driving"))
+        .andThen(shoot(1).withTimeout(3))
+        .andThen(drive(withSpeedAndAcceleration(1, 1.2), startPose, cargoOnePose)
+            .deadlineWith(loadCargoWithIndexer()))
+        .andThen(print("Done driving to cargo one"))
         .andThen(turnToAngle(angleAfterCargoOne).deadlineWith(loadCargoWithIndexer()))
-        .andThen(drive(withSpeedAndAcceleration(1, 1), new Pose2d(cargoOnePose.getX(), cargoOnePose.getY(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
-            .deadlineWith(loadCargoWithIndexer().alongWith(spinUpShooter(inchesToMeters(118)))))
-        .andThen(new PrintCommand("Done driving to ball two"))
-        .andThen(shoot(2).withTimeout(10))
-        .andThen(drive(withSpeedAndAcceleration(1, 1), cargoTwoPose, cargoThreePose).deadlineWith(loadCargoWithIndexer()))
-        .andThen(new PrintCommand("Done driving to human player"))
-        .andThen(drive(withSpeedAndAcceleration(1, 1).setReversed(true), cargoThreePose, shootPose).deadlineWith(loadCargoWithIndexer()))
+        .andThen(driveFromAngle(withSpeedAndAcceleration(1, 1.2), new Pose2d(cargoOnePose.getTranslation(), Rotation2d.fromDegrees(angleAfterCargoOne)), cargoTwoPose)
+            .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(118)), aimTurret()))
+        .andThen(print("Done driving to cargo two"))
+        .andThen(shoot(1).withTimeout(10))
+        .andThen(shoot(1).withTimeout(10))
+        .andThen(print("Done shooting two cargos"))
+        .andThen(drive(withSpeedAndAcceleration(1, 1.2), cargoTwoPose, humanPlayerPose).deadlineWith(loadCargoWithIndexer()))
+        .andThen(print("Done driving to human player"))
+        .andThen(drive(withSpeedAndAcceleration(.5, .5).setReversed(true), humanPlayerPose, waitForCargoPose)
+            .deadlineWith(loadCargoWithIndexer()))
+        .andThen(waitForCargoCount(2).withTimeout(1))
+        .andThen(print("Done waiting at human player station"))
+        .andThen(drive(withSpeedAndAcceleration(1, 1.2).setReversed(true), waitForCargoPose, shootPose)
+            .deadlineWith(spinUpShooter(inchesToMeters(92)), prepareIndexerToShoot(), loadCargoWithoutIndexer(), aimTurret()))
         .andThen(shoot(Integer.MAX_VALUE));
       
     autoChooser.addOption("5-cargo", command);
@@ -199,13 +217,12 @@ public class AutonomousBuilder {
    * @return command for the routine
    */
   private Command drivePickupShootTwo(Pose2d startPose, Pose2d endPose) {
-    return new PrintCommand("Starting auto")
+    return print("Starting auto")
         .alongWith(setCargoCount(1)).alongWith(deployIntake())
         .andThen(drive(withSpeedAndAcceleration(1, 1), startPose, endPose)
-            .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92))))
-        .andThen(new PrintCommand("Done driving"))
-        .andThen(shoot(2).withTimeout(3))
-        .andThen(new PrintCommand("Done shooting 2"));
+            .deadlineWith(loadCargoWithIndexer(), spinUpShooter(inchesToMeters(92)), aimTurret()))
+        .andThen(print("Done driving to cargo"))
+        .andThen(shoot(Integer.MAX_VALUE));
   }
 
   private Command deployIntake() {
@@ -214,6 +231,12 @@ public class AutonomousBuilder {
 
   private Command drive(TrajectoryConfig config, Pose2d... waypoints) {
     return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(waypoints[0]), driveTrainSubsystem)
+        .andThen(driveTrainSubsystem.createCommandForTrajectory(generateTrajectory(Arrays.asList(waypoints), config))
+        .andThen(() -> driveTrainSubsystem.stop()));
+  }
+
+  private Command driveFromAngle(TrajectoryConfig config, Pose2d... waypoints) {
+    return new InstantCommand(() -> driveTrainSubsystem.setCurrentPose(new Pose2d(waypoints[0].getTranslation(), driveTrainSubsystem.getCurrentPose().getRotation())), driveTrainSubsystem)
         .andThen(driveTrainSubsystem.createCommandForTrajectory(generateTrajectory(Arrays.asList(waypoints), config))
         .andThen(() -> driveTrainSubsystem.stop()));
   }
@@ -234,7 +257,7 @@ public class AutonomousBuilder {
    */
   private TrajectoryConfig withSpeedAndAcceleration(double maxSpeedPercent, double maxAccelerationPercent) {
     return new TrajectoryConfig(
-        MAX_SPEED_AUTO * clamp(maxSpeedPercent, 0, 1), MAX_ACCELERATION_AUTO * clamp(maxAccelerationPercent, 0, 1))
+        MAX_SPEED_AUTO * clamp(maxSpeedPercent, 0, 1), MAX_ACCELERATION_AUTO * clamp(maxAccelerationPercent, 0, 1.5))
       .setKinematics(DriveTrainConstants.DRIVE_KINEMATICS)
       .addConstraint(TrajectoryConstants.VOLTAGE_CONSTRAINT);
   }
@@ -249,11 +272,11 @@ public class AutonomousBuilder {
   }
 
   private Command loadCargoWithIndexer() {
-    return new LoadCargoAutoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem);
+    return new LoadCargoWithIndexerCommand(intakeSubsystem, transferSubsystem, indexerSubsystem);
   }
 
   private Command loadCargoWithoutIndexer() {
-    return new LoadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped, null);
+    return new LoadCargoCommand(intakeSubsystem, transferSubsystem);
   }
 
   private Command waitForCargoCount(int count) {
@@ -264,6 +287,14 @@ public class AutonomousBuilder {
 
   private Command turnToAngle(double angle) {
     return new TurnToAngleCommand(angle, driveTrainSubsystem);
+  }
+
+  private Command aimTurret() {
+    return new AimTurretCommand(turretSubsystem, limelightSubsystem, trackTargetCommand::getAngleToTarget);
+  }
+
+  private Command print(String string) {
+    return new PrintCommand(string);
   }
 
 }

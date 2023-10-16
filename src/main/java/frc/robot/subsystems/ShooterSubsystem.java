@@ -24,6 +24,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -38,7 +39,7 @@ public class ShooterSubsystem extends SubsystemBase {
   // Note, CTRE native velocities are in
   // encoder edges per 100 ms.
   private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(kS, kV, kA);
-  private double gain = 0;
+  private double gain = Units.inchesToMeters(2);
   private double targetSpeed = 0;
 
   public ShooterSubsystem() {

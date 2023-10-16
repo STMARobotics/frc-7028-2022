@@ -3,22 +3,26 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+
+import java.util.Map;
+
 import edu.wpi.first.cscore.HttpCamera;
-import edu.wpi.first.util.net.PortForwarder;
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.IndexCommand;
 import frc.robot.commands.JustShootCommand;
-import frc.robot.commands.LoadCargoCommand;
+import frc.robot.commands.LoadCargoTelopCommand;
 import frc.robot.commands.TeleDriveCommand;
 import frc.robot.commands.TeleopTurretCommand;
-import frc.robot.commands.UnloadCargoCommand;
+import frc.robot.commands.UnloadCargoTeleopCommand;
 import frc.robot.subsystems.DriveTrainSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -50,6 +54,9 @@ public class RobotContainer {
 
   private final TeleDriveCommand teleDriveCommand = new TeleDriveCommand(
       driveTrainSubsystem, () -> driverController.getLeftY(), () -> driverController.getRightX());
+  private final LoadCargoTelopCommand loadCargo = new LoadCargoTelopCommand(intakeSubsystem, transferSubsystem);
+  private final UnloadCargoTeleopCommand unloadCargo = new UnloadCargoTeleopCommand(intakeSubsystem, transferSubsystem, indexerSubsystem);
+
 
 
   private final Boolean indoorMode = false;
@@ -85,30 +92,30 @@ public class RobotContainer {
     //new JoystickButton(driverController, XboxController.Button.kB.value)
     //    .whenPressed(teleDriveCommand::toggleSlowMode);
 
-    new JoystickButton(driverController, XboxController.Button.kA.value).whileActiveContinuous(
-        new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 11000));
+    new JoystickButton(driverController, XboxController.Button.kA.value).whileTrue(
+        new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 11000).repeatedly());
 
     if (!indoorMode) {
-      new JoystickButton(driverController, XboxController.Button.kB.value).whileActiveContinuous(
-          new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 13000));
+      new JoystickButton(driverController, XboxController.Button.kB.value).whileTrue(
+          new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 13000).repeatedly());
 
-      new JoystickButton(driverController, XboxController.Button.kY.value).whileActiveContinuous(
-          new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 16000));
+      new JoystickButton(driverController, XboxController.Button.kY.value).whileTrue(
+          new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 16000).repeatedly());
 
-      new JoystickButton(driverController, XboxController.Button.kX.value).whileActiveContinuous(
-          new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 19000));
+      new JoystickButton(driverController, XboxController.Button.kX.value).whileTrue(
+          new JustShootCommand(shooterSubsystem, indexerSubsystem, () -> 19000).repeatedly());
     }
+    
 
     // Intake/transfer/indexer
     new JoystickButton(driverController, XboxController.Button.kLeftBumper.value)
-        .whileHeld(new UnloadCargoCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
+        .whileTrue(new UnloadCargoTeleopCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
 
-    new JoystickButton(driverController, XboxController.Button.kRightBumper.value).whileHeld(new LoadCargoCommand(
-        intakeSubsystem, transferSubsystem, indexerSubsystem::isFullSensorTripped,
-        (r) -> driverController.setRumble(RumbleType.kRightRumble, r)));
+    new JoystickButton(driverController, XboxController.Button.kRightBumper.value).whileTrue(
+        new UnloadCargoTeleopCommand(intakeSubsystem, transferSubsystem, indexerSubsystem));
 
-    new POVButton(driverController, 0).whenPressed(intakeSubsystem::deploy);
-    new POVButton(driverController, 180).whenPressed(intakeSubsystem::retract);
+    new POVButton(driverController, 0).onTrue(runOnce(intakeSubsystem::deploy));
+    new POVButton(driverController, 180).onTrue(runOnce(intakeSubsystem::retract));
   }
 
   private void configureSubsystemCommands() {
@@ -116,6 +123,12 @@ public class RobotContainer {
     turretSubsystem.setDefaultCommand(new TeleopTurretCommand(
         turretSubsystem, driverController::getRightTriggerAxis, driverController::getLeftTriggerAxis));
     indexerSubsystem.setDefaultCommand(new IndexCommand(indexerSubsystem));
+    // shooterSubsystem.setDefaultCommand(
+    //     new RunCommand(() -> shooterSubsystem.prepareToShoot(MIN_DISTANCE), shooterSubsystem));
+  }
+
+  public void teleopInit() {
+    intakeSubsystem.retract();
   }
 
   /**
@@ -143,12 +156,17 @@ public class RobotContainer {
 
   private void configureDriverDashboard() {
     shooterSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
-    driveTrainSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
     indexerSubsystem.addDriverDashboardWidgets(Dashboard.driverTab);
-    var camera = new HttpCamera("Driver", "http://10.70.28.13:1182");
-    if (camera != null) {
-      Dashboard.driverTab.add("Driver Camera", camera).withSize(8, 5).withPosition(0, 0);
-    }
+
+    Dashboard.driverTab.add(new HttpCamera("Driver", "http://10.70.28.13:1182"))
+        .withWidget(BuiltInWidgets.kCameraStream)
+        .withProperties(Map.of("showCrosshair", true, "showControls", false))
+        .withSize(8, 5).withPosition(0, 0);
+    
+    Dashboard.driverTab.add(new HttpCamera("limelight", "http://10.70.28.11:5800"))
+        .withWidget(BuiltInWidgets.kCameraStream)
+        .withProperties(Map.of("showCrosshair", false, "showControls", false))
+        .withSize(4, 3).withPosition(9, 2);
   }
 
   /**

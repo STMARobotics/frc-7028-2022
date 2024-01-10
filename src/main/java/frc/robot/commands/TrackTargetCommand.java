@@ -10,13 +10,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
 
 /**
  * Command that tracks the position of the robot and attempts to keep the turret pointed in the direction of the hub.
  */
-public class TrackTargetCommand extends CommandBase {
+public class TrackTargetCommand extends Command {
 
   // The hub is in the center of the field. The field is 54' x 27'
   private static final Pose2d hubPose = 

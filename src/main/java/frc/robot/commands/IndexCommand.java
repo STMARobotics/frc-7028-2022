@@ -1,12 +1,12 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IndexerSubsystem;
 
 /**
  * Default command for Indexer subsystem
  */
-public class IndexCommand extends CommandBase {
+public class IndexCommand extends Command {
 
   private final IndexerSubsystem indexerSubsystem;
 

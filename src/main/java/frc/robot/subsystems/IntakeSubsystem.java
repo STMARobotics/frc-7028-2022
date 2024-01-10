@@ -5,9 +5,9 @@ import static frc.robot.Constants.IntakeConstants.CHANNEL_SOLENOID_BACKWARD;
 import static frc.robot.Constants.IntakeConstants.CHANNEL_SOLENOID_FORWARD;
 import static frc.robot.Constants.IntakeConstants.DEVICE_ID_INTAKE;
 
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;

@@ -2,7 +2,7 @@ package frc.robot.commands.autonomous;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.AimConstants;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
@@ -10,7 +10,7 @@ import frc.robot.subsystems.TurretSubsystem;
 /**
  * Command to constantly aim the turret at the target. Probably only useful in autonomous.
  */
-public class AimTurretCommand extends CommandBase {
+public class AimTurretCommand extends Command {
   
   private final TurretSubsystem turretSubsystem;
   private final LimelightSubsystem limelightSubsystem;

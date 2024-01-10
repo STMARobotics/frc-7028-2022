@@ -6,10 +6,10 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ClimbSubsystem;
 
-public class TeleopClimbCommand extends CommandBase {
+public class TeleopClimbCommand extends Command {
 
   private final ClimbSubsystem climbSubsystem;
   private final DoubleSupplier firstStageSupplier;

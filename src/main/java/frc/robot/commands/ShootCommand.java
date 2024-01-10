@@ -13,7 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.AimConstants;
 import frc.robot.Constants.DriverConstants;
 import frc.robot.Constants.IndexerConstants;
@@ -26,7 +26,7 @@ import frc.robot.subsystems.TurretSubsystem;
 /**
  * Command that finds a target, spins up the shooter, aims, and shoots at a the correct speed for the target distance.
  */
-public class ShootCommand extends CommandBase {
+public class ShootCommand extends Command {
   
   private static final Pose2d hubPose = 
       new Pose2d(Units.inchesToMeters(54 * 12) / 2, Units.inchesToMeters(27 * 12) / 2, new Rotation2d());
@@ -242,7 +242,7 @@ public class ShootCommand extends CommandBase {
     // Change the value of wrongColor only if a color is visible to prevent snapping
     // back to the target between the time the cargo leaves the top sensor to when it
     // is shot by the shooter
-    var alliance = DriverStation.getAlliance();
+    var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     var cargoColor = indexerSubsystem.getFullColor();
     if (cargoColor == IndexerConstants.COLOR_BLUE) {
       wrongColor = alliance != Alliance.Blue;

@@ -11,13 +11,13 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DriveTrainSubsystem;
 
 /**
  * TeleDriveCommand
  */
-public class TeleDriveCommand extends CommandBase {
+public class TeleDriveCommand extends Command {
 
   private final DoubleSupplier speedSupplier;
   private final DoubleSupplier rotationSupplier;

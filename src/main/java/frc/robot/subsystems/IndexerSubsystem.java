@@ -9,13 +9,13 @@ import static frc.robot.Constants.IndexerConstants.THRESHOLD_SPACE;
 
 import java.util.Map;
 
+import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ColorMatch;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.SparkPIDController;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
@@ -37,7 +37,7 @@ import frc.robot.commands.ColorSensorReader;
 public class IndexerSubsystem extends SubsystemBase {
 
   private final CANSparkMax indexer = new CANSparkMax(DEVICE_ID_INDEXER, MotorType.kBrushless);
-  private final SparkMaxPIDController pidController;
+  private final SparkPIDController pidController;
   private final RelativeEncoder encoder;
   
   private final ColorSensorReader colorSensorReader = new ColorSensorReader();

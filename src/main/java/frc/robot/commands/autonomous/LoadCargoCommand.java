@@ -1,13 +1,13 @@
 package frc.robot.commands.autonomous;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 
 /**
  * Command that runs the intake and transfer to load cargo.
  */
-public class LoadCargoCommand extends CommandBase {
+public class LoadCargoCommand extends Command {
 
   private final IntakeSubsystem intakeSubsystem;
   private final TransferSubsystem transferSubsystem;

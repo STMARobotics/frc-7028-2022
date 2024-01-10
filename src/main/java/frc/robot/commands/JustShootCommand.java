@@ -2,7 +2,7 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
@@ -10,7 +10,7 @@ import frc.robot.subsystems.ShooterSubsystem;
  * Command to spin up the shooter and run the indexer to shoot cargo when the shooter is up to speed.
  * Used to manually get values for shooting interpolation table.
  */
-public class JustShootCommand extends CommandBase {
+public class JustShootCommand extends Command {
   
   private final ShooterSubsystem shooterSubsystem;
   private final IndexerSubsystem indexerSubsystem;

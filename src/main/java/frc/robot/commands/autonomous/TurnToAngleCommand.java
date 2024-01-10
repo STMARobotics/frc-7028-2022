@@ -1,13 +1,13 @@
 package frc.robot.commands.autonomous;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DriveTrainSubsystem;
 
 /**
  * TurnToAngleCommand
  */
-public class TurnToAngleCommand extends CommandBase {
+public class TurnToAngleCommand extends Command {
 
   private final DriveTrainSubsystem driveTrainSubsystem;
   private final PIDController pidController = new PIDController(.02, 0.0, 0.0);

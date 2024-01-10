@@ -1,12 +1,12 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
 
 /**
  * Positions the turret to an angle
  */
-public class PositionTurretCommand extends CommandBase {
+public class PositionTurretCommand extends Command {
   
   private final TurretSubsystem turretSubsystem;
   private final double angle;

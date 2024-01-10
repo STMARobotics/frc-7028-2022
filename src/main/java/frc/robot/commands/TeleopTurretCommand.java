@@ -4,13 +4,13 @@ import static frc.robot.Constants.DriverConstants.DEADBAND_FILTER;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
 
 /**
  * Command to manually run the turret.
  */
-public class TeleopTurretCommand extends CommandBase {
+public class TeleopTurretCommand extends Command {
   private final DoubleSupplier rightSupplier;
   private final DoubleSupplier leftSupplier;
   private final TurretSubsystem turretSubsystem;

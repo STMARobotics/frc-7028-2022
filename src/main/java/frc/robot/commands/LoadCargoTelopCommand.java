@@ -1,13 +1,13 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 
 /**
  * Deploys and runs the intake and transfer wheels
  */
-public class LoadCargoTelopCommand extends CommandBase {
+public class LoadCargoTelopCommand extends Command {
   
   private final IntakeSubsystem intakeSubsystem;
   private final TransferSubsystem transferSubsystem;
